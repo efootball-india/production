@@ -1,0 +1,361 @@
+/* ============================================================
+   eFTBL · Theme tokens + auth shell
+   ============================================================ */
+
+:root {
+  /* Dark base — slight green undertone */
+  --bg: #050a08;
+  --bg-2: #0a1410;
+  --surface: #0f1714;
+  --surface-2: #131e1a;
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.16);
+
+  /* Glass surfaces */
+  --glass: rgba(255,255,255,0.04);
+  --glass-2: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.08);
+
+  --text: #e8f5ee;
+  --text-2: rgba(232,245,238,0.7);
+  --text-3: rgba(232,245,238,0.4);
+
+  /* Phosphor green */
+  --accent: #00ff88;
+  --accent-2: #4dffaa;
+  --accent-dim: rgba(0,255,136,0.6);
+  --accent-ink: #001a0d;
+  --accent-glow: 0 0 24px rgba(0,255,136,0.4);
+  --accent-glow-strong: 0 0 32px rgba(0,255,136,0.55), 0 0 8px rgba(0,255,136,0.6);
+
+  /* Semantic */
+  --danger: #ff5252;
+  --warn: #ffb84d;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+body {
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Ambient phosphor glow */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 90% 0%, rgba(0,255,136,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 60% at 10% 100%, rgba(0,255,136,0.06) 0%, transparent 60%);
+}
+
+button { font-family: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+a { color: inherit; text-decoration: none; }
+input, select, textarea { font-family: inherit; }
+
+/* AUTH SHELL */
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-card {
+  background: var(--glass);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--glass-border);
+  width: 100%;
+  max-width: 440px;
+  padding: 32px 28px;
+  position: relative;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.auth-back {
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 20px;
+  transition: color 0.18s;
+}
+.auth-back:hover { color: var(--text); }
+
+.auth-eyebrow {
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.auth-h1 {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.auth-sub {
+  color: var(--text-2);
+  font-size: 14px;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-label {
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 11px;
+  color: var(--text-2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.auth-input {
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  padding: 11px 14px;
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  width: 100%;
+}
+.auth-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,255,136,0.12);
+}
+
+.auth-button {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: none;
+  padding: 14px 20px;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.18s, box-shadow 0.18s;
+  width: 100%;
+  margin-top: 6px;
+  box-shadow: var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+.auth-button:hover {
+  opacity: 0.95;
+  box-shadow: var(--accent-glow-strong), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+.auth-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.auth-oauth-btn {
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  padding: 11px 14px;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+.auth-oauth-btn:hover {
+  border-color: var(--accent-dim);
+  box-shadow: 0 0 16px rgba(0,255,136,0.15);
+}
+
+.auth-oauth-icon {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.08);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.auth-divider::before, .auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.auth-error {
+  padding: 10px 12px;
+  background: rgba(255, 60, 60, 0.1);
+  border: 1px solid rgba(255, 60, 60, 0.3);
+  color: #ff6b6b;
+  font-size: 13px;
+  margin-bottom: 14px;
+  font-family: ui-monospace, monospace;
+}
+
+.auth-foot {
+  font-size: 12px;
+  color: var(--text-2);
+  text-align: center;
+  margin-top: 20px;
+}
+.auth-foot a {
+  color: var(--accent);
+  font-weight: 600;
+}
+.auth-foot a:hover { text-decoration: underline; }
+
+/* WELCOME (landing) */
+.welcome {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  z-index: 1;
+}
+.welcome-inner {
+  text-align: center;
+  max-width: 520px;
+}
+.welcome-mark {
+  font-size: clamp(56px, 14vw, 88px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.welcome-mark .accent {
+  color: var(--accent);
+  text-shadow: 0 0 32px rgba(0,255,136,0.6);
+}
+.welcome-tag {
+  color: var(--text-2);
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+.welcome-sub {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 36px;
+}
+.welcome-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 320px;
+  margin: 0 auto 32px;
+}
+.welcome-btn-primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 14px 28px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: inline-block;
+  text-align: center;
+  box-shadow: var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+.welcome-btn-primary:hover { box-shadow: var(--accent-glow-strong), inset 0 1px 0 rgba(255,255,255,0.18); }
+
+.welcome-btn-secondary {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  padding: 14px 28px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: inline-block;
+  text-align: center;
+}
+.welcome-btn-secondary:hover {
+  border-color: var(--accent-dim);
+  box-shadow: 0 0 16px rgba(0,255,136,0.15);
+}
+
+.welcome-foot {
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.welcome-preview-link {
+  color: var(--text-2);
+  font-size: 11px;
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.06em;
+}
+.welcome-preview-link:hover { color: var(--accent); }

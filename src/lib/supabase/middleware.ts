@@ -1,5 +1,7 @@
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+
+type CookieToSet = { name: string; value: string; options: CookieOptions };
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -14,7 +16,7 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: CookieToSet[]) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({
             request,
@@ -38,8 +40,6 @@ export async function updateSession(request: NextRequest) {
   const protectedPaths = ['/home', '/onboarding', '/profile', '/tournaments'];
   // Routes that should redirect if already authenticated
   const authPaths = ['/signin', '/signup', '/verify'];
-  // Public routes (welcome page is at /)
-  const publicPaths = ['/', '/prototype.html'];
 
   const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
   const isAuthPath = authPaths.some((p) => pathname.startsWith(p));

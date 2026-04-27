@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { completeOnboarding } from '../actions/auth';
+import { completeOnboarding } from '../actions/profile';
+import { PLATFORM_OPTIONS } from '@/lib/player';
 
 export default async function OnboardingPage({
   searchParams,
@@ -8,32 +9,38 @@ export default async function OnboardingPage({
   searchParams: { error?: string };
 }) {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     redirect('/signin');
   }
 
-  // If already onboarded, send to home
+  // If profile already exists with required fields, send to home.
+  // Otherwise show onboarding (or let them complete missing fields).
   const { data: existing } = await supabase
     .from('players')
-    .select('username')
+    .select('username, platform, game_id, discord_handle')
     .eq('id', user.id)
     .maybeSingle();
 
-  if (existing) {
+  if (
+    existing &&
+    existing.username &&
+    existing.platform &&
+    existing.game_id &&
+    existing.discord_handle
+  ) {
     redirect('/home');
   }
 
   return (
     <main className="auth-shell">
-      <div className="auth-card">
-        <div className="auth-eyebrow">eFTBaller · Profile Setup · 1 of 1</div>
-        <h1 className="auth-h1">Set Up Your eFTBaller</h1>
+      <div className="auth-card" style={{ maxWidth: 480 }}>
+        <div className="auth-eyebrow">eFTBaller · Profile setup</div>
+        <h1 className="auth-h1">Set up your profile</h1>
         <p className="auth-sub">
-          This is how you&apos;ll appear in tournaments, scoreboards, and the leaderboard.
+          This is how you&apos;ll appear in tournaments. Opponents need your platform,
+          in-game ID, and Discord handle to actually play you.
         </p>
 
         {searchParams.error && (
@@ -41,8 +48,9 @@ export default async function OnboardingPage({
         )}
 
         <form action={completeOnboarding} className="auth-form">
+
           <div className="auth-field">
-            <label htmlFor="username" className="auth-label">In-Game Name (IGN) *</label>
+            <label htmlFor="username" className="auth-label">In-game name *</label>
             <input
               id="username"
               name="username"
@@ -52,22 +60,22 @@ export default async function OnboardingPage({
               maxLength={24}
               pattern="[A-Za-z0-9_]+"
               className="auth-input"
-              placeholder="e.g. RAGEMODE_99"
+              placeholder="e.g. ragemode_99"
             />
-            <small style={{ fontSize: 11, color: 'var(--text-3)', fontFamily: 'ui-monospace, monospace' }}>
-              3–24 chars · letters, numbers, underscore
+            <small style={{ fontSize: 11, color: 'var(--text-3)' }}>
+              3–24 characters · letters, numbers, underscore
             </small>
           </div>
 
           <div className="auth-field">
-            <label htmlFor="display_name" className="auth-label">Display Name (optional)</label>
+            <label htmlFor="display_name" className="auth-label">Display name</label>
             <input
               id="display_name"
               name="display_name"
               type="text"
               maxLength={48}
               className="auth-input"
-              placeholder="Defaults to your IGN"
+              placeholder="Defaults to your in-game name"
             />
           </div>
 
@@ -75,12 +83,42 @@ export default async function OnboardingPage({
             <label htmlFor="platform" className="auth-label">Platform *</label>
             <select id="platform" name="platform" required className="auth-input">
               <option value="">Select…</option>
-              <option value="ps5">PlayStation 5</option>
-              <option value="ps4">PlayStation 4</option>
-              <option value="xbox">Xbox</option>
-              <option value="pc">PC · Steam</option>
-              <option value="mobile">Mobile</option>
+              {PLATFORM_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
             </select>
+          </div>
+
+          <div className="auth-field">
+            <label htmlFor="game_id" className="auth-label">eFootball friend code *</label>
+            <input
+              id="game_id"
+              name="game_id"
+              type="text"
+              required
+              minLength={4}
+              maxLength={32}
+              className="auth-input"
+              placeholder="Your in-game ID for opponents to add you"
+            />
+          </div>
+
+          <div className="auth-field">
+            <label htmlFor="discord_handle" className="auth-label">Discord handle *</label>
+            <input
+              id="discord_handle"
+              name="discord_handle"
+              type="text"
+              required
+              minLength={2}
+              maxLength={32}
+              pattern="\S+"
+              className="auth-input"
+              placeholder="e.g. ragemode99"
+            />
+            <small style={{ fontSize: 11, color: 'var(--text-3)' }}>
+              For coordinating match times with your opponent
+            </small>
           </div>
 
           <div className="auth-field">
@@ -91,13 +129,16 @@ export default async function OnboardingPage({
               type="text"
               maxLength={2}
               className="auth-input"
-              placeholder="e.g. IN, BR, ES (ISO 2-letter code)"
+              placeholder="e.g. IN, BR, ES"
               style={{ textTransform: 'uppercase' }}
             />
+            <small style={{ fontSize: 11, color: 'var(--text-3)' }}>
+              ISO 2-letter country code
+            </small>
           </div>
 
           <button type="submit" className="auth-button">
-            ▸ Enter eFTBL
+            Enter eFTBL →
           </button>
         </form>
       </div>

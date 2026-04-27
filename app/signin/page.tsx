@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { signInWithGoogle, signInWithEmail } from '@/app/actions/auth';
+import { signInWithGoogle, signInWithEmail } from '../actions/auth';
 
 export default function SignInPage({
   searchParams,

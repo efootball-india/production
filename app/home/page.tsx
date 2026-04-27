@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { signOut } from '@/app/actions/auth';
+import { signOut } from '../actions/auth';
 
 export default async function HomePage() {
   const supabase = createClient();
@@ -16,7 +16,7 @@ export default async function HomePage() {
     .from('players')
     .select('username, display_name, region, platform, role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   if (!player) {
     redirect('/onboarding');

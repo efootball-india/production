@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { completeOnboarding } from '@/app/actions/auth';
+import { completeOnboarding } from '../actions/auth';
 
 export default async function OnboardingPage({
   searchParams,

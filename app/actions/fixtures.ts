@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { generateGroupFixtures } from '@/lib/fixtures';
+import { generateBracket as libGenerateBracket, groupStageComplete, bracketExists } from '@/lib/knockout';
 
 async function requireAdmin() {
   const supabase = createClient();
@@ -26,6 +27,20 @@ async function requireMod() {
     .select('role').eq('id', user.id).maybeSingle();
   if (!me || !['moderator', 'admin', 'super_admin'].includes(me.role)) redirect('/');
   return { supabase, user };
+}
+
+/**
+ * After a group match completes, check if the group stage is fully done with no
+ * unresolved ties. If yes, auto-generate the knockout bracket.
+ * Idempotent: skips if bracket already exists.
+ */
+async function tryAutoGenerateBracket(tournamentId: string): Promise<void> {
+  if (await bracketExists(tournamentId)) return;
+  const groupCheck = await groupStageComplete(tournamentId);
+  if (!groupCheck.complete) return;
+  // Generate. If a tie is unresolved, lib returns ok:false with reason.
+  // Admin can fix via match overrides, which retriggers this on the next score.
+  await libGenerateBracket(tournamentId);
 }
 
 export async function generateFixtures(formData: FormData) {
@@ -118,7 +133,7 @@ export async function submitScore(formData: FormData) {
   const { data: match } = await supabase
     .from('matches')
     .select(`
-      id, home_participant_id, away_participant_id, status,
+      id, tournament_id, home_participant_id, away_participant_id, status,
       home:tournament_participants!matches_home_participant_id_fkey(player_id),
       away:tournament_participants!matches_away_participant_id_fkey(player_id)
     `)
@@ -134,7 +149,6 @@ export async function submitScore(formData: FormData) {
   }
 
   // ===== ADMIN/MOD FAST PATH =====
-  // Their submission is final. Skip the dual-confirmation dance.
   if (isPrivileged) {
     const winnerId = homeScore > awayScore
       ? match.home_participant_id
@@ -142,7 +156,6 @@ export async function submitScore(formData: FormData) {
       ? match.away_participant_id
       : null;
 
-    // Still record the submission (so we have a paper trail)
     await supabase.from('score_submissions').upsert({
       match_id: matchId,
       submitted_by: user.id,
@@ -162,6 +175,8 @@ export async function submitScore(formData: FormData) {
         confirmed_at: new Date().toISOString(),
       })
       .eq('id', matchId);
+
+    await tryAutoGenerateBracket(match.tournament_id);
 
     revalidatePath(`/play/${slug}`);
     redirect(`/play/${slug}?completed=${matchId}`);
@@ -206,6 +221,8 @@ export async function submitScore(formData: FormData) {
             confirmed_at: new Date().toISOString(),
           })
           .eq('id', matchId);
+
+        await tryAutoGenerateBracket(match.tournament_id);
       } else {
         await supabase
           .from('matches')
@@ -227,6 +244,7 @@ export async function submitScore(formData: FormData) {
   revalidatePath(`/play/${slug}`);
   redirect(`/play/${slug}?submitted=${matchId}`);
 }
+
 export async function overrideMatchScore(formData: FormData) {
   const { supabase } = await requireMod();
   const matchId = formData.get('match_id') as string;
@@ -243,7 +261,7 @@ export async function overrideMatchScore(formData: FormData) {
 
   const { data: match } = await supabase
     .from('matches')
-    .select('home_participant_id, away_participant_id')
+    .select('tournament_id, home_participant_id, away_participant_id')
     .eq('id', matchId)
     .maybeSingle();
   if (!match) redirect(`/admin/tournaments/${slug}/queue`);
@@ -264,6 +282,8 @@ export async function overrideMatchScore(formData: FormData) {
       confirmed_at: new Date().toISOString(),
     })
     .eq('id', matchId);
+
+  await tryAutoGenerateBracket(match.tournament_id);
 
   revalidatePath(`/admin/tournaments/${slug}/queue`);
   redirect(`/admin/tournaments/${slug}/queue?overridden=${matchId}`);

@@ -199,9 +199,9 @@ async function createFeeders(tournamentId: string, stageId: string): Promise<voi
       if (!targetId) continue;
       const slot = (fm.match_number_in_round % 2 === 1) ? 'home' : 'away';
       await supabase.from('match_feeders').insert({
-        match_id: targetId,
-        feeder_match_id: fm.id,
-        feeder_type: 'winner',
+        target_match_id: targetId,
+        source_match_id: fm.id,
+        source_role: 'winner',
         target_slot: slot,
       });
     }

@@ -93,9 +93,14 @@ export default async function GroupsPage({ params }: { params: { slug: string } 
                     background: advance ? 'rgba(0,255,136,0.04)' : 'transparent',
                   }}>
                     <span style={{ color: advance ? 'var(--accent)' : thirds ? '#ff9500' : 'var(--text-3)' }}>{s.position}</span>
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {s.country?.name}
-                      {s.needs_tiebreaker && <span style={{ marginLeft: 4, fontSize: 9, color: '#ff9500' }}>TIE</span>}
+                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0 }}>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {s.country?.name}
+                        {s.needs_tiebreaker && <span style={{ marginLeft: 4, fontSize: 9, color: '#ff9500' }}>TIE</span>}
+                      </span>
+                      <span style={{ fontSize: 10, color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {s.player?.username ?? '—'}
+                      </span>
                     </span>
                     <span style={{ textAlign: 'right' }}>{s.played}</span>
                     <span style={{ textAlign: 'right' }}>{s.wins}</span>

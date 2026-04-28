@@ -227,3 +227,44 @@ export async function submitScore(formData: FormData) {
   revalidatePath(`/play/${slug}`);
   redirect(`/play/${slug}?submitted=${matchId}`);
 }
+export async function overrideMatchScore(formData: FormData) {
+  const { supabase } = await requireMod();
+  const matchId = formData.get('match_id') as string;
+  const slug = formData.get('slug') as string;
+  const homeScoreRaw = (formData.get('home_score') as string ?? '').trim();
+  const awayScoreRaw = (formData.get('away_score') as string ?? '').trim();
+
+  const homeScore = parseInt(homeScoreRaw, 10);
+  const awayScore = parseInt(awayScoreRaw, 10);
+
+  if (isNaN(homeScore) || isNaN(awayScore) || homeScore < 0 || awayScore < 0) {
+    redirect(`/admin/tournaments/${slug}/queue?error=${encodeURIComponent('Invalid score')}`);
+  }
+
+  const { data: match } = await supabase
+    .from('matches')
+    .select('home_participant_id, away_participant_id')
+    .eq('id', matchId)
+    .maybeSingle();
+  if (!match) redirect(`/admin/tournaments/${slug}/queue`);
+
+  const winnerId = homeScore > awayScore
+    ? match.home_participant_id
+    : homeScore < awayScore
+    ? match.away_participant_id
+    : null;
+
+  await supabase
+    .from('matches')
+    .update({
+      home_score: homeScore,
+      away_score: awayScore,
+      status: 'completed',
+      winner_participant_id: winnerId,
+      confirmed_at: new Date().toISOString(),
+    })
+    .eq('id', matchId);
+
+  revalidatePath(`/admin/tournaments/${slug}/queue`);
+  redirect(`/admin/tournaments/${slug}/queue?overridden=${matchId}`);
+}

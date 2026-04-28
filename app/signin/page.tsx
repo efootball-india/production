@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { signInWithGoogle, signInWithEmail } from '../actions/auth';
+import { signInWithGoogle, signInWithUsername } from '../actions/auth';
 
 export default function SignInPage({
   searchParams,
@@ -27,21 +27,22 @@ export default function SignInPage({
           </button>
         </form>
 
-        <div className="auth-divider"><span>OR USE EMAIL</span></div>
+        <div className="auth-divider"><span>OR USE USERNAME</span></div>
 
-        <form action={signInWithEmail} className="auth-form">
+        <form action={signInWithUsername} className="auth-form">
           <div className="auth-field">
-            <label htmlFor="email" className="auth-label">Email</label>
+            <label htmlFor="username" className="auth-label">Username</label>
             <input
-              id="email"
-              name="email"
-              type="email"
+              id="username"
+              name="username"
+              type="text"
               required
-              autoComplete="email"
+              autoComplete="username"
               className="auth-input"
-              placeholder="you@example.com"
+              placeholder="Your eFTBaller username"
             />
           </div>
+
           <div className="auth-field">
             <label htmlFor="password" className="auth-label">Password</label>
             <input
@@ -53,7 +54,11 @@ export default function SignInPage({
               className="auth-input"
               placeholder="Your password"
             />
+            <Link href="/forgot-password" style={{ fontSize: 11, color: 'var(--text-3)', display: 'inline-block', marginTop: 4 }}>
+              Forgot password?
+            </Link>
           </div>
+
           <button type="submit" className="auth-button">
             ▸ Sign In
           </button>

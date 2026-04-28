@@ -10,25 +10,15 @@ export default async function OnboardingPage({
 }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/signin');
-  }
+  if (!user) redirect('/signin');
 
   const { data: existing } = await supabase
     .from('players')
-    .select('username, platform, game_id, discord_handle, security_question')
+    .select('username, platform, security_question')
     .eq('id', user.id)
     .maybeSingle();
 
-  if (
-    existing &&
-    existing.username &&
-    existing.platform &&
-    existing.game_id &&
-    existing.discord_handle &&
-    existing.security_question
-  ) {
+  if (existing && existing.username && existing.platform && existing.security_question) {
     redirect('/home');
   }
 
@@ -38,8 +28,7 @@ export default async function OnboardingPage({
         <div className="auth-eyebrow">eFTBaller · Profile setup</div>
         <h1 className="auth-h1">Set up your profile</h1>
         <p className="auth-sub">
-          This is how you&apos;ll appear in tournaments. Opponents need your platform,
-          in-game ID, and Discord handle to actually play you.
+          This is how you&apos;ll appear in tournaments. Opponents need your platform and in-game ID to play you.
         </p>
 
         {searchParams.error && (
@@ -47,19 +36,12 @@ export default async function OnboardingPage({
         )}
 
         <form action={completeOnboarding} className="auth-form">
-
           <div className="auth-field">
             <label htmlFor="username" className="auth-label">In-game name *</label>
             <input
-              id="username"
-              name="username"
-              type="text"
-              required
-              minLength={3}
-              maxLength={24}
-              pattern="[A-Za-z0-9_]+"
-              className="auth-input"
-              placeholder="e.g. ragemode_99"
+              id="username" name="username" type="text" required
+              minLength={3} maxLength={24} pattern="[A-Za-z0-9_]+"
+              className="auth-input" placeholder="e.g. ragemode_99"
             />
             <small style={{ fontSize: 11, color: 'var(--text-3)' }}>
               3–24 characters · letters, numbers, underscore
@@ -69,12 +51,8 @@ export default async function OnboardingPage({
           <div className="auth-field">
             <label htmlFor="display_name" className="auth-label">Display name</label>
             <input
-              id="display_name"
-              name="display_name"
-              type="text"
-              maxLength={48}
-              className="auth-input"
-              placeholder="Defaults to your in-game name"
+              id="display_name" name="display_name" type="text" maxLength={48}
+              className="auth-input" placeholder="Defaults to your in-game name"
             />
           </div>
 
@@ -89,44 +67,18 @@ export default async function OnboardingPage({
           </div>
 
           <div className="auth-field">
-            <label htmlFor="game_id" className="auth-label">eFootball friend code *</label>
+            <label htmlFor="game_id" className="auth-label">eFootball friend code (optional)</label>
             <input
-              id="game_id"
-              name="game_id"
-              type="text"
-              required
-              minLength={4}
-              maxLength={32}
+              id="game_id" name="game_id" type="text" maxLength={32}
               className="auth-input"
-              placeholder="Your in-game ID for opponents to add you"
+              placeholder="In-game ID for opponents to add you"
             />
-          </div>
-
-          <div className="auth-field">
-            <label htmlFor="discord_handle" className="auth-label">Discord handle *</label>
-            <input
-              id="discord_handle"
-              name="discord_handle"
-              type="text"
-              required
-              minLength={2}
-              maxLength={32}
-              pattern="\S+"
-              className="auth-input"
-              placeholder="e.g. ragemode99"
-            />
-            <small style={{ fontSize: 11, color: 'var(--text-3)' }}>
-              For coordinating match times with your opponent
-            </small>
           </div>
 
           <div className="auth-field">
             <label htmlFor="region" className="auth-label">Country (optional)</label>
             <input
-              id="region"
-              name="region"
-              type="text"
-              maxLength={2}
+              id="region" name="region" type="text" maxLength={2}
               className="auth-input"
               placeholder="e.g. IN, BR, ES"
               style={{ textTransform: 'uppercase' }}
@@ -136,15 +88,10 @@ export default async function OnboardingPage({
             </small>
           </div>
 
-          <div style={{
-            marginTop: 8,
-            paddingTop: 16,
-            borderTop: '1px solid var(--border)',
-          }}>
+          <div style={{ marginTop: 8, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
             <div className="auth-eyebrow" style={{ marginBottom: 8 }}>Password recovery</div>
             <p style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12, lineHeight: 1.5 }}>
-              Pick a question and answer to recover your password if you forget it.
-              Only you should know the answer.
+              Pick a question and answer in case you forget your password. Only you should know the answer.
             </p>
 
             <div className="auth-field">
@@ -160,21 +107,14 @@ export default async function OnboardingPage({
             <div className="auth-field">
               <label htmlFor="security_answer" className="auth-label">Answer *</label>
               <input
-                id="security_answer"
-                name="security_answer"
-                type="text"
-                required
-                minLength={2}
-                maxLength={64}
-                className="auth-input"
+                id="security_answer" name="security_answer" type="text" required
+                minLength={2} maxLength={64} className="auth-input"
                 placeholder="Case-insensitive · keep it memorable"
               />
             </div>
           </div>
 
-          <button type="submit" className="auth-button">
-            Enter eFTBL →
-          </button>
+          <button type="submit" className="auth-button">Enter eFTBL →</button>
         </form>
       </div>
     </main>

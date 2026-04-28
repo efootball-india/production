@@ -1,66 +1,150 @@
 import Link from 'next/link';
-import { listTournaments, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments';
-import { getCurrentPlayer } from '@/lib/player';
+import { notFound } from 'next/navigation';
+import { getTournamentBySlug, isCurrentUserRegistered, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments';
+import { getCurrentPlayer, isProfileComplete, PLATFORM_LABELS } from '@/lib/player';
 import { registerForTournament, withdrawFromTournament } from '../../actions/tournaments';
-export default async function TournamentsPage() {
-  const tournaments = await listTournaments();
+
+export default async function TournamentDetailPage({
+  params,
+  searchParams,
+}: {
+  params: { slug: string };
+  searchParams: { registered?: string; withdrawn?: string; error?: string };
+}) {
+  const result = await getTournamentBySlug(params.slug);
+  if (!result) notFound();
+  const { tournament, participants } = result;
+
   const player = await getCurrentPlayer();
-  const isAdmin = player?.role === 'admin' || player?.role === 'super_admin';
+  const isRegistered = player ? await isCurrentUserRegistered(tournament.id) : false;
+  const profileOk = player ? isProfileComplete(player) : false;
+
+  const registeredCount = participants.filter((p: any) => p.status === 'registered').length;
+  const capacityFull = tournament.max_participants
+    ? registeredCount >= tournament.max_participants
+    : false;
+
+  const regOpen = tournament.status === 'registration_open' &&
+    (!tournament.registration_closes_at || new Date(tournament.registration_closes_at) > new Date());
 
   return (
-    <main className="auth-shell" style={{ alignItems: 'flex-start', paddingTop: 56 }}>
+    <main className="auth-shell" style={{ alignItems: 'flex-start', paddingTop: 40 }}>
       <div style={{ maxWidth: 720, width: '100%', padding: '0 20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24 }}>
-          <div>
-            <div className="auth-eyebrow">eFTBL</div>
-            <h1 className="auth-h1" style={{ marginBottom: 0 }}>Tournaments</h1>
-          </div>
-          {isAdmin && (
-            <Link href="/admin/tournaments/new" className="auth-button" style={{ padding: '8px 14px', width: 'auto' }}>
-              + New tournament
-            </Link>
-          )}
-        </div>
+        <Link href="/tournaments" style={{ color: 'var(--text-2)', fontSize: 13, display: 'inline-block', marginBottom: 16 }}>
+          All tournaments
+        </Link>
 
-        {tournaments.length === 0 && (
-          <div style={{ padding: 24, border: '1px solid var(--glass-border)', color: 'var(--text-2)', fontSize: 14 }}>
-            No tournaments yet. {isAdmin && 'Click "New tournament" above to create the first one.'}
+        {searchParams.registered && (
+          <div style={{ padding: '10px 14px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)', color: 'var(--accent)', fontSize: 13, marginBottom: 16 }}>
+            You are registered. See you at the draw.
+          </div>
+        )}
+        {searchParams.withdrawn && (
+          <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'var(--text-2)', fontSize: 13, marginBottom: 16 }}>
+            Withdrawn from this tournament.
+          </div>
+        )}
+        {searchParams.error && (
+          <div style={{ padding: '10px 14px', background: 'rgba(255,92,92,0.08)', border: '1px solid rgba(255,92,92,0.3)', color: '#ff5c5c', fontSize: 13, marginBottom: 16 }}>
+            {searchParams.error}
           </div>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {tournaments.map(t => (
-            <Link
-              key={t.id}
-              href={`/tournaments/${t.slug}`}
-              style={{
-                display: 'block',
-                padding: '18px 20px',
-                background: 'var(--glass)',
-                border: '1px solid var(--glass-border)',
-                textDecoration: 'none',
-                color: 'inherit',
-                transition: 'border-color 0.15s',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-                <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>{t.name}</h2>
-                <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{STATUS_LABELS[t.status]}</span>
-              </div>
-              <div style={{ fontSize: 13, color: 'var(--text-2)', display: 'flex', gap: 16 }}>
-                <span>{FORMAT_LABELS[t.format]}</span>
-                <span>{t.participant_count}{t.max_participants ? ` / ${t.max_participants}` : ''} players</span>
-                {t.starts_at && (
-                  <span>Starts {new Date(t.starts_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-                )}
-              </div>
-            </Link>
-          ))}
+        <div style={{ marginBottom: 24 }}>
+          <div className="auth-eyebrow">{STATUS_LABELS[tournament.status]}</div>
+          <h1 className="auth-h1" style={{ marginBottom: 8 }}>{tournament.name}</h1>
+          {tournament.description && (
+            <p style={{ color: 'var(--text-2)', fontSize: 14, lineHeight: 1.55 }}>{tournament.description}</p>
+          )}
         </div>
 
-        <div style={{ marginTop: 32, paddingTop: 20, borderTop: '1px solid var(--border)', display: 'flex', gap: 16, fontSize: 13 }}>
-          <Link href="/home" style={{ color: 'var(--text-2)' }}>← Home</Link>
-          <Link href="/profile/edit" style={{ color: 'var(--text-2)' }}>Profile</Link>
+        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', padding: '16px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: 24 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-3)' }}>Format</span>
+            <span style={{ fontSize: 14, fontWeight: 500 }}>{FORMAT_LABELS[tournament.format]}</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-3)' }}>Players</span>
+            <span style={{ fontSize: 14, fontWeight: 500 }}>{registeredCount}{tournament.max_participants ? ` / ${tournament.max_participants}` : ''}</span>
+          </div>
+          {tournament.starts_at && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span style={{ fontSize: 11, color: 'var(--text-3)' }}>Starts</span>
+              <span style={{ fontSize: 14, fontWeight: 500 }}>{new Date(tournament.starts_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>
+            </div>
+          )}
+        </div>
+
+        <div style={{ marginBottom: 32, padding: '16px 18px', background: 'var(--glass)', border: '1px solid var(--glass-border)' }}>
+          {!player && (
+            <>
+              <p style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 12 }}>Sign in to register.</p>
+              <Link href="/signin" className="auth-button" style={{ display: 'inline-block', padding: '8px 16px', width: 'auto' }}>Sign in</Link>
+            </>
+          )}
+          {player && !profileOk && (
+            <>
+              <p style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 12 }}>Complete your profile (set your platform) to register.</p>
+              <Link href="/profile/edit" className="auth-button" style={{ display: 'inline-block', padding: '8px 16px', width: 'auto' }}>Complete profile</Link>
+            </>
+          )}
+          {player && profileOk && isRegistered && (
+            <>
+              <p style={{ fontSize: 14, color: 'var(--accent)', marginBottom: 12 }}>You are registered.</p>
+              {tournament.status === 'registration_open' && (
+                <form action={withdrawFromTournament}>
+                  <input type="hidden" name="slug" value={tournament.slug} />
+                  <input type="hidden" name="tournament_id" value={tournament.id} />
+                  <button type="submit" style={{ padding: '8px 16px', background: 'transparent', border: '1px solid rgba(255,255,255,0.16)', color: 'var(--text-2)', fontSize: 13, cursor: 'pointer' }}>Withdraw</button>
+                </form>
+              )}
+            </>
+          )}
+          {player && profileOk && !isRegistered && regOpen && !capacityFull && (
+            <form action={registerForTournament}>
+              <input type="hidden" name="slug" value={tournament.slug} />
+              <button type="submit" className="auth-button" style={{ padding: '10px 20px', width: 'auto' }}>Register</button>
+            </form>
+          )}
+          {player && profileOk && !isRegistered && regOpen && capacityFull && (
+            <p style={{ fontSize: 14, color: 'var(--text-2)', margin: 0 }}>Tournament is full.</p>
+          )}
+          {player && profileOk && !isRegistered && !regOpen && (
+            <p style={{ fontSize: 14, color: 'var(--text-2)', margin: 0 }}>Registration is closed.</p>
+          )}
+        </div>
+
+        <div>
+          <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-2)', marginBottom: 12 }}>
+            Players ({registeredCount})
+          </h2>
+          {participants.length === 0 ? (
+            <p style={{ fontSize: 13, color: 'var(--text-3)' }}>No registrations yet.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--border)' }}>
+              {participants.map((p: any) => (
+                <div key={p.id} style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto auto',
+                  gap: 12,
+                  alignItems: 'center',
+                  padding: '10px 14px',
+                  background: 'var(--bg)',
+                  fontSize: 13,
+                  opacity: p.status === 'withdrawn' ? 0.4 : 1,
+                  textDecoration: p.status === 'withdrawn' ? 'line-through' : 'none',
+                }}>
+                  <span style={{ fontWeight: 500 }}>{p.player?.display_name ?? p.player?.username}</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                    {p.player?.platform ? PLATFORM_LABELS[p.player.platform as keyof typeof PLATFORM_LABELS] : ''}
+                  </span>
+                  <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                    {p.player?.region ?? ''}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </main>

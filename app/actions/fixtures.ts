@@ -28,9 +28,6 @@ async function requireMod() {
   return { supabase, user };
 }
 
-/**
- * Generate the 72 group-stage matches for a tournament. Idempotent.
- */
 export async function generateFixtures(formData: FormData) {
   const { supabase } = await requireAdmin();
   const slug = formData.get('slug') as string;
@@ -47,9 +44,6 @@ export async function generateFixtures(formData: FormData) {
   redirect(`/tournaments/${slug}?fixtures_generated=1`);
 }
 
-/**
- * Set or update the matchday deadlines for a tournament.
- */
 export async function setMatchdayDeadlines(formData: FormData) {
   const { supabase } = await requireAdmin();
   const slug = formData.get('slug') as string;
@@ -74,7 +68,6 @@ export async function setMatchdayDeadlines(formData: FormData) {
     .update({ matchday_deadlines: deadlines })
     .eq('id', tournament.id);
 
-  // Also update matches to set their deadline_at
   for (const md of [1, 2, 3]) {
     const iso = deadlines[String(md)];
     if (iso) {
@@ -92,8 +85,8 @@ export async function setMatchdayDeadlines(formData: FormData) {
 
 /**
  * A player submits a score for one of their matches.
- * If both players have submitted and they agree, the match auto-completes.
- * If they disagree, status becomes 'disputed' for mod review.
+ * - Regular players: needs both players to submit and agree to auto-complete.
+ * - Mods/admins: their submission is authoritative; match completes immediately.
  */
 export async function submitScore(formData: FormData) {
   const supabase = createClient();
@@ -112,6 +105,14 @@ export async function submitScore(formData: FormData) {
   if (isNaN(homeScore) || isNaN(awayScore) || homeScore < 0 || awayScore < 0) {
     redirect(`/play/${slug}?error=${encodeURIComponent('Invalid score')}`);
   }
+
+  // Check submitter's role
+  const { data: me } = await supabase
+    .from('players')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+  const isPrivileged = me && ['moderator', 'admin', 'super_admin'].includes(me.role);
 
   // Verify user is a participant in this match
   const { data: match } = await supabase
@@ -132,7 +133,41 @@ export async function submitScore(formData: FormData) {
     redirect(`/play/${slug}?error=${encodeURIComponent('Not your match')}`);
   }
 
-  // Upsert this submission
+  // ===== ADMIN/MOD FAST PATH =====
+  // Their submission is final. Skip the dual-confirmation dance.
+  if (isPrivileged) {
+    const winnerId = homeScore > awayScore
+      ? match.home_participant_id
+      : homeScore < awayScore
+      ? match.away_participant_id
+      : null;
+
+    // Still record the submission (so we have a paper trail)
+    await supabase.from('score_submissions').upsert({
+      match_id: matchId,
+      submitted_by: user.id,
+      home_score: homeScore,
+      away_score: awayScore,
+      notes,
+    }, { onConflict: 'match_id,submitted_by' });
+
+    await supabase
+      .from('matches')
+      .update({
+        home_score: homeScore,
+        away_score: awayScore,
+        status: 'completed',
+        winner_participant_id: winnerId,
+        confirmed_by: user.id,
+        confirmed_at: new Date().toISOString(),
+      })
+      .eq('id', matchId);
+
+    revalidatePath(`/play/${slug}`);
+    redirect(`/play/${slug}?completed=${matchId}`);
+  }
+
+  // ===== REGULAR PLAYER PATH =====
   await supabase.from('score_submissions').upsert({
     match_id: matchId,
     submitted_by: user.id,
@@ -141,7 +176,6 @@ export async function submitScore(formData: FormData) {
     notes,
   }, { onConflict: 'match_id,submitted_by' });
 
-  // Check if both players have now submitted
   const { data: subs } = await supabase
     .from('score_submissions')
     .select('submitted_by, home_score, away_score')
@@ -156,7 +190,6 @@ export async function submitScore(formData: FormData) {
                     homeSub.away_score === awaySub.away_score;
 
       if (agree) {
-        // Both players agree → auto-complete the match
         const winnerId = homeSub.home_score > homeSub.away_score
           ? match.home_participant_id
           : homeSub.home_score < homeSub.away_score
@@ -174,7 +207,6 @@ export async function submitScore(formData: FormData) {
           })
           .eq('id', matchId);
       } else {
-        // Disagreement → flag for mod review
         await supabase
           .from('matches')
           .update({ status: 'disputed' })
@@ -182,7 +214,6 @@ export async function submitScore(formData: FormData) {
       }
     }
   } else {
-    // Only one submission so far
     await supabase
       .from('matches')
       .update({
@@ -195,49 +226,4 @@ export async function submitScore(formData: FormData) {
 
   revalidatePath(`/play/${slug}`);
   redirect(`/play/${slug}?submitted=${matchId}`);
-}
-
-/**
- * Mod-only: override the score for a match. Bypasses the dual-submission check.
- */
-export async function overrideMatchScore(formData: FormData) {
-  const { supabase } = await requireMod();
-  const matchId = formData.get('match_id') as string;
-  const slug = formData.get('slug') as string;
-  const homeScoreRaw = (formData.get('home_score') as string ?? '').trim();
-  const awayScoreRaw = (formData.get('away_score') as string ?? '').trim();
-
-  const homeScore = parseInt(homeScoreRaw, 10);
-  const awayScore = parseInt(awayScoreRaw, 10);
-
-  if (isNaN(homeScore) || isNaN(awayScore) || homeScore < 0 || awayScore < 0) {
-    redirect(`/admin/tournaments/${slug}/queue?error=${encodeURIComponent('Invalid score')}`);
-  }
-
-  const { data: match } = await supabase
-    .from('matches')
-    .select('home_participant_id, away_participant_id')
-    .eq('id', matchId)
-    .maybeSingle();
-  if (!match) redirect(`/admin/tournaments/${slug}/queue`);
-
-  const winnerId = homeScore > awayScore
-    ? match.home_participant_id
-    : homeScore < awayScore
-    ? match.away_participant_id
-    : null;
-
-  await supabase
-    .from('matches')
-    .update({
-      home_score: homeScore,
-      away_score: awayScore,
-      status: 'completed',
-      winner_participant_id: winnerId,
-      confirmed_at: new Date().toISOString(),
-    })
-    .eq('id', matchId);
-
-  revalidatePath(`/admin/tournaments/${slug}/queue`);
-  redirect(`/admin/tournaments/${slug}/queue?overridden=${matchId}`);
 }

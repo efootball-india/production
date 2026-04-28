@@ -1,8 +1,10 @@
+// PASS-1-PAGE-TOURNAMENT-DETAIL
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTournamentBySlug, isCurrentUserRegistered, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments';
 import { getCurrentPlayer, isProfileComplete, PLATFORM_LABELS } from '@/lib/player';
 import { registerForTournament, withdrawFromTournament } from '../../actions/tournaments';
+import { getDrawState } from '@/lib/draw';
 
 export default async function TournamentDetailPage({
   params,
@@ -18,12 +20,11 @@ export default async function TournamentDetailPage({
   const player = await getCurrentPlayer();
   const isRegistered = player ? await isCurrentUserRegistered(tournament.id) : false;
   const profileOk = player ? isProfileComplete(player) : false;
+  const isAdmin = player?.role === 'admin' || player?.role === 'super_admin';
+  const drawState = await getDrawState(tournament.id);
 
   const registeredCount = participants.filter((p: any) => p.status === 'registered').length;
-  const capacityFull = tournament.max_participants
-    ? registeredCount >= tournament.max_participants
-    : false;
-
+  const capacityFull = tournament.max_participants ? registeredCount >= tournament.max_participants : false;
   const regOpen = tournament.status === 'registration_open' &&
     (!tournament.registration_closes_at || new Date(tournament.registration_closes_at) > new Date());
 
@@ -59,21 +60,24 @@ export default async function TournamentDetailPage({
         </div>
 
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', padding: '16px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', marginBottom: 24 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <span style={{ fontSize: 11, color: 'var(--text-3)' }}>Format</span>
-            <span style={{ fontSize: 14, fontWeight: 500 }}>{FORMAT_LABELS[tournament.format]}</span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <span style={{ fontSize: 11, color: 'var(--text-3)' }}>Players</span>
-            <span style={{ fontSize: 14, fontWeight: 500 }}>{registeredCount}{tournament.max_participants ? ` / ${tournament.max_participants}` : ''}</span>
-          </div>
+          <Meta label="Format" value={FORMAT_LABELS[tournament.format]} />
+          <Meta label="Players" value={`${registeredCount}${tournament.max_participants ? ` / ${tournament.max_participants}` : ''}`} />
           {tournament.starts_at && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <span style={{ fontSize: 11, color: 'var(--text-3)' }}>Starts</span>
-              <span style={{ fontSize: 14, fontWeight: 500 }}>{new Date(tournament.starts_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>
-            </div>
+            <Meta label="Starts" value={new Date(tournament.starts_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} />
           )}
+          <Meta label="Draw" value={drawState.status === 'not_started' ? 'Not started' : drawState.status === 'in_progress' ? 'In progress' : 'Complete'} />
         </div>
+
+        {isAdmin && (
+          <div style={{ marginBottom: 24, padding: '12px 14px', background: 'rgba(0,255,136,0.04)', border: '1px solid rgba(0,255,136,0.2)' }}>
+            <div style={{ fontSize: 11, color: 'var(--accent)', marginBottom: 6 }}>ADMIN</div>
+            <Link href={`/admin/tournaments/${tournament.slug}/draw`} style={{ color: 'var(--accent)', fontSize: 14, fontWeight: 500 }}>
+              {drawState.status === 'not_started' && 'Set up group draw'}
+              {drawState.status === 'in_progress' && 'Continue group draw'}
+              {drawState.status === 'completed' && 'View / reset draw'}
+            </Link>
+          </div>
+        )}
 
         <div style={{ marginBottom: 32, padding: '16px 18px', background: 'var(--glass)', border: '1px solid var(--glass-border)' }}>
           {!player && (
@@ -148,5 +152,14 @@ export default async function TournamentDetailPage({
         </div>
       </div>
     </main>
+  );
+}
+
+function Meta({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{label}</span>
+      <span style={{ fontSize: 14, fontWeight: 500 }}>{value}</span>
+    </div>
   );
 }

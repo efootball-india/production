@@ -6,7 +6,6 @@ import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 
 function getOrigin() {
-  // Prefer the explicit env var, fall back to request headers
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL;
   }
@@ -16,61 +15,96 @@ function getOrigin() {
   return `${proto}://${host}`;
 }
 
+/**
+ * Convert a username into a synthetic email used internally by Supabase auth.
+ * The user never sees this email; they always sign in with their username.
+ */
+function usernameToEmail(username: string): string {
+  return `${username.toLowerCase()}@eftbl.local`;
+}
+
+function isValidUsername(username: string): boolean {
+  return /^[A-Za-z0-9_]{3,24}$/.test(username);
+}
+
 export async function signInWithGoogle() {
   const supabase = createClient();
   const origin = getOrigin();
-
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: {
-      redirectTo: `${origin}/auth/callback`,
-    },
+    options: { redirectTo: `${origin}/auth/callback` },
+  });
+  if (error) redirect(`/?error=${encodeURIComponent(error.message)}`);
+  if (data.url) redirect(data.url);
+}
+
+export async function signInWithUsername(formData: FormData) {
+  const username = (formData.get('username') as string ?? '').trim();
+  const password = formData.get('password') as string;
+
+  if (!username || !password) {
+    redirect(`/signin?error=${encodeURIComponent('Username and password required')}`);
+  }
+  if (!isValidUsername(username)) {
+    redirect(`/signin?error=${encodeURIComponent('Invalid username format')}`);
+  }
+
+  const supabase = createClient();
+  const { error } = await supabase.auth.signInWithPassword({
+    email: usernameToEmail(username),
+    password,
   });
 
   if (error) {
-    redirect(`/?error=${encodeURIComponent(error.message)}`);
+    redirect(`/signin?error=${encodeURIComponent('Invalid username or password')}`);
   }
-
-  if (data.url) {
-    redirect(data.url);
-  }
-}
-
-export async function signInWithEmail(formData: FormData) {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-
-  const supabase = createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    redirect(`/signin?error=${encodeURIComponent(error.message)}`);
-  }
-
   revalidatePath('/', 'layout');
   redirect('/home');
 }
 
-export async function signUpWithEmail(formData: FormData) {
-  const email = formData.get('email') as string;
+export async function signUpWithUsername(formData: FormData) {
+  const username = (formData.get('username') as string ?? '').trim();
   const password = formData.get('password') as string;
 
+  if (!username || !password) {
+    redirect(`/signup?error=${encodeURIComponent('Username and password required')}`);
+  }
+  if (!isValidUsername(username)) {
+    redirect(`/signup?error=${encodeURIComponent('Username must be 3-24 chars · letters, numbers, underscore')}`);
+  }
+  if (password.length < 8) {
+    redirect(`/signup?error=${encodeURIComponent('Password must be at least 8 characters')}`);
+  }
+
   const supabase = createClient();
-  const origin = getOrigin();
+
+  // Pre-check that username isn't taken in players table
+  const { data: existing } = await supabase
+    .from('players')
+    .select('username')
+    .eq('username', username)
+    .maybeSingle();
+  if (existing) {
+    redirect(`/signup?error=${encodeURIComponent('That username is already taken')}`);
+  }
 
   const { error } = await supabase.auth.signUp({
-    email,
+    email: usernameToEmail(username),
     password,
-    options: {
-      emailRedirectTo: `${origin}/auth/callback`,
-    },
   });
 
   if (error) {
     redirect(`/signup?error=${encodeURIComponent(error.message)}`);
   }
 
-  redirect('/verify');
+  // Sign them in immediately (since email confirmation is off)
+  await supabase.auth.signInWithPassword({
+    email: usernameToEmail(username),
+    password,
+  });
+
+  revalidatePath('/', 'layout');
+  redirect('/onboarding');
 }
 
 export async function signOut() {
@@ -78,40 +112,4 @@ export async function signOut() {
   await supabase.auth.signOut();
   revalidatePath('/', 'layout');
   redirect('/');
-}
-
-export async function completeOnboarding(formData: FormData) {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/signin');
-  }
-
-  const username = (formData.get('username') as string)?.trim();
-  const display_name = (formData.get('display_name') as string)?.trim() || username;
-  const region = (formData.get('region') as string) || null;
-  const platform = (formData.get('platform') as string) || null;
-
-  if (!username || username.length < 3 || username.length > 24) {
-    redirect('/onboarding?error=Username must be 3-24 characters');
-  }
-
-  const { error } = await supabase.from('players').upsert({
-    id: user.id,
-    username,
-    display_name,
-    region,
-    platform: platform as 'ps5' | 'ps4' | 'xbox' | 'pc' | 'mobile' | null,
-  });
-
-  if (error) {
-    // Most common error: username already taken
-    redirect(`/onboarding?error=${encodeURIComponent(error.message)}`);
-  }
-
-  revalidatePath('/', 'layout');
-  redirect('/home');
 }

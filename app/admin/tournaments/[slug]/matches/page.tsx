@@ -50,13 +50,9 @@ export default async function AdminMatchesPage({
 
   const { data: matches } = await query;
 
-  // Group matches by group_id for display
   const { data: groups } = await supabase
     .from('groups')
-    .select(`
-      id, name, position,
-      stage:stages!inner(tournament_id)
-    `)
+    .select('id, name, position, stage:stages!inner(tournament_id)')
     .eq('stage.tournament_id', tournament.id)
     .order('position');
 
@@ -71,17 +67,16 @@ export default async function AdminMatchesPage({
     matchesByGroup.set(gid, arr);
   }
 
-  // Counts for quick stats
   const total = matches?.length ?? 0;
   const completed = (matches ?? []).filter(m => m.status === 'completed').length;
   const disputed = (matches ?? []).filter(m => m.status === 'disputed').length;
   const awaiting = (matches ?? []).filter(m => m.status === 'awaiting_confirmation').length;
 
   return (
-    <main style={{ minHeight: '100vh', maxWidth: 960, margin: '0 auto', padding: '24px 20px 60px' }}>
+    <main style={{ minHeight: '100vh', maxWidth: 960, margin: '0 auto', padding: '20px 16px 60px' }}>
       <Link href={`/tournaments/${tournament.slug}`} style={{ color: 'var(--text-2)', fontSize: 13 }}>← {tournament.name}</Link>
-      <h1 style={{ fontSize: 26, fontWeight: 600, marginTop: 12, marginBottom: 8 }}>All matches</h1>
-      <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 20 }}>
+      <h1 style={{ fontSize: 22, fontWeight: 600, marginTop: 12, marginBottom: 6 }}>All matches</h1>
+      <p style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 16 }}>
         {completed} of {total} completed · {disputed} disputed · {awaiting} awaiting
       </p>
 
@@ -96,20 +91,18 @@ export default async function AdminMatchesPage({
         </div>
       )}
 
-      {/* Matchday filter */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 20, flexWrap: 'wrap' }}>
         <FilterChip slug={tournament.slug} label="All" active={!filterMd} md={null} />
         <FilterChip slug={tournament.slug} label="MD1" active={filterMd === 1} md={1} />
         <FilterChip slug={tournament.slug} label="MD2" active={filterMd === 2} md={2} />
         <FilterChip slug={tournament.slug} label="MD3" active={filterMd === 3} md={3} />
       </div>
 
-      {/* Matches grouped */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         {Array.from(matchesByGroup.entries()).map(([gid, ms]) => (
           <section key={gid}>
-            <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-2)', marginBottom: 8 }}>
-              {groupNameById.get(gid) ?? 'Unknown group'}
+            <h2 style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6, letterSpacing: '0.04em' }}>
+              {(groupNameById.get(gid) ?? 'Unknown').toUpperCase()}
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {ms.map(m => <MatchRow key={m.id} match={m} slug={tournament.slug} />)}
@@ -141,6 +134,8 @@ function MatchRow({ match, slug }: any) {
   const away = match.away;
   const homeName = home?.country?.name ?? '?';
   const awayName = away?.country?.name ?? '?';
+  const homeUser = home?.player?.username ?? '?';
+  const awayUser = away?.player?.username ?? '?';
   const completed = match.status === 'completed';
 
   const statusColors: Record<string, string> = {
@@ -155,55 +150,86 @@ function MatchRow({ match, slug }: any) {
     <div style={{
       background: 'var(--glass)',
       border: '1px solid var(--glass-border)',
-      padding: '10px 14px',
-      display: 'grid',
-      gridTemplateColumns: '40px 1fr auto 1fr 1fr',
-      gap: 12,
-      alignItems: 'center',
-      fontSize: 13,
+      padding: '10px 12px',
     }}>
-      <span style={{ fontSize: 11, color: 'var(--text-3)' }}>MD{match.matchday}</span>
+      {/* Top row: matchup + score/status */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 8,
+        fontSize: 13,
+      }}>
+        <span style={{ fontSize: 10, color: 'var(--text-3)', flexShrink: 0, width: 32 }}>MD{match.matchday}</span>
 
-      <div>
-        <div style={{ fontWeight: 500 }}>{homeName}</div>
-        <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{home?.player?.username ?? '?'}</div>
+        <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+          <div style={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {homeName}
+          </div>
+          <div style={{ fontSize: 10, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {homeUser}
+          </div>
+        </div>
+
+        <div style={{ minWidth: 60, textAlign: 'center', flexShrink: 0 }}>
+          {completed && match.home_score != null && match.away_score != null ? (
+            <strong style={{ fontSize: 16 }}>{match.home_score}–{match.away_score}</strong>
+          ) : (
+            <span style={{ color: statusColors[match.status] ?? 'var(--text-3)', fontSize: 10 }}>
+              {match.status === 'awaiting_result' ? 'Pending' : match.status.replace(/_/g, ' ')}
+            </span>
+          )}
+        </div>
+
+        <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', textAlign: 'right' }}>
+          <div style={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {awayName}
+          </div>
+          <div style={{ fontSize: 10, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {awayUser}
+          </div>
+        </div>
       </div>
 
-      <div style={{ minWidth: 60, textAlign: 'center' }}>
-        {completed && match.home_score != null && match.away_score != null ? (
-          <strong style={{ fontSize: 15 }}>{match.home_score} – {match.away_score}</strong>
-        ) : (
-          <span style={{ color: statusColors[match.status] ?? 'var(--text-3)', fontSize: 11 }}>
-            {match.status === 'awaiting_result' ? 'Pending' : match.status.replace(/_/g, ' ')}
-          </span>
-        )}
-      </div>
-
-      <div style={{ textAlign: 'right' }}>
-        <div style={{ fontWeight: 500 }}>{awayName}</div>
-        <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{away?.player?.username ?? '?'}</div>
-      </div>
-
-      <details style={{ justifySelf: 'end' }}>
-        <summary style={{ cursor: 'pointer', fontSize: 11, color: 'var(--accent)' }}>
-          {completed ? 'Edit' : 'Set score'}
+      {/* Bottom row: score-entry form, full width */}
+      <details>
+        <summary style={{ cursor: 'pointer', fontSize: 11, color: 'var(--accent)', listStyle: 'none' }}>
+          {completed ? '✏ Edit score' : '+ Set score'}
         </summary>
-        <form action={overrideMatchScore} style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'flex-end' }}>
+        <form action={overrideMatchScore} style={{
+          marginTop: 8,
+          display: 'flex',
+          gap: 8,
+          alignItems: 'center',
+          flexWrap: 'wrap',
+        }}>
           <input type="hidden" name="match_id" value={match.id} />
           <input type="hidden" name="slug" value={slug} />
-          <input
-            type="number" name="home_score" min={0} max={50} required
-            defaultValue={match.home_score ?? ''}
-            placeholder={homeName.slice(0, 3)}
-            className="auth-input" style={{ width: 50, fontSize: 12 }}
-          />
-          <input
-            type="number" name="away_score" min={0} max={50} required
-            defaultValue={match.away_score ?? ''}
-            placeholder={awayName.slice(0, 3)}
-            className="auth-input" style={{ width: 50, fontSize: 12 }}
-          />
-          <button type="submit" className="auth-button" style={{ padding: '4px 10px', fontSize: 11, width: 'auto' }}>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: '1 1 auto' }}>
+            <input
+              type="number" name="home_score" min={0} max={50} required
+              defaultValue={match.home_score ?? ''}
+              aria-label={`${homeName} score`}
+              className="auth-input"
+              style={{ width: 56, fontSize: 14, textAlign: 'center' }}
+            />
+            <span style={{ fontSize: 12, color: 'var(--text-3)' }}>–</span>
+            <input
+              type="number" name="away_score" min={0} max={50} required
+              defaultValue={match.away_score ?? ''}
+              aria-label={`${awayName} score`}
+              className="auth-input"
+              style={{ width: 56, fontSize: 14, textAlign: 'center' }}
+            />
+          </div>
+
+          <button type="submit" className="auth-button" style={{
+            padding: '6px 14px',
+            fontSize: 12,
+            width: 'auto',
+            flexShrink: 0,
+          }}>
             Save
           </button>
         </form>

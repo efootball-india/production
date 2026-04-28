@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { listTournaments, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments';
 import { getCurrentPlayer } from '@/lib/player';
-
+import { createTournament } from '../../../actions/tournaments';
 export default async function TournamentsPage() {
   const tournaments = await listTournaments();
   const player = await getCurrentPlayer();

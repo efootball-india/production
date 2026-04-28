@@ -20,7 +20,7 @@ function getOrigin() {
  * The user never sees this email; they always sign in with their username.
  */
 function usernameToEmail(username: string): string {
-  return `${username.toLowerCase()}@eftbl.local`;
+  return `${username.toLowerCase()}@users.eftbl.app`;
 }
 
 function isValidUsername(username: string): boolean {

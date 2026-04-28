@@ -11,7 +11,7 @@ export default async function PlayPage({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { submitted?: string; error?: string };
+searchParams: { submitted?: string; completed?: string; error?: string };
 }) {
   const player = await getCurrentPlayer();
   if (!player) redirect('/signin');
@@ -111,11 +111,16 @@ export default async function PlayPage({
         <p style={{ fontSize: 13, color: 'var(--text-2)' }}>Group {country.group_label} · Played {played} · {wins}W {draws}D {losses}L</p>
       </div>
 
-      {searchParams.submitted && (
-        <div style={{ padding: '10px 14px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)', color: 'var(--accent)', fontSize: 13, marginBottom: 16 }}>
-          Score submitted. Waiting on opponent confirmation, or admin if disputed.
-        </div>
-      )}
+      {searchParams.completed && (
+  <div style={{ padding: '10px 14px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)', color: 'var(--accent)', fontSize: 13, marginBottom: 16 }}>
+    Match recorded.
+  </div>
+)}
+{searchParams.submitted && (
+  <div style={{ padding: '10px 14px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)', color: 'var(--accent)', fontSize: 13, marginBottom: 16 }}>
+    Score submitted. Waiting on opponent confirmation.
+  </div>
+)}
       {searchParams.error && (
         <div style={{ padding: '10px 14px', background: 'rgba(255,92,92,0.08)', border: '1px solid rgba(255,92,92,0.3)', color: '#ff5c5c', fontSize: 13, marginBottom: 16 }}>
           {searchParams.error}

@@ -1,30 +1,23 @@
 import { getCurrentPlayer, PLATFORM_OPTIONS } from '@/lib/player';
 import { updateProfile } from '../../actions/profile';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
 
-export default async function EditProfilePage({
+export default async function ProfilePage({
   searchParams,
 }: {
-  searchParams: { error?: string; incomplete?: string };
+  searchParams: { error?: string; saved?: string };
 }) {
   const player = await getCurrentPlayer();
-
-  if (!player) {
-    redirect('/onboarding');
-  }
+  if (!player) redirect('/onboarding');
 
   return (
     <main className="auth-shell">
       <div className="auth-card" style={{ maxWidth: 480 }}>
-        <Link href="/profile" className="auth-back">Back to profile</Link>
-        <div className="auth-eyebrow">Edit profile</div>
-        <h1 className="auth-h1">Update your details</h1>
+        <div className="auth-eyebrow">Profile</div>
+        <h1 className="auth-h1">Your details</h1>
 
-        {searchParams.incomplete && (
-          <div className="auth-error" style={{ marginBottom: 14 }}>
-            Please complete your profile before registering for a tournament.
-          </div>
+        {searchParams.saved && (
+          <div style={{ padding: '10px 12px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)', color: 'var(--accent)', fontSize: 13, marginBottom: 14 }}>Profile saved.</div>
         )}
 
         {searchParams.error && (
@@ -53,26 +46,11 @@ export default async function EditProfilePage({
           </div>
 
           <div className="auth-field">
-            <label htmlFor="game_id" className="auth-label">eFootball friend code</label>
-            <input id="game_id" name="game_id" type="text" required minLength={4} maxLength={32} defaultValue={player.game_id ?? ''} className="auth-input" />
-          </div>
-
-          <div className="auth-field">
-            <label htmlFor="discord_handle" className="auth-label">Discord handle</label>
-            <input id="discord_handle" name="discord_handle" type="text" required minLength={2} maxLength={32} pattern="\S+" defaultValue={player.discord_handle ?? ''} className="auth-input" />
-          </div>
-
-          <div className="auth-field">
             <label htmlFor="region" className="auth-label">Country (optional)</label>
             <input id="region" name="region" type="text" maxLength={2} defaultValue={player.region ?? ''} className="auth-input" style={{ textTransform: 'uppercase' }} />
           </div>
 
-          <div className="auth-field">
-            <label htmlFor="bio" className="auth-label">Bio (optional)</label>
-            <textarea id="bio" name="bio" maxLength={280} defaultValue={player.bio ?? ''} className="auth-input" rows={3} />
-          </div>
-
-          <button type="submit" className="auth-button">Save changes</button>
+          <button type="submit" className="auth-button">Save</button>
         </form>
       </div>
     </main>

@@ -1,72 +1,77 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
-/**
- * Top-of-page progress bar. Renders a thin animated bar that:
- *   - Starts when a navigation begins (link click, form submit, redirect)
- *   - Completes when the new page renders
- *
- * Drop this in the root layout once. No props needed.
- */
 export default function NavigationProgress() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Reset to 100% then hide whenever pathname/searchParams change
-  // (i.e. after the new page has rendered)
+  // Stop any in-progress animation
+  const stopAnimation = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  // Whenever the route changes, finish the bar and hide it.
   useEffect(() => {
+    stopAnimation();
     setProgress(100);
-    const t = setTimeout(() => {
+
+    // After a short delay, hide entirely
+    if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+    hideTimeoutRef.current = setTimeout(() => {
       setVisible(false);
       setProgress(0);
-    }, 200);
-    return () => clearTimeout(t);
-  }, [pathname, searchParams]);
+    }, 250);
 
-  // Hijack link clicks and form submits to start the bar immediately
+    return () => {
+      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, searchParams?.toString()]);
+
+  // Hijack link clicks and form submits to start the bar
   useEffect(() => {
     const start = () => {
+      stopAnimation();
+      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
       setVisible(true);
       setProgress(15);
-      // Slow climb toward 90% so user sees motion even on long requests
       let p = 15;
-      const interval = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         p = Math.min(p + Math.random() * 8, 90);
         setProgress(p);
       }, 200);
-      return () => clearInterval(interval);
     };
-
-    let stopFn: (() => void) | null = null;
 
     const onClick = (e: MouseEvent) => {
       const target = (e.target as HTMLElement)?.closest('a');
       if (!target) return;
       const href = target.getAttribute('href');
       if (!href || href.startsWith('#') || target.target === '_blank' || target.hasAttribute('download')) return;
-      // Skip external links
       if (href.startsWith('http') && !href.includes(window.location.host)) return;
-      stopFn = start();
+      start();
     };
 
-    const onSubmit = () => {
-      stopFn = start();
-    };
+    const onSubmit = () => start();
 
     document.addEventListener('click', onClick);
     document.addEventListener('submit', onSubmit);
     return () => {
       document.removeEventListener('click', onClick);
       document.removeEventListener('submit', onSubmit);
-      stopFn?.();
+      stopAnimation();
     };
   }, []);
 
-  if (!visible && progress === 0) return null;
+  if (!visible) return null;
 
   return (
     <div
@@ -87,7 +92,7 @@ export default function NavigationProgress() {
           width: `${progress}%`,
           background: 'var(--accent, #00ff88)',
           boxShadow: '0 0 6px var(--accent, #00ff88)',
-          transition: progress >= 100 ? 'width 200ms ease-out, opacity 200ms ease-out' : 'width 200ms ease-out',
+          transition: 'width 200ms ease-out, opacity 200ms ease-out',
           opacity: progress >= 100 ? 0 : 1,
         }}
       />

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { createHash } from 'crypto';
 
 export type Platform =
   | 'ps5' | 'ps4'
@@ -22,37 +23,24 @@ export interface Player {
   discord_handle: string | null;
   role: PlayerRole;
   is_active: boolean;
+  security_question: string | null;
+  security_answer_hash: string | null;
   created_at: string;
   updated_at: string;
 }
 
-/**
- * Fetch the current authenticated user's player record.
- * Returns null if not signed in or if the player row doesn't exist yet
- * (e.g. user signed up but didn't complete onboarding).
- */
 export async function getCurrentPlayer(): Promise<Player | null> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
-
   const { data } = await supabase
     .from('players')
     .select('*')
     .eq('id', user.id)
     .maybeSingle();
-
   return (data as Player) ?? null;
 }
 
-/**
- * Require an authenticated user with a player record. Used at the top
- * of pages that should never be reached without auth.
- *
- * - Not signed in → /signin
- * - Signed in but no player row → /onboarding
- * - Signed in with player row but profile incomplete → /profile/edit
- */
 export async function requireCompleteProfile(): Promise<Player> {
   const player = await getCurrentPlayer();
   if (!player) {
@@ -67,22 +55,10 @@ export async function requireCompleteProfile(): Promise<Player> {
   return player;
 }
 
-/**
- * A profile is "complete enough to register for tournaments" when it has
- * the fields opponents need to actually find each other and play:
- *   - username (always present once row exists)
- *   - display_name (always present)
- *   - platform (so opponents know what console)
- *   - game_id (so opponents can add them in-game)
- *   - discord_handle (so opponents can coordinate scheduling)
- */
 export function isProfileComplete(player: Player): boolean {
   return Boolean(player.username && player.display_name && player.platform);
 }
 
-/**
- * Human-friendly platform labels for UI.
- */
 export const PLATFORM_LABELS: Record<Platform, string> = {
   ps5: 'PlayStation 5',
   ps4: 'PlayStation 4',
@@ -104,3 +80,34 @@ export const PLATFORM_OPTIONS: { value: Platform; label: string }[] = [
   { value: 'mobile_android', label: 'Mobile · Android' },
   { value: 'mobile_ios',     label: 'Mobile · iOS' },
 ];
+
+/**
+ * Predefined security questions. Users pick one when signing up via
+ * username/password. If they forget their password, they answer this
+ * question to reset.
+ */
+export const SECURITY_QUESTIONS: string[] = [
+  'What is your favorite real-life football club?',
+  'Who is your eFootball go-to striker?',
+  'What was your first FIFA or PES game?',
+  'What console do you play eFootball on?',
+  'What is your favorite international team?',
+  'Who is your all-time favorite footballer?',
+];
+
+/**
+ * Hash a security answer for storage / comparison.
+ * Lowercased and trimmed before hashing for forgiving matching.
+ */
+export function hashSecurityAnswer(answer: string): string {
+  const normalized = answer.trim().toLowerCase();
+  return createHash('sha256').update(normalized).digest('hex');
+}
+
+/**
+ * Verify a plaintext answer matches a stored hash.
+ */
+export function verifySecurityAnswer(plain: string, storedHash: string): boolean {
+  if (!storedHash) return false;
+  return hashSecurityAnswer(plain) === storedHash;
+}

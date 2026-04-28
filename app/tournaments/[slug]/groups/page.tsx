@@ -44,12 +44,14 @@ export default async function GroupsPage({ params }: { params: { slug: string } 
     }))
   );
 
+  const COLS = '20px 1fr 22px 22px 22px 22px 28px 28px 32px';
+
   return (
     <main style={{ minHeight: '100vh', maxWidth: 1100, margin: '0 auto', padding: '24px 20px 60px' }}>
       <Link href={`/tournaments/${tournament.slug}`} style={{ color: 'var(--text-2)', fontSize: 13 }}>← {tournament.name}</Link>
       <h1 style={{ fontSize: 26, fontWeight: 600, marginTop: 12, marginBottom: 24 }}>Standings</h1>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
         {groupsWithStandings.map(({ group, standings }) => (
           <div key={group.id} style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)' }}>
             <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)', fontSize: 13, fontWeight: 600 }}>
@@ -57,7 +59,7 @@ export default async function GroupsPage({ params }: { params: { slug: string } 
             </div>
             <div style={{
               display: 'grid',
-              gridTemplateColumns: '20px 1fr 22px 22px 22px 28px 28px 32px',
+              gridTemplateColumns: COLS,
               gap: 4,
               padding: '6px 10px',
               fontSize: 10,
@@ -68,6 +70,7 @@ export default async function GroupsPage({ params }: { params: { slug: string } 
               <span>Team</span>
               <span style={{ textAlign: 'right' }}>P</span>
               <span style={{ textAlign: 'right' }}>W</span>
+              <span style={{ textAlign: 'right' }}>D</span>
               <span style={{ textAlign: 'right' }}>L</span>
               <span style={{ textAlign: 'right' }}>GF</span>
               <span style={{ textAlign: 'right' }}>GA</span>
@@ -82,7 +85,7 @@ export default async function GroupsPage({ params }: { params: { slug: string } 
                 return (
                   <div key={s.participant_id} style={{
                     display: 'grid',
-                    gridTemplateColumns: '20px 1fr 22px 22px 22px 28px 28px 32px',
+                    gridTemplateColumns: COLS,
                     gap: 4,
                     padding: '6px 10px',
                     fontSize: 12,
@@ -96,6 +99,7 @@ export default async function GroupsPage({ params }: { params: { slug: string } 
                     </span>
                     <span style={{ textAlign: 'right' }}>{s.played}</span>
                     <span style={{ textAlign: 'right' }}>{s.wins}</span>
+                    <span style={{ textAlign: 'right' }}>{s.draws}</span>
                     <span style={{ textAlign: 'right' }}>{s.losses}</span>
                     <span style={{ textAlign: 'right' }}>{s.goals_for}</span>
                     <span style={{ textAlign: 'right' }}>{s.goals_against}</span>

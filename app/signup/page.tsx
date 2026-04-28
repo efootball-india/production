@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { signInWithGoogle, signUpWithEmail } from '../actions/auth';
+import { signInWithGoogle, signUpWithUsername } from '../actions/auth';
 
 export default function SignUpPage({
   searchParams,
@@ -27,21 +27,28 @@ export default function SignUpPage({
           </button>
         </form>
 
-        <div className="auth-divider"><span>OR USE EMAIL</span></div>
+        <div className="auth-divider"><span>OR PICK A USERNAME</span></div>
 
-        <form action={signUpWithEmail} className="auth-form">
+        <form action={signUpWithUsername} className="auth-form">
           <div className="auth-field">
-            <label htmlFor="email" className="auth-label">Email</label>
+            <label htmlFor="username" className="auth-label">Username</label>
             <input
-              id="email"
-              name="email"
-              type="email"
+              id="username"
+              name="username"
+              type="text"
               required
-              autoComplete="email"
+              minLength={3}
+              maxLength={24}
+              pattern="[A-Za-z0-9_]+"
+              autoComplete="username"
               className="auth-input"
-              placeholder="you@example.com"
+              placeholder="e.g. ragemode_99"
             />
+            <small style={{ fontSize: 11, color: 'var(--text-3)' }}>
+              3–24 characters · letters, numbers, underscore
+            </small>
           </div>
+
           <div className="auth-field">
             <label htmlFor="password" className="auth-label">Password</label>
             <input
@@ -55,6 +62,7 @@ export default function SignUpPage({
               placeholder="8+ characters"
             />
           </div>
+
           <button type="submit" className="auth-button">
             ▸ Create Account
           </button>

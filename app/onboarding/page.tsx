@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { completeOnboarding } from '../actions/profile';
-import { PLATFORM_OPTIONS } from '@/lib/player';
+import { PLATFORM_OPTIONS, SECURITY_QUESTIONS } from '@/lib/player';
 
 export default async function OnboardingPage({
   searchParams,
@@ -15,11 +15,9 @@ export default async function OnboardingPage({
     redirect('/signin');
   }
 
-  // If profile already exists with required fields, send to home.
-  // Otherwise show onboarding (or let them complete missing fields).
   const { data: existing } = await supabase
     .from('players')
-    .select('username, platform, game_id, discord_handle')
+    .select('username, platform, game_id, discord_handle, security_question')
     .eq('id', user.id)
     .maybeSingle();
 
@@ -28,7 +26,8 @@ export default async function OnboardingPage({
     existing.username &&
     existing.platform &&
     existing.game_id &&
-    existing.discord_handle
+    existing.discord_handle &&
+    existing.security_question
   ) {
     redirect('/home');
   }
@@ -135,6 +134,42 @@ export default async function OnboardingPage({
             <small style={{ fontSize: 11, color: 'var(--text-3)' }}>
               ISO 2-letter country code
             </small>
+          </div>
+
+          <div style={{
+            marginTop: 8,
+            paddingTop: 16,
+            borderTop: '1px solid var(--border)',
+          }}>
+            <div className="auth-eyebrow" style={{ marginBottom: 8 }}>Password recovery</div>
+            <p style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12, lineHeight: 1.5 }}>
+              Pick a question and answer to recover your password if you forget it.
+              Only you should know the answer.
+            </p>
+
+            <div className="auth-field">
+              <label htmlFor="security_question" className="auth-label">Security question *</label>
+              <select id="security_question" name="security_question" required className="auth-input">
+                <option value="">Select…</option>
+                {SECURITY_QUESTIONS.map(q => (
+                  <option key={q} value={q}>{q}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="security_answer" className="auth-label">Answer *</label>
+              <input
+                id="security_answer"
+                name="security_answer"
+                type="text"
+                required
+                minLength={2}
+                maxLength={64}
+                className="auth-input"
+                placeholder="Case-insensitive · keep it memorable"
+              />
+            </div>
           </div>
 
           <button type="submit" className="auth-button">

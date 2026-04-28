@@ -99,6 +99,11 @@ export default async function TournamentDetailPage({
                   → Fixtures &amp; deadlines
                 </Link>
               )}
+              {hasFixtures && (
+                <Link href={`/admin/tournaments/${tournament.slug}/matches`} style={{ color: 'var(--accent)' }}>
+                  → All matches (set scores)
+                </Link>
+              )}
             </div>
           </div>
         )}

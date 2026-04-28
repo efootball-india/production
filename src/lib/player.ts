@@ -77,13 +77,7 @@ export async function requireCompleteProfile(): Promise<Player> {
  *   - discord_handle (so opponents can coordinate scheduling)
  */
 export function isProfileComplete(player: Player): boolean {
-  return Boolean(
-    player.username &&
-    player.display_name &&
-    player.platform &&
-    player.game_id &&
-    player.discord_handle
-  );
+  return Boolean(player.username && player.display_name && player.platform);
 }
 
 /**

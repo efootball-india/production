@@ -1,4 +1,4 @@
-// PASS-16-BOTTOM-NAV
+// PASS-26-BOTTOM-NAV
 'use client';
 
 import Link from 'next/link';
@@ -11,13 +11,14 @@ type Props = {
 export default function BottomNav({ activeSlug }: Props) {
   const pathname = usePathname() ?? '/';
 
-  const playHref = activeSlug ? `/play/${activeSlug}` : '/tournaments';
+  const playHref = '/play';
   const bracketHref = activeSlug ? `/tournaments/${activeSlug}/bracket` : '/tournaments';
 
   const isHome = pathname === '/';
   const isBracket = pathname.includes('/bracket');
   const isTourneys =
     !isBracket &&
+    !pathname.startsWith('/play') &&
     (pathname.startsWith('/tournaments') || pathname.startsWith('/admin/tournaments'));
   const isProfile = pathname.startsWith('/profile');
 
@@ -108,7 +109,7 @@ export default function BottomNav({ activeSlug }: Props) {
               <span>Tourneys</span>
             </Link>
 
-            <Link href={playHref} className="bn-play" aria-label="Play next match">
+            <Link href={playHref} className="bn-play" aria-label="My matches">
               <div className="bn-play-circle">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#050a08" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />

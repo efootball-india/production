@@ -1,7 +1,8 @@
-// PASS-10-PROFILE-HERO
+// PASS-14-PROFILE-HERO
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 type Props = {
   displayName: string;
@@ -22,84 +23,131 @@ export default function ProfileHero({ displayName, username, avatarUrl, wins, dr
     return () => window.removeEventListener('scroll', handler);
   }, []);
 
-  const imageOffset = scrollY * 0.4;
+  const parallax = scrollY * 0.4;
   const imageOpacity = Math.max(0, 1 - scrollY / 350);
   const textOpacity = Math.max(0, 1 - scrollY / 240);
 
-  const initial = (displayName || username || '?').charAt(0).toUpperCase();
-  const nameToShow = displayName || username;
+  const nameToShow = (displayName || username || '').toUpperCase();
+  const photoBg = avatarUrl
+    ? `url(${avatarUrl}) center/cover no-repeat`
+    : 'radial-gradient(ellipse at 50% 25%, #3a4540 0%, #222a26 40%, #0f1513 75%, #050a08 100%)';
 
   return (
-    <section style={{
-      position: 'relative',
-      paddingTop: 28,
-      paddingBottom: 40,
-      overflow: 'hidden',
-      minHeight: 380,
-    }}>
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 20,
-        transform: `translateY(${-imageOffset}px)`,
-        opacity: imageOpacity,
-        willChange: 'transform, opacity',
-      }}>
-        <div style={{
-          width: 'min(60vw, 240px)',
-          aspectRatio: '1',
-          borderRadius: '50%',
-          background: avatarUrl
-            ? `url(${avatarUrl}) center/cover no-repeat`
-            : 'linear-gradient(135deg, rgba(0,255,136,0.18), rgba(0,255,136,0.04))',
-          border: '2px solid rgba(0,255,136,0.35)',
-          boxShadow: '0 0 60px rgba(0,255,136,0.15)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}>
+    <section style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          aspectRatio: '1 / 1',
+          overflow: 'hidden',
+          borderBottomLeftRadius: '50% 30%',
+          borderBottomRightRadius: '50% 30%',
+          transform: `translateY(${-parallax}px)`,
+          willChange: 'transform',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: photoBg,
+            opacity: imageOpacity,
+            willChange: 'opacity',
+          }}
+        >
           {!avatarUrl && (
-            <span style={{
-              fontSize: 'clamp(64px, 18vw, 96px)',
-              color: 'var(--accent)',
-              fontWeight: 800,
-              letterSpacing: '-0.02em',
-              lineHeight: 1,
-            }}>
-              {initial}
-            </span>
+            <svg
+              viewBox="0 0 200 200"
+              preserveAspectRatio="xMidYMid slice"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                opacity: 0.35,
+              }}
+              aria-hidden="true"
+            >
+              <ellipse cx="100" cy="78" rx="24" ry="28" fill="#0a0e0c" />
+              <path d="M 44 200 Q 44 128 100 128 Q 156 128 156 200 Z" fill="#0a0e0c" />
+            </svg>
           )}
         </div>
-      </div>
 
-      <div style={{
-        textAlign: 'center',
-        marginTop: 20,
-        opacity: textOpacity,
-        willChange: 'opacity',
-      }}>
-        <h1 style={{
-          fontSize: 'clamp(28px, 6.5vw, 44px)',
-          fontWeight: 800,
-          letterSpacing: '0.01em',
-          color: 'var(--accent)',
-          textTransform: 'uppercase',
-          margin: 0,
-          lineHeight: 1.1,
-        }}>
-          {nameToShow}
-        </h1>
-        <div style={{
-          marginTop: 10,
-          fontSize: 'clamp(15px, 3.2vw, 20px)',
-          color: 'var(--text)',
-          fontWeight: 700,
-          letterSpacing: '0.16em',
-          fontVariantNumeric: 'tabular-nums',
-        }}>
-          {wins}W · {draws}D · {losses}L
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background:
+              'linear-gradient(180deg, transparent 45%, rgba(0,0,0,0.45) 75%, rgba(0,0,0,0.85) 100%)',
+            opacity: imageOpacity,
+            pointerEvents: 'none',
+          }}
+        />
+
+        {!avatarUrl && (
+          <Link
+            href="/profile/edit"
+            style={{
+              position: 'absolute',
+              top: 16,
+              right: 16,
+              fontSize: 11,
+              color: 'var(--accent)',
+              background: 'rgba(0, 255, 136, 0.12)',
+              border: '1px solid rgba(0, 255, 136, 0.4)',
+              padding: '6px 12px',
+              borderRadius: 4,
+              letterSpacing: '0.12em',
+              textDecoration: 'none',
+              fontWeight: 700,
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+              opacity: textOpacity,
+            }}
+          >
+            + ADD PHOTO
+          </Link>
+        )}
+
+        <div
+          style={{
+            position: 'absolute',
+            left: 20,
+            right: 20,
+            bottom: 28,
+            textAlign: 'center',
+            opacity: textOpacity,
+            willChange: 'opacity',
+          }}
+        >
+          <h1
+            style={{
+              fontSize: 'clamp(22px, 6vw, 36px)',
+              color: 'var(--accent)',
+              fontWeight: 900,
+              letterSpacing: '0.01em',
+              lineHeight: 1.05,
+              margin: 0,
+              textShadow: '0 1px 10px rgba(0,0,0,0.6)',
+              wordBreak: 'break-word',
+            }}
+          >
+            {nameToShow}
+          </h1>
+          <div
+            style={{
+              marginTop: 10,
+              fontSize: 'clamp(13px, 3.4vw, 18px)',
+              color: 'var(--text)',
+              fontWeight: 800,
+              letterSpacing: '0.14em',
+              fontVariantNumeric: 'tabular-nums',
+              textShadow: '0 1px 8px rgba(0,0,0,0.6)',
+            }}
+          >
+            {wins}W &nbsp;·&nbsp; {draws}D &nbsp;·&nbsp; {losses}L
+          </div>
         </div>
       </div>
     </section>

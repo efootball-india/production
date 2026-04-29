@@ -81,24 +81,20 @@ export default async function TournamentLayout({
       </Link>
 
       {/* Banner */}
-      <div className="border border-ink-strong overflow-hidden mb-7 md:mb-8">
-        <div className="relative w-full h-[120px] md:h-[220px] bg-card-2">
-          {bannerUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={bannerUrl}
-              alt={tournament.name}
-              className="w-full h-full object-cover block"
-            />
-          ) : (
-            <BannerFallback
-              name={tournament.name}
-              formatLabel={formatLabel}
-              capacityLabel={capacityForBanner}
-            />
-          )}
-        </div>
-      </div>
+<div className="border border-ink-strong overflow-hidden mb-7 md:mb-8">
+  <div className="relative w-full h-[120px] md:h-[220px] bg-card-2">
+    {bannerUrl ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={bannerUrl}
+        alt={tournament.name}
+        className="w-full h-full object-cover block"
+      />
+    ) : (
+      <BannerFallback />
+    )}
+  </div>
+</div>
 
       {/* Header — Option 2: eyebrow + title + 3-col stat strip */}
       <header className="mb-7 md:mb-8">

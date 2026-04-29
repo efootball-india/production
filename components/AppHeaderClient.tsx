@@ -1,4 +1,4 @@
-// PASS-19-APP-HEADER-CLIENT
+// PASS-27-APP-HEADER-CLIENT
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -12,7 +12,6 @@ type Props = {
   displayName: string | null;
   isAdmin: boolean;
   isLoggedIn: boolean;
-  playHref: string;
 };
 
 const HOMEPAGE_THRESHOLD = 200;
@@ -22,7 +21,6 @@ export default function AppHeaderClient({
   displayName,
   isAdmin,
   isLoggedIn,
-  playHref,
 }: Props) {
   const pathname = usePathname() ?? '/';
   const isHomepage = pathname === '/';
@@ -188,12 +186,12 @@ export default function AppHeaderClient({
             <nav className="ah-nav">
               <Link href="/">Home</Link>
               <Link href="/tournaments">Tournaments</Link>
-              <Link href={playHref}>My matches</Link>
+              <Link href="/play">My matches</Link>
             </nav>
           )}
 
           <div className="ah-right">
-            {isLoggedIn && <Link href={playHref} className="ah-play-cta">▸ PLAY</Link>}
+            {isLoggedIn && <Link href="/play" className="ah-play-cta">▸ PLAY</Link>}
             {isLoggedIn && nameToShow && (
               <span className="ah-username">{nameToShow}</span>
             )}

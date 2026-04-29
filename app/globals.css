@@ -343,6 +343,11 @@ input, select, textarea { font-family: inherit; }
     font-size: 14px;
     letter-spacing: 0.02em;
   }
+   .handle-pill-sm {
+  padding: 4px 8px;
+  font-size: 10px;
+  letter-spacing: 0;
+}
   .handle-pill-qualify   { background: hsl(var(--accent)); color: white; }
   .handle-pill-qualify::before { color: rgba(255, 255, 255, 0.7); }
   .handle-pill-eliminated { background: var(--ink-3-rgba); color: white; }

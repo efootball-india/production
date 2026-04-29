@@ -1,4 +1,4 @@
-// PASS-6-BOTTOM-NAV
+// PASS-16-BOTTOM-NAV
 'use client';
 
 import Link from 'next/link';
@@ -16,7 +16,6 @@ export default function BottomNav({ activeSlug }: Props) {
 
   const isHome = pathname === '/';
   const isBracket = pathname.includes('/bracket');
-  const isPlay = pathname.startsWith('/play/');
   const isTourneys =
     !isBracket &&
     (pathname.startsWith('/tournaments') || pathname.startsWith('/admin/tournaments'));
@@ -29,10 +28,9 @@ export default function BottomNav({ activeSlug }: Props) {
     <>
       <style>{`
         .bn-wrap { display: none; }
-        .bn-spacer { display: none; }
         @media (max-width: 720px) {
           .bn-wrap { display: block; }
-          .bn-spacer { display: block; }
+          body { padding-bottom: 70px; }
         }
         .bn {
           position: fixed;
@@ -88,7 +86,6 @@ export default function BottomNav({ activeSlug }: Props) {
           color: #00ff88;
           font-weight: 500;
         }
-        .bn-spacer { height: 70px; }
       `}</style>
 
       <nav className="bn-wrap" aria-label="Primary navigation">
@@ -141,8 +138,6 @@ export default function BottomNav({ activeSlug }: Props) {
           </div>
         </div>
       </nav>
-
-      <div className="bn-spacer" aria-hidden="true" />
     </>
   );
 }

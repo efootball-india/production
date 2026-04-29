@@ -1,26 +1,21 @@
-// PASS-30-BOTTOM-NAV
+// PASS-33-BOTTOM-NAV
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-type Props = {
-  activeSlug: string | null;
-};
-
-export default function BottomNav({ activeSlug }: Props) {
+export default function BottomNav() {
   const pathname = usePathname() ?? '/';
 
-  const playHref = '/play';
-  const bracketHref = activeSlug ? `/tournaments/${activeSlug}/bracket` : '/tournaments';
-
   const isHome = pathname === '/';
-  const isBracket = pathname.includes('/bracket');
-  const isTourneys =
-    !isBracket &&
-    !pathname.startsWith('/play') &&
-    (pathname.startsWith('/tournaments') || pathname.startsWith('/admin/tournaments'));
+  const isPlay = pathname.startsWith('/play');
+  const isFormations = pathname.startsWith('/formations');
   const isProfile = pathname.startsWith('/profile');
+  const isTourneys =
+    !isPlay &&
+    !isFormations &&
+    !isProfile &&
+    (pathname.startsWith('/tournaments') || pathname.startsWith('/admin/tournaments'));
 
   const ACTIVE = '#00ff88';
   const INACTIVE = 'rgba(255,255,255,0.5)';
@@ -109,7 +104,7 @@ export default function BottomNav({ activeSlug }: Props) {
               <span>Tourneys</span>
             </Link>
 
-            <Link href={playHref} className="bn-play" aria-label="My matches">
+            <Link href="/play" className="bn-play" aria-label="My matches">
               <div className="bn-play-circle">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#050a08" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
@@ -118,15 +113,13 @@ export default function BottomNav({ activeSlug }: Props) {
               <span className="bn-play-label">Play</span>
             </Link>
 
-            <Link href={bracketHref} className="bn-tab" style={{ color: isBracket ? ACTIVE : INACTIVE }}>
+            <Link href="/formations" className="bn-tab" style={{ color: isFormations ? ACTIVE : INACTIVE }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 6h6" />
-                <path d="M3 14h6" />
-                <path d="M15 6h6" />
-                <path d="M15 14h6" />
-                <path d="M9 8h3v8h3" />
+                <rect x="5" y="3" width="14" height="18" rx="1.5" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <circle cx="12" cy="12" r="2" />
               </svg>
-              <span>Bracket</span>
+              <span>Formations</span>
             </Link>
 
             <Link href="/profile" className="bn-tab" style={{ color: isProfile ? ACTIVE : INACTIVE }}>

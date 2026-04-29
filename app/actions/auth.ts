@@ -1,3 +1,4 @@
+// PASS-1-AUTH-ACTIONS
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
@@ -41,31 +42,27 @@ export async function signInWithGoogle() {
 export async function signInWithUsername(formData: FormData) {
   const username = (formData.get('username') as string ?? '').trim();
   const password = formData.get('password') as string;
-
   if (!username || !password) {
     redirect(`/signin?error=${encodeURIComponent('Username and password required')}`);
   }
   if (!isValidUsername(username)) {
     redirect(`/signin?error=${encodeURIComponent('Invalid username format')}`);
   }
-
   const supabase = createClient();
   const { error } = await supabase.auth.signInWithPassword({
     email: usernameToEmail(username),
     password,
   });
-
   if (error) {
     redirect(`/signin?error=${encodeURIComponent('Invalid username or password')}`);
   }
   revalidatePath('/', 'layout');
-  redirect('/home');
+  redirect('/');
 }
 
 export async function signUpWithUsername(formData: FormData) {
   const username = (formData.get('username') as string ?? '').trim();
   const password = formData.get('password') as string;
-
   if (!username || !password) {
     redirect(`/signup?error=${encodeURIComponent('Username and password required')}`);
   }
@@ -75,9 +72,7 @@ export async function signUpWithUsername(formData: FormData) {
   if (password.length < 8) {
     redirect(`/signup?error=${encodeURIComponent('Password must be at least 8 characters')}`);
   }
-
   const supabase = createClient();
-
   // Pre-check that username isn't taken in players table
   const { data: existing } = await supabase
     .from('players')
@@ -87,22 +82,18 @@ export async function signUpWithUsername(formData: FormData) {
   if (existing) {
     redirect(`/signup?error=${encodeURIComponent('That username is already taken')}`);
   }
-
   const { error } = await supabase.auth.signUp({
     email: usernameToEmail(username),
     password,
   });
-
   if (error) {
     redirect(`/signup?error=${encodeURIComponent(error.message)}`);
   }
-
   // Sign them in immediately (since email confirmation is off)
   await supabase.auth.signInWithPassword({
     email: usernameToEmail(username),
     password,
   });
-
   revalidatePath('/', 'layout');
   redirect('/onboarding');
 }

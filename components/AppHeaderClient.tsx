@@ -1,10 +1,11 @@
-// PASS-11-APP-HEADER-CLIENT
+// PASS-18-APP-HEADER-CLIENT
 'use client';
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { signOut } from '../app/actions/auth';
+import Logo from './Logo';
 
 type Props = {
   username: string | null;
@@ -74,17 +75,18 @@ export default function AppHeaderClient({
         .ah-left {
           display: flex;
           flex-direction: column;
-          gap: 2px;
+          gap: 3px;
           flex-shrink: 0;
-        }
-        .ah-logo {
-          font-size: 14px;
-          color: var(--accent);
-          font-weight: 700;
-          letter-spacing: 0.14em;
-          text-decoration: none;
           line-height: 1;
         }
+        .ah-logo {
+          display: inline-flex;
+          align-items: center;
+          color: #ffffff;
+          text-decoration: none;
+          line-height: 0;
+        }
+        .ah-logo:hover { color: #ffffff; }
         .ah-username {
           font-size: 10px;
           color: var(--text-2);
@@ -182,7 +184,9 @@ export default function AppHeaderClient({
       <header className="ah" data-expanded={expanded} data-minimal={minimalMode}>
         <div className="ah-inner">
           <div className="ah-left">
-            <Link href="/" className="ah-logo">EFTBL</Link>
+            <Link href="/" className="ah-logo" aria-label="eFTBL home">
+              <Logo height={22} />
+            </Link>
             {isLoggedIn && nameToShow && (
               <span className="ah-username">{nameToShow}</span>
             )}

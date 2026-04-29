@@ -1,4 +1,4 @@
-// PASS-40-TOURNAMENT-LAYOUT
+// PASS-41-TOURNAMENT-LAYOUT (editorial)
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTournamentBySlug, isCurrentUserRegistered, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments';
@@ -32,120 +32,144 @@ export default async function TournamentLayout({
   const regOpen = tournament.status === 'registration_open' &&
     (!tournament.registration_closes_at || new Date(tournament.registration_closes_at) > new Date());
 
-  const statusColor =
-    tournament.status === 'registration_open' ? '#00ff88' :
-    tournament.status === 'in_progress' ? '#ff9500' :
-    tournament.status === 'completed' ? 'var(--text-2)' :
-    'var(--text-3)';
-  const statusBg =
-    tournament.status === 'registration_open' ? 'rgba(0,255,136,0.1)' :
-    tournament.status === 'in_progress' ? 'rgba(255,149,0,0.1)' :
-    'rgba(255,255,255,0.06)';
+  const statusLabel = STATUS_LABELS[tournament.status as keyof typeof STATUS_LABELS] ?? tournament.status;
+  const formatLabel = FORMAT_LABELS[tournament.format as keyof typeof FORMAT_LABELS] ?? tournament.format;
+  const capacityLabel = `${registeredCount}${tournament.max_participants ? ` / ${tournament.max_participants}` : ''} players`;
 
   return (
-    <main style={{ maxWidth: 760, margin: '0 auto', padding: '20px 20px 60px' }}>
-      <Link href="/tournaments" style={{ color: 'var(--text-3)', fontSize: 12, display: 'inline-block', marginBottom: 16 }}>
+    <main className="max-w-[920px] mx-auto px-5 md:px-8 pt-6 md:pt-10 pb-24">
+
+      {/* Breadcrumb */}
+      <Link
+        href="/tournaments"
+        className="label hover:text-default transition-colors inline-block mb-8"
+      >
         ← All tournaments
       </Link>
 
-      <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0, marginBottom: 6, letterSpacing: '-0.01em' }}>
-        {tournament.name}
-      </h1>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: tournament.description ? 12 : 16 }}>
-        <span style={{
-          fontSize: 9,
-          color: statusColor,
-          background: statusBg,
-          padding: '3px 8px',
-          borderRadius: 2,
-          letterSpacing: '0.14em',
-          fontWeight: 700,
-        }}>
-          {STATUS_LABELS[tournament.status as keyof typeof STATUS_LABELS]?.toUpperCase() ?? tournament.status.toUpperCase()}
-        </span>
-        <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
-          {FORMAT_LABELS[tournament.format as keyof typeof FORMAT_LABELS] ?? tournament.format} · {registeredCount}{tournament.max_participants ? ` / ${tournament.max_participants}` : ''} players
-        </span>
-      </div>
-      {tournament.description && (
-        <p style={{ color: 'var(--text-2)', fontSize: 13, lineHeight: 1.5, margin: 0, marginBottom: 16 }}>{tournament.description}</p>
-      )}
+      {/* Header — meta line, then huge name, then description */}
+      <header className="mb-10">
+        <div className="label mb-4 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="text-default font-bold">{statusLabel.toUpperCase()}</span>
+          <span className="text-disabled">·</span>
+          <span>{formatLabel}</span>
+          <span className="text-disabled">·</span>
+          <span className="tabular-nums">{capacityLabel}</span>
+        </div>
 
-      <div style={{ marginBottom: 18 }}>
+        <h1 className="display-h1 mb-6">{tournament.name}.</h1>
+
+        {tournament.description && (
+          <p className="text-muted text-base md:text-lg leading-relaxed max-w-2xl">
+            {tournament.description}
+          </p>
+        )}
+      </header>
+
+      {/* Action row — register / withdraw / sign in / complete profile */}
+      <div className="mb-8">
         {!player && (
-          <Link href="/signin" className="auth-button" style={{ display: 'inline-block', padding: '8px 16px', width: 'auto', fontSize: 12 }}>
+          <Link
+            href="/signin"
+            className="inline-block bg-accent text-white border border-accent hover:bg-ink hover:border-ink transition-colors px-5 py-3 font-mono text-[11px] font-bold tracking-[0.18em] uppercase"
+          >
             Sign in to register
           </Link>
         )}
+
         {player && !profileOk && (
-          <Link href="/profile/edit" className="auth-button" style={{ display: 'inline-block', padding: '8px 16px', width: 'auto', fontSize: 12 }}>
+          <Link
+            href="/profile/edit"
+            className="inline-block bg-accent text-white border border-accent hover:bg-ink hover:border-ink transition-colors px-5 py-3 font-mono text-[11px] font-bold tracking-[0.18em] uppercase"
+          >
             Complete profile to register
           </Link>
         )}
+
         {player && profileOk && !isRegistered && regOpen && !capacityFull && (
           <form action={registerForTournament}>
             <input type="hidden" name="slug" value={tournament.slug} />
-            <button type="submit" className="auth-button" style={{ padding: '10px 20px', width: 'auto', fontSize: 13 }}>
-              Register
+            <button
+              type="submit"
+              className="bg-accent text-white border border-accent hover:bg-ink hover:border-ink transition-colors px-6 py-3 font-mono text-[11px] font-bold tracking-[0.18em] uppercase cursor-pointer"
+            >
+              Register →
             </button>
           </form>
         )}
+
         {player && profileOk && !isRegistered && regOpen && capacityFull && (
-          <span style={{ fontSize: 12, color: 'var(--text-3)' }}>Tournament is full</span>
+          <span className="label">Tournament is full</span>
         )}
+
         {player && profileOk && isRegistered && tournament.status === 'registration_open' && (
           <form action={withdrawFromTournament}>
             <input type="hidden" name="slug" value={tournament.slug} />
             <input type="hidden" name="tournament_id" value={tournament.id} />
-            <button type="submit" style={{
-              padding: '6px 12px',
-              background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.16)',
-              color: 'var(--text-2)',
-              fontSize: 12,
-              cursor: 'pointer',
-              borderRadius: 4,
-            }}>
-              You're registered · Withdraw
-            </button>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="label-strong text-status-ok">✓ You're in</span>
+              <button
+                type="submit"
+                className="border border-hairline-strong hover:border-ink-strong text-muted hover:text-default transition-colors px-3 py-2 font-mono text-[10px] font-bold tracking-[0.14em] uppercase cursor-pointer"
+              >
+                Withdraw
+              </button>
+            </div>
           </form>
         )}
+
         {player && profileOk && isRegistered && tournament.status !== 'registration_open' && (
-          <span style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600 }}>✓ You're in this tournament</span>
+          <span className="label-strong text-status-ok">✓ You're in this tournament</span>
         )}
       </div>
 
+      {/* Admin shortcuts */}
       {isAdmin && (
-        <div style={{ padding: '10px 14px', background: 'rgba(0,255,136,0.04)', border: '1px solid rgba(0,255,136,0.2)', borderRadius: 6, marginBottom: 12, fontSize: 12 }}>
-          <span style={{ color: 'var(--accent)', letterSpacing: '0.12em', fontWeight: 700, marginRight: 12 }}>ADMIN</span>
-          <Link href={`/admin/tournaments/${tournament.slug}/draw`} style={{ color: 'var(--accent)', marginRight: 14 }}>
+        <div className="border border-hairline bg-status-ok-soft px-4 py-3 mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 label">
+          <span className="text-status-ok font-bold">ADMIN</span>
+          <Link
+            href={`/admin/tournaments/${tournament.slug}/draw`}
+            className="text-status-ok hover:text-default transition-colors"
+          >
             {drawState.status === 'completed' ? 'Draw' : drawState.status === 'in_progress' ? 'Continue draw' : 'Set up draw'}
           </Link>
           {drawState.status === 'completed' && (
-            <Link href={`/admin/tournaments/${tournament.slug}/fixtures`} style={{ color: 'var(--accent)', marginRight: 14 }}>
+            <Link
+              href={`/admin/tournaments/${tournament.slug}/fixtures`}
+              className="text-status-ok hover:text-default transition-colors"
+            >
               Fixtures
             </Link>
           )}
           {hasFixtures && (
-            <Link href={`/admin/tournaments/${tournament.slug}/matches`} style={{ color: 'var(--accent)' }}>
+            <Link
+              href={`/admin/tournaments/${tournament.slug}/matches`}
+              className="text-status-ok hover:text-default transition-colors"
+            >
               All matches
             </Link>
           )}
         </div>
       )}
 
+      {/* Mod shortcuts */}
       {isMod && hasFixtures && (
-        <div style={{ padding: '10px 14px', background: 'rgba(255,149,0,0.04)', border: '1px solid rgba(255,149,0,0.2)', borderRadius: 6, marginBottom: 12, fontSize: 12 }}>
-          <span style={{ color: '#ff9500', letterSpacing: '0.12em', fontWeight: 700, marginRight: 12 }}>MOD</span>
-          <Link href={`/admin/tournaments/${tournament.slug}/queue`} style={{ color: '#ff9500' }}>
+        <div className="border border-hairline bg-status-warn-soft px-4 py-3 mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 label">
+          <span className="text-status-warn font-bold">MOD</span>
+          <Link
+            href={`/admin/tournaments/${tournament.slug}/queue`}
+            className="text-status-warn hover:text-default transition-colors"
+          >
             Match queue
           </Link>
         </div>
       )}
 
+      {/* Tabs (sticky) */}
       <TournamentTabs slug={tournament.slug} />
 
-      <div style={{ paddingTop: 20 }}>
+      {/* Tab content */}
+      <div className="pt-6">
         {children}
       </div>
     </main>

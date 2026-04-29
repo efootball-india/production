@@ -1,4 +1,4 @@
-// PASS-14-PROFILE-HERO
+// PASS-15-PROFILE-HERO
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -28,9 +28,10 @@ export default function ProfileHero({ displayName, username, avatarUrl, wins, dr
   const textOpacity = Math.max(0, 1 - scrollY / 240);
 
   const nameToShow = (displayName || username || '').toUpperCase();
+
   const photoBg = avatarUrl
     ? `url(${avatarUrl}) center/cover no-repeat`
-    : 'radial-gradient(ellipse at 50% 25%, #3a4540 0%, #222a26 40%, #0f1513 75%, #050a08 100%)';
+    : 'linear-gradient(180deg, #2a3a35 0%, #1c2a26 35%, #11201b 65%, #08130f 100%)';
 
   return (
     <section style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
@@ -64,12 +65,25 @@ export default function ProfileHero({ displayName, username, avatarUrl, wins, dr
                 inset: 0,
                 width: '100%',
                 height: '100%',
-                opacity: 0.35,
+                opacity: 0.5,
               }}
               aria-hidden="true"
             >
-              <ellipse cx="100" cy="78" rx="24" ry="28" fill="#0a0e0c" />
-              <path d="M 44 200 Q 44 128 100 128 Q 156 128 156 200 Z" fill="#0a0e0c" />
+              <ellipse
+                cx="100"
+                cy="76"
+                rx="24"
+                ry="28"
+                fill="none"
+                stroke="rgba(0,255,136,0.35)"
+                strokeWidth="1.5"
+              />
+              <path
+                d="M 44 200 Q 44 128 100 128 Q 156 128 156 200 Z"
+                fill="none"
+                stroke="rgba(0,255,136,0.35)"
+                strokeWidth="1.5"
+              />
             </svg>
           )}
         </div>

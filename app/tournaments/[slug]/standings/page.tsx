@@ -1,7 +1,8 @@
-// PASS-44-STANDINGS-TAB (editorial · group cards)
+// PASS-45-STANDINGS-TAB (editorial · group cards + best 3rds)
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getGroupStandings } from '@/lib/fixtures';
+import { computeBestThirds, type BestThirdRow, type GroupResult } from '@/lib/knockout';
 
 export default async function StandingsTab({ params }: { params: { slug: string } }) {
   const supabase = createClient();
@@ -51,19 +52,37 @@ export default async function StandingsTab({ params }: { params: { slug: string 
     }))
   );
 
-  const totalPlayers = groupsWithStandings.reduce(
-    (n, { standings }) => n + standings.length,
-    0
+  const groupResults: GroupResult[] = groupsWithStandings.map(({ group, standings }) => ({
+    label: extractLetter(group.name),
+    groupId: group.id,
+    standings,
+    hasUnresolvedTie: standings.some((s) => s.needs_tiebreaker),
+  }));
+
+  const bestThirds = computeBestThirds(groupResults);
+
+  const anyMatchPlayed = groupResults.some((g) =>
+    g.standings.some((s) => (s.played ?? 0) > 0)
   );
-  const completedGroups = groupsWithStandings.filter(({ standings }) => {
-    const size = standings.length;
-    if (size === 0) return false;
-    const expected = (size * (size - 1)) / 2;
-    const played = Math.floor(
-      standings.reduce((s: number, x: any) => s + (x.played ?? 0), 0) / 2
-    );
-    return played === expected;
-  }).length;
+
+  const totalPlayers = groupResults.reduce((n, g) => n + g.standings.length, 0);
+  const completedGroups = groupResults.filter((g) => isGroupFinal(g)).length;
+  const allGroupsFinal =
+    groupResults.length > 0 && completedGroups === groupResults.length;
+
+  const thirdsExtras = new Map<
+    string,
+    { wins: number; draws: number; losses: number }
+  >();
+  for (const g of groupResults) {
+    const third = g.standings[2];
+    if (!third) continue;
+    thirdsExtras.set(third.participant_id, {
+      wins: third.wins ?? 0,
+      draws: third.draws ?? 0,
+      losses: third.losses ?? 0,
+    });
+  }
 
   return (
     <>
@@ -73,37 +92,35 @@ export default async function StandingsTab({ params }: { params: { slug: string 
           <h2 className="ef-st-title">
             Standings
             <span className="ef-st-ct">
-              /{String(groupsWithStandings.length).padStart(2, '0')}
+              /{String(groupResults.length).padStart(2, '0')}
             </span>
           </h2>
           <div className="ef-st-sub">
-            {groupsWithStandings.length} GROUPS · {totalPlayers} PLAYERS · {completedGroups}/
-            {groupsWithStandings.length} COMPLETE
+            {groupResults.length} GROUPS · {totalPlayers} PLAYERS · {completedGroups}/
+            {groupResults.length} COMPLETE
           </div>
         </header>
 
         <div className="ef-st-cards">
-          {groupsWithStandings.map(({ group, standings }) => (
-            <GroupCard
-              key={group.id}
-              group={group}
-              standings={standings as any[]}
-            />
+          {groupResults.map((gr) => (
+            <GroupCard key={gr.groupId} groupResult={gr} />
           ))}
+
+          {bestThirds.length > 0 && anyMatchPlayed && (
+            <BestThirdsCard
+              rows={bestThirds}
+              extras={thirdsExtras}
+              isFinal={allGroupsFinal}
+            />
+          )}
         </div>
       </div>
     </>
   );
 }
 
-function GroupCard({
-  group,
-  standings,
-}: {
-  group: { id: string; name: string };
-  standings: any[];
-}) {
-  const letter = extractLetter(group.name);
+function GroupCard({ groupResult }: { groupResult: GroupResult }) {
+  const { label, standings } = groupResult;
   const groupSize = standings.length;
   const expected = (groupSize * (groupSize - 1)) / 2;
   const played = Math.floor(
@@ -126,9 +143,9 @@ function GroupCard({
   return (
     <div className="ef-card">
       <div className="ef-card-head">
-        <span className="ef-letter">{letter}</span>
+        <span className="ef-letter">{label}</span>
         <div className="ef-info">
-          <span className="ef-info-lbl">GROUP {letter}</span>
+          <span className="ef-info-lbl">GROUP {label}</span>
           <span className="ef-info-name">{subline}</span>
         </div>
         <StatusPill status={status} played={played} expected={expected} />
@@ -146,29 +163,101 @@ function GroupCard({
       ) : (
         standings.map((s) => {
           const rowClass = getRowClass(s.position, groupSize);
-          const draws = Math.max(
-            0,
-            (s.played ?? 0) - (s.wins ?? 0) - (s.losses ?? 0)
-          );
+          const handle = s.player?.username ?? s.player?.display_name ?? '';
           return (
             <div key={s.participant_id} className={`ef-row ${rowClass}`}>
               <span className="ef-pos">{s.position}</span>
               <div className="ef-team">
                 <div className="ef-team-line">
-                  <span className="ef-cntry">
-                    {s.country?.name ?? 'TBD'}
-                  </span>
+                  <span className="ef-cntry">{s.country?.name ?? 'TBD'}</span>
                   {s.needs_tiebreaker && <span className="ef-tie">TIE</span>}
                 </div>
+                {handle && <span className="ef-handle">{handle}</span>}
               </div>
               <span className="ef-rec">
-                {s.wins ?? 0}-{draws}-{s.losses ?? 0}
+                {s.wins ?? 0}-{s.draws ?? 0}-{s.losses ?? 0}
               </span>
               <span className="ef-pts">{s.points ?? 0}</span>
             </div>
           );
         })
       )}
+    </div>
+  );
+}
+
+function BestThirdsCard({
+  rows,
+  extras,
+  isFinal,
+}: {
+  rows: BestThirdRow[];
+  extras: Map<string, { wins: number; draws: number; losses: number }>;
+  isFinal: boolean;
+}) {
+  const qualifyCount = rows.filter((r) => r.qualifies).length;
+  const total = rows.length;
+
+  return (
+    <div className="ef-card ef-bt-card">
+      <div className="ef-bt-head">
+        <div className="ef-info">
+          <span className="ef-info-lbl">★ BEST 3RDS · CROSS-GROUP</span>
+          <span className="ef-info-name">
+            Top {qualifyCount} of {total} third-place finishers advance to R32
+          </span>
+        </div>
+        <span
+          className={`ef-pill ${isFinal ? 'ef-pill-done' : 'ef-pill-prov'}`}
+        >
+          {isFinal ? `FINAL · ${qualifyCount}/${total}` : 'PROVISIONAL'}
+        </span>
+      </div>
+
+      <div className="ef-bt-table-head">
+        <span className="left">#</span>
+        <span className="left">TEAM</span>
+        <span>GRP</span>
+        <span>W-D-L</span>
+        <span>GD</span>
+        <span>PTS</span>
+      </div>
+
+      {rows.map((r, idx) => {
+        const extra = extras.get(r.participant_id);
+        const w = extra?.wins ?? 0;
+        const d = extra?.draws ?? 0;
+        const l = extra?.losses ?? 0;
+        const isLastQualifier =
+          r.qualifies && rows[idx + 1] && !rows[idx + 1].qualifies;
+        return (
+          <div
+            key={r.participant_id}
+            className={`ef-bt-row ${r.qualifies ? 'qualify' : 'eliminated'} ${
+              isLastQualifier ? 'cutoff' : ''
+            }`}
+          >
+            <span className="ef-pos">{r.rank}</span>
+            <div className="ef-team">
+              <span className="ef-cntry">{r.country_name}</span>
+              {r.player_username && r.player_username !== '?' && (
+                <span className="ef-handle">{r.player_username}</span>
+              )}
+            </div>
+            <span className="ef-bt-grp">{r.group_label}</span>
+            <span className="ef-rec">
+              {w}-{d}-{l}
+            </span>
+            <span className="ef-bt-gd">{formatGD(r.goal_diff)}</span>
+            <span className="ef-pts">{r.points}</span>
+          </div>
+        );
+      })}
+
+      <div className="ef-bt-foot">
+        Sorted by points → goal difference → goals for. Top 8 fill seeds 25–32 in
+        the R32 bracket.
+      </div>
     </div>
   );
 }
@@ -197,17 +286,22 @@ function StatusPill({
 
 function EmptyState({ title, body }: { title: string; body: string }) {
   return (
-    <div className="ef-st-empty">
-      <div className="ef-st-empty-title">{title}.</div>
-      <p className="ef-st-empty-body">{body}</p>
-    </div>
+    <>
+      <Styles />
+      <div className="ef-st-empty">
+        <div className="ef-st-empty-title">{title}.</div>
+        <p className="ef-st-empty-body">{body}</p>
+      </div>
+    </>
   );
 }
 
 function extractLetter(name: string): string {
   const stripped = name.replace(/^group\s+/i, '').trim();
   if (!stripped) return '?';
-  return stripped.length === 1 ? stripped.toUpperCase() : stripped.charAt(0).toUpperCase();
+  return stripped.length === 1
+    ? stripped.toUpperCase()
+    : stripped.charAt(0).toUpperCase();
 }
 
 function getRowClass(position: number, groupSize: number): string {
@@ -215,6 +309,21 @@ function getRowClass(position: number, groupSize: number): string {
   if (groupSize === 4 && position === 3) return 'bestthird';
   if (position === groupSize) return 'eliminated';
   return '';
+}
+
+function isGroupFinal(g: GroupResult): boolean {
+  const size = g.standings.length;
+  if (size === 0) return false;
+  const expected = (size * (size - 1)) / 2;
+  const played = Math.floor(
+    g.standings.reduce((s, x) => s + (x.played ?? 0), 0) / 2
+  );
+  return played === expected;
+}
+
+function formatGD(gd: number): string {
+  if (gd > 0) return `+${gd}`;
+  return String(gd);
 }
 
 function Styles() {
@@ -346,8 +455,11 @@ function Styles() {
         0%, 100% { opacity: 1; transform: scale(1); }
         50% { opacity: 0.5; transform: scale(0.85); }
       }
-      .ef-pill-pending {
-        color: hsl(var(--ink) / 0.42);
+      .ef-pill-pending { color: hsl(var(--ink) / 0.42); }
+      .ef-pill-prov {
+        background: hsl(var(--warn));
+        border-color: hsl(var(--warn));
+        color: #fff;
       }
 
       .ef-table-head {
@@ -404,6 +516,7 @@ function Styles() {
       .ef-team {
         display: flex;
         flex-direction: column;
+        gap: 3px;
         min-width: 0;
       }
       .ef-team-line {
@@ -423,6 +536,18 @@ function Styles() {
         overflow: hidden;
         text-overflow: ellipsis;
         color: hsl(var(--ink));
+      }
+      .ef-handle {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 8px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: hsl(var(--ink) / 0.42);
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .ef-tie {
         font-family: var(--font-mono), ui-monospace, monospace;
@@ -446,7 +571,8 @@ function Styles() {
         letter-spacing: 0.04em;
         font-variant-numeric: tabular-nums;
       }
-      .ef-row.qualify .ef-rec {
+      .ef-row.qualify .ef-rec,
+      .ef-bt-row.qualify .ef-rec {
         color: hsl(var(--ink));
         font-weight: 700;
       }
@@ -461,7 +587,10 @@ function Styles() {
         color: hsl(var(--ink));
         font-variant-numeric: tabular-nums;
       }
-      .ef-row.qualify .ef-pts { color: hsl(var(--accent)); }
+      .ef-row.qualify .ef-pts,
+      .ef-bt-row.qualify .ef-pts {
+        color: hsl(var(--accent));
+      }
 
       .ef-empty-row {
         padding: 16px;
@@ -496,6 +625,93 @@ function Styles() {
         color: hsl(var(--ink) / 0.62);
         max-width: 440px;
         margin: 0 auto;
+      }
+
+      .ef-bt-card {
+        margin-top: 8px;
+        border-color: hsl(var(--ink) / 0.30);
+      }
+      .ef-bt-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+        padding: 14px 16px;
+        border-bottom: 1px solid hsl(var(--ink) / 0.08);
+        background: hsl(var(--surface-2));
+      }
+      .ef-bt-table-head {
+        display: grid;
+        grid-template-columns: 22px minmax(0, 1fr) 22px 48px 32px 28px;
+        gap: 6px;
+        align-items: center;
+        padding: 6px 16px;
+        background: hsl(var(--ink));
+        border-bottom: 1px solid hsl(var(--ink));
+      }
+      .ef-bt-table-head span {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: hsl(var(--bg) / 0.7);
+        text-align: center;
+      }
+      .ef-bt-table-head span.left { text-align: left; }
+
+      .ef-bt-row {
+        display: grid;
+        grid-template-columns: 22px minmax(0, 1fr) 22px 48px 32px 28px;
+        gap: 6px;
+        align-items: center;
+        padding: 9px 16px;
+        border-bottom: 1px solid hsl(var(--ink) / 0.08);
+      }
+      .ef-bt-row:last-of-type { border-bottom: none; }
+      .ef-bt-row.qualify {
+        background: hsl(var(--accent) / 0.08);
+        border-left: 3px solid hsl(var(--accent));
+        padding-left: 13px;
+      }
+      .ef-bt-row.qualify .ef-pos { color: hsl(var(--accent)); }
+      .ef-bt-row.eliminated { opacity: 0.42; }
+      .ef-bt-row.cutoff {
+        border-bottom: 2px solid hsl(var(--ink));
+      }
+
+      .ef-bt-grp {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 900;
+        font-size: 14px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        text-align: center;
+        color: hsl(var(--ink));
+      }
+      .ef-bt-row.eliminated .ef-bt-grp { color: hsl(var(--ink) / 0.6); }
+
+      .ef-bt-gd {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: center;
+        letter-spacing: 0.02em;
+        color: hsl(var(--ink) / 0.62);
+        font-variant-numeric: tabular-nums;
+      }
+      .ef-bt-row.qualify .ef-bt-gd { color: hsl(var(--ink)); }
+
+      .ef-bt-foot {
+        padding: 10px 16px;
+        background: hsl(var(--surface-2));
+        border-top: 1px solid hsl(var(--ink) / 0.08);
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        color: hsl(var(--ink) / 0.62);
+        line-height: 1.5;
       }
     `}</style>
   );

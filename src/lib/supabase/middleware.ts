@@ -4,16 +4,8 @@ import { NextResponse, type NextRequest } from 'next/server';
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
 export async function updateSession(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // PUBLIC HOMEPAGE: rewrite root to the prototype HTML.
-  // URL stays as eftbl.vercel.app — the prototype loads in-place.
-  if (pathname === '/') {
-    return NextResponse.rewrite(new URL('/prototype.html', request.url));
-  }
-
-  // For all other paths: keep Supabase session fresh, but do NOT enforce auth.
-  // Anyone can visit /signin, /signup, /home, /onboarding — auth is optional in v1.
+  // Keep Supabase session fresh on all routes. No auth enforcement here —
+  // individual pages handle their own redirects via requireCompleteProfile() etc.
   let supabaseResponse = NextResponse.next({
     request,
   });

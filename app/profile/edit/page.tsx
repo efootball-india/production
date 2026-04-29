@@ -1,6 +1,9 @@
+// PASS-38-PROFILE-EDIT
+import Link from 'next/link';
 import { getCurrentPlayer, PLATFORM_OPTIONS, SECURITY_QUESTIONS } from '@/lib/player';
 import { updateProfile } from '../../actions/profile';
 import { redirect } from 'next/navigation';
+import AvatarUpload from '../../../components/AvatarUpload';
 
 export default async function ProfilePage({
   searchParams,
@@ -10,10 +13,15 @@ export default async function ProfilePage({
   const player = await getCurrentPlayer();
   if (!player) redirect('/onboarding');
 
+  const initial = (player.display_name ?? player.username ?? '?').charAt(0).toUpperCase();
+
   return (
     <main className="auth-shell">
       <div className="auth-card" style={{ maxWidth: 480 }}>
-        <div className="auth-eyebrow">Profile</div>
+        <Link href="/profile" style={{ fontSize: 12, color: 'var(--text-3)', textDecoration: 'none', marginBottom: 16, display: 'inline-block' }}>
+          ← Back to profile
+        </Link>
+        <div className="auth-eyebrow">Edit profile</div>
         <h1 className="auth-h1">Your details</h1>
 
         {searchParams.saved && (
@@ -24,6 +32,14 @@ export default async function ProfilePage({
         {searchParams.error && (
           <div className="auth-error">{searchParams.error}</div>
         )}
+
+        <div style={{ marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid var(--border)' }}>
+          <div className="auth-eyebrow" style={{ marginBottom: 16, textAlign: 'center' }}>PROFILE PHOTO</div>
+          <AvatarUpload
+            currentUrl={player.avatar_url ?? null}
+            initial={initial}
+          />
+        </div>
 
         <form action={updateProfile} className="auth-form">
           <div className="auth-field">

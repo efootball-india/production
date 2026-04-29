@@ -1,6 +1,8 @@
+// PASS-4-LAYOUT
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import NavigationProgress from '../components/NavigationProgress';
+import AppHeader from '../components/AppHeader';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -19,6 +21,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <NavigationProgress />
         </Suspense>
+        <AppHeader />
         {children}
       </body>
     </html>

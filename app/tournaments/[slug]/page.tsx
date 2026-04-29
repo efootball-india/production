@@ -1,340 +1,718 @@
-// PASS-43-FIXTURES-TAB (Option B + smaller pills + bigger country names)
+// PASS-45-STANDINGS-TAB (editorial · group cards + best 3rds)
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { FORMAT_LABELS } from '@/lib/tournaments';
+import { getGroupStandings } from '@/lib/fixtures';
+import { computeBestThirds, type BestThirdRow, type GroupResult } from '@/lib/knockout';
 
-const ROUND_LABELS: Record<number, string> = {
-  1: 'Round of 32',
-  2: 'Round of 16',
-  3: 'Quarter-finals',
-  4: 'Semi-finals',
-  5: 'Final',
-};
-
-type WinnerSide = 'home' | 'away' | 'draw' | null;
-
-export default async function FixturesTab({
-  params,
-  searchParams,
-}: {
-  params: { slug: string };
-  searchParams: { registered?: string; withdrawn?: string; error?: string };
-}) {
+export default async function StandingsTab({ params }: { params: { slug: string } }) {
   const supabase = createClient();
 
   const { data: tournament } = await supabase
     .from('tournaments')
-    .select('id, name, slug, status, format, starts_at, max_participants')
+    .select('id')
     .eq('slug', params.slug)
     .maybeSingle();
   if (!tournament) notFound();
 
-  const { data: matches } = await supabase
-    .from('matches')
-    .select(`
-      id, matchday, round, status, group_id,
-      home_score, away_score, home_pens, away_pens, decided_by,
-      home:tournament_participants!matches_home_participant_id_fkey(
-        id,
-        country:countries(name, group_label),
-        player:players(id, username, display_name)
-      ),
-      away:tournament_participants!matches_away_participant_id_fkey(
-        id,
-        country:countries(name, group_label),
-        player:players(id, username, display_name)
-      )
-    `)
+  const { data: stage } = await supabase
+    .from('stages')
+    .select('id')
     .eq('tournament_id', tournament.id)
-    .order('round', { ascending: true, nullsFirst: true })
-    .order('matchday', { ascending: true, nullsFirst: false })
-    .order('match_number_in_round', { ascending: true, nullsFirst: false });
+    .eq('stage_type', 'groups')
+    .maybeSingle();
 
-  const groupMatches: Record<number, any[]> = {};
-  const koMatches: Record<number, any[]> = {};
-
-  for (const m of (matches ?? [])) {
-    const md = (m as any).matchday;
-    const round = (m as any).round;
-    if (md != null) {
-      if (!groupMatches[md]) groupMatches[md] = [];
-      groupMatches[md].push(m);
-    } else if (round != null) {
-      if (!koMatches[round]) koMatches[round] = [];
-      koMatches[round].push(m);
-    }
+  if (!stage) {
+    return (
+      <EmptyState
+        title="Group stage hasn't started"
+        body="Standings will appear here once the group draw is complete and fixtures are generated."
+      />
+    );
   }
 
-  const totalMatches = matches?.length ?? 0;
+  const { data: groups } = await supabase
+    .from('groups')
+    .select('id, name, position')
+    .eq('stage_id', stage.id)
+    .order('position', { ascending: true });
 
-  return (
-    <div>
-      {searchParams.registered && (
-        <Banner tone="ok">You are registered. See you at the draw.</Banner>
-      )}
-      {searchParams.withdrawn && (
-        <Banner tone="muted">Withdrawn from this tournament.</Banner>
-      )}
-      {searchParams.error && (
-        <Banner tone="warn">{searchParams.error}</Banner>
-      )}
+  if (!groups || groups.length === 0) {
+    return (
+      <EmptyState
+        title="No groups yet"
+        body="Waiting for the draw to complete. Group standings appear once players are placed."
+      />
+    );
+  }
 
-      {totalMatches === 0 ? (
-        <FixturesEmptyState tournament={tournament} />
-      ) : (
-        <>
-          {Object.keys(groupMatches).sort((a, b) => Number(a) - Number(b)).map((md) => (
-            <Section
-              key={`md-${md}`}
-              title={`Matchday ${md} · group stage`}
-              count={groupMatches[Number(md)].length}
-            >
-              {groupMatches[Number(md)].map((m: any) => (
-                <MatchRow key={m.id} match={m} />
-              ))}
-            </Section>
-          ))}
-          {Object.keys(koMatches).sort((a, b) => Number(a) - Number(b)).map((r) => (
-            <Section
-              key={`r-${r}`}
-              title={ROUND_LABELS[Number(r)] ?? `Round ${r}`}
-              count={koMatches[Number(r)].length}
-            >
-              {koMatches[Number(r)].map((m: any) => (
-                <MatchRow key={m.id} match={m} />
-              ))}
-            </Section>
-          ))}
-        </>
-      )}
-    </div>
+  const groupsWithStandings = await Promise.all(
+    groups.map(async (g) => ({
+      group: g,
+      standings: await getGroupStandings(g.id),
+    }))
   );
-}
 
-function FixturesEmptyState({ tournament }: { tournament: any }) {
-  const startsAt = tournament.starts_at ? new Date(tournament.starts_at) : null;
-  const startDate = startsAt
-    ? startsAt.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
-    : null;
-  const formatLabel = FORMAT_LABELS[tournament.format as keyof typeof FORMAT_LABELS] ?? tournament.format;
+  const groupResults: GroupResult[] = groupsWithStandings.map(({ group, standings }) => ({
+    label: extractLetter(group.name),
+    groupId: group.id,
+    standings,
+    hasUnresolvedTie: standings.some((s) => s.needs_tiebreaker),
+  }));
 
-  let eyebrow = 'No fixtures yet';
-  let headline = "Fixtures haven't been generated.";
-  let body = 'Matches will publish here once the tournament is set up.';
+  const bestThirds = computeBestThirds(groupResults);
 
-  if (tournament.status === 'registration_open') {
-    eyebrow = 'Awaiting group-stage draw';
-    headline = "Fixtures aren't out yet.";
-    body = 'Group-stage draw happens after registration closes. Matches publish here on day one of the tournament.';
-  } else if (tournament.status === 'registration_closed') {
-    eyebrow = 'Draw in progress';
-    headline = 'Fixtures coming soon.';
-    body = 'Group draws are being finalized. Matches will publish here once the draw concludes.';
-  } else if (tournament.status === 'in_progress') {
-    eyebrow = 'No fixtures yet';
-    headline = "Fixtures haven't been generated.";
-    body = 'The tournament has started but fixtures are still being set up. Check back shortly.';
-  } else if (tournament.status === 'cancelled') {
-    eyebrow = 'Tournament cancelled';
-    headline = 'No fixtures.';
-    body = 'This tournament was cancelled before fixtures were generated.';
+  const anyMatchPlayed = groupResults.some((g) =>
+    g.standings.some((s) => (s.played ?? 0) > 0)
+  );
+
+  const totalPlayers = groupResults.reduce((n, g) => n + g.standings.length, 0);
+  const completedGroups = groupResults.filter((g) => isGroupFinal(g)).length;
+  const allGroupsFinal =
+    groupResults.length > 0 && completedGroups === groupResults.length;
+
+  const thirdsExtras = new Map<
+    string,
+    { wins: number; draws: number; losses: number }
+  >();
+  for (const g of groupResults) {
+    const third = g.standings[2];
+    if (!third) continue;
+    thirdsExtras.set(third.participant_id, {
+      wins: third.wins ?? 0,
+      draws: third.draws ?? 0,
+      losses: third.losses ?? 0,
+    });
   }
 
   return (
     <>
-      <SectionHead title="Fixtures" count={0} />
-      <div className="bg-card border border-hairline-strong px-6 py-7 md:px-7 md:py-8 mb-8">
-        <div className="label-strong mb-3">{eyebrow}</div>
-        <div className="font-sans font-black text-2xl md:text-[28px] leading-[1.05] tracking-tight text-default mb-3">
-          {headline}
-        </div>
-        <p className="text-muted text-sm md:text-base leading-relaxed max-w-[520px] mb-5">
-          {body}
-        </p>
-        <div className="flex flex-wrap gap-x-7 gap-y-3 pt-4 hairline-t">
-          {startDate && (
-            <div>
-              <div className="label mb-1">Tournament begins</div>
-              <div className="font-sans font-bold text-base text-default">{startDate}</div>
-            </div>
-          )}
-          <div>
-            <div className="label mb-1">Format</div>
-            <div className="font-sans font-bold text-base text-default">{formatLabel}</div>
+      <Styles />
+      <div className="ef-st-page">
+        <header className="ef-st-head">
+          <h2 className="ef-st-title">
+            Standings
+            <span className="ef-st-ct">
+              /{String(groupResults.length).padStart(2, '0')}
+            </span>
+          </h2>
+          <div className="ef-st-sub">
+            {groupResults.length} GROUPS · {totalPlayers} PLAYERS · {completedGroups}/
+            {groupResults.length} COMPLETE
           </div>
+        </header>
+
+        <div className="ef-st-cards">
+          {groupResults.map((gr) => (
+            <GroupCard key={gr.groupId} groupResult={gr} />
+          ))}
+
+          {bestThirds.length > 0 && anyMatchPlayed && (
+            <BestThirdsCard
+              rows={bestThirds}
+              extras={thirdsExtras}
+              isFinal={allGroupsFinal}
+            />
+          )}
         </div>
       </div>
     </>
   );
 }
 
-function SectionHead({ title, count }: { title: string; count: number }) {
+function GroupCard({ groupResult }: { groupResult: GroupResult }) {
+  const { label, standings } = groupResult;
+  const groupSize = standings.length;
+  const expected = (groupSize * (groupSize - 1)) / 2;
+  const played = Math.floor(
+    standings.reduce((s, x) => s + (x.played ?? 0), 0) / 2
+  );
+  const status: 'pending' | 'live' | 'final' =
+    expected === 0 || played === 0
+      ? 'pending'
+      : played === expected
+      ? 'final'
+      : 'live';
+
+  const subline =
+    status === 'final'
+      ? `Complete · ${played}/${expected} played`
+      : status === 'live'
+      ? `In progress · ${played}/${expected} played`
+      : `Awaiting first match · 0/${expected} played`;
+
   return (
-    <div className="flex justify-between items-baseline pb-3 hairline-strong-b mb-4">
-      <div className="label-strong">{title}</div>
-      <div className="label tabular-nums">/{String(count).padStart(2, '0')}</div>
+    <div className="ef-card">
+      <div className="ef-card-head">
+        <span className="ef-letter">{label}</span>
+        <div className="ef-info">
+          <span className="ef-info-lbl">GROUP {label}</span>
+          <span className="ef-info-name">{subline}</span>
+        </div>
+        <StatusPill status={status} played={played} expected={expected} />
+      </div>
+
+      <div className="ef-table-head">
+        <span className="left">#</span>
+        <span className="left">TEAM</span>
+        <span>W-D-L</span>
+        <span>PTS</span>
+      </div>
+
+      {standings.length === 0 ? (
+        <div className="ef-empty-row">No participants drawn yet</div>
+      ) : (
+        standings.map((s) => {
+          const rowClass = getRowClass(s.position, groupSize);
+          const handle = s.player?.username ?? s.player?.display_name ?? '';
+          return (
+            <div key={s.participant_id} className={`ef-row ${rowClass}`}>
+              <span className="ef-pos">{s.position}</span>
+              <div className="ef-team">
+                <div className="ef-team-line">
+                  <span className="ef-cntry">{s.country?.name ?? 'TBD'}</span>
+                  {s.needs_tiebreaker && <span className="ef-tie">TIE</span>}
+                </div>
+                {handle && <span className="ef-handle">{handle}</span>}
+              </div>
+              <span className="ef-rec">
+                {s.wins ?? 0}-{s.draws ?? 0}-{s.losses ?? 0}
+              </span>
+              <span className="ef-pts">{s.points ?? 0}</span>
+            </div>
+          );
+        })
+      )}
     </div>
   );
 }
 
-function Section({
-  title,
-  count,
-  children,
+function BestThirdsCard({
+  rows,
+  extras,
+  isFinal,
 }: {
-  title: string;
-  count: number;
-  children: React.ReactNode;
+  rows: BestThirdRow[];
+  extras: Map<string, { wins: number; draws: number; losses: number }>;
+  isFinal: boolean;
 }) {
+  const qualifyCount = rows.filter((r) => r.qualifies).length;
+  const total = rows.length;
+
   return (
-    <section className="mb-8">
-      <SectionHead title={title} count={count} />
-      <div className="flex flex-col gap-2.5">
-        {children}
+    <div className="ef-card ef-bt-card">
+      <div className="ef-bt-head">
+        <div className="ef-info">
+          <span className="ef-info-lbl">★ BEST 3RDS · CROSS-GROUP</span>
+          <span className="ef-info-name">
+            Top {qualifyCount} of {total} third-place finishers advance to R32
+          </span>
+        </div>
+        <span
+          className={`ef-pill ${isFinal ? 'ef-pill-done' : 'ef-pill-prov'}`}
+        >
+          {isFinal ? `FINAL · ${qualifyCount}/${total}` : 'PROVISIONAL'}
+        </span>
       </div>
-    </section>
+
+      <div className="ef-bt-table-head">
+        <span className="left">#</span>
+        <span className="left">TEAM</span>
+        <span>GRP</span>
+        <span>W-D-L</span>
+        <span>GD</span>
+        <span>PTS</span>
+      </div>
+
+      {rows.map((r, idx) => {
+        const extra = extras.get(r.participant_id);
+        const w = extra?.wins ?? 0;
+        const d = extra?.draws ?? 0;
+        const l = extra?.losses ?? 0;
+        const isLastQualifier =
+          r.qualifies && rows[idx + 1] && !rows[idx + 1].qualifies;
+        return (
+          <div
+            key={r.participant_id}
+            className={`ef-bt-row ${r.qualifies ? 'qualify' : 'eliminated'} ${
+              isLastQualifier ? 'cutoff' : ''
+            }`}
+          >
+            <span className="ef-pos">{r.rank}</span>
+            <div className="ef-team">
+              <span className="ef-cntry">{r.country_name}</span>
+              {r.player_username && r.player_username !== '?' && (
+                <span className="ef-handle">{r.player_username}</span>
+              )}
+            </div>
+            <span className="ef-bt-grp">{r.group_label}</span>
+            <span className="ef-rec">
+              {w}-{d}-{l}
+            </span>
+            <span className="ef-bt-gd">{formatGD(r.goal_diff)}</span>
+            <span className="ef-pts">{r.points}</span>
+          </div>
+        );
+      })}
+
+      <div className="ef-bt-foot">
+        Sorted by points → goal difference → goals for. Top 8 fill seeds 25–32 in
+        the R32 bracket.
+      </div>
+    </div>
   );
 }
 
-function getWinner(match: any): WinnerSide {
-  if (match.status !== 'completed') return null;
-  const hs = match.home_score ?? 0;
-  const as_ = match.away_score ?? 0;
-  if (match.decided_by === 'penalties') {
-    const hp = match.home_pens ?? 0;
-    const ap = match.away_pens ?? 0;
-    if (hp > ap) return 'home';
-    if (ap > hp) return 'away';
-    return 'draw';
+function StatusPill({
+  status,
+  played,
+  expected,
+}: {
+  status: 'pending' | 'live' | 'final';
+  played: number;
+  expected: number;
+}) {
+  if (status === 'final') {
+    return <span className="ef-pill ef-pill-done">FINAL</span>;
   }
-  if (hs > as_) return 'home';
-  if (as_ > hs) return 'away';
-  return 'draw';
-}
-
-function MatchRow({ match }: { match: any }) {
-  const home = match.home;
-  const away = match.away;
-  const homeUsername = home?.player?.username ?? null;
-  const awayUsername = away?.player?.username ?? null;
-  const homeCountry = home?.country?.name ?? 'TBD';
-  const awayCountry = away?.country?.name ?? 'TBD';
-  const groupLabel = home?.country?.group_label ?? away?.country?.group_label;
-
-  const status = match.status as string;
-  const isPending = status === 'awaiting_result' || status === 'scheduled';
-  const isAwaiting = status === 'awaiting_confirmation' || status === 'disputed';
-  const isComplete = status === 'completed';
-  const winner = getWinner(match);
-
-  let statusEl: React.ReactNode = null;
-  if (isPending) {
-    statusEl = <span className="label-strong">Pending</span>;
-  } else if (isAwaiting) {
-    statusEl = <span className="pill pill-warn">Awaiting confirm</span>;
-  } else if (isComplete) {
-    statusEl = (
-      <span className="label-strong">
-        {match.decided_by === 'penalties' ? 'Final · Pen' : 'Final'}
+  if (status === 'live') {
+    return (
+      <span className="ef-pill ef-pill-live">
+        LIVE · {played}/{expected}
       </span>
     );
   }
+  return <span className="ef-pill ef-pill-pending">PENDING</span>;
+}
 
-  let centerEl: React.ReactNode;
-  if (isComplete || isAwaiting) {
-    const hs = match.home_score ?? 0;
-    const as_ = match.away_score ?? 0;
-    if (match.decided_by === 'penalties' && isComplete) {
-      const hp = match.home_pens ?? 0;
-      const ap = match.away_pens ?? 0;
-      centerEl = (
-        <div className="text-center flex-shrink-0">
-          <div className="font-sans font-black text-[22px] tabular-nums tracking-tight leading-none whitespace-nowrap text-default">
-            {hs} — {as_}
-          </div>
-          <div className="label mt-1 whitespace-nowrap">{hp}-{ap} PEN</div>
-        </div>
-      );
-    } else {
-      centerEl = (
-        <span className="font-sans font-black text-[22px] tabular-nums tracking-tight leading-none whitespace-nowrap text-default flex-shrink-0">
-          {hs} — {as_}
-        </span>
-      );
-    }
-  } else {
-    centerEl = <span className="label tracking-[0.16em] flex-shrink-0">VS</span>;
-  }
-
+function EmptyState({ title, body }: { title: string; body: string }) {
   return (
-    <article className="bg-card border border-hairline px-4 md:px-5 py-3.5 md:py-4">
-      {(groupLabel || statusEl) && (
-        <div className="flex justify-between items-center mb-3.5 gap-2">
-          <span className="label">{groupLabel ? `Group ${groupLabel}` : ''}</span>
-          {statusEl}
-        </div>
-      )}
-      <div className="max-w-[480px] mx-auto flex items-center gap-4 justify-between">
-        <PlayerSide
-          username={homeUsername}
-          country={homeCountry}
-          dimmed={isComplete && winner === 'away'}
-          align="left"
-        />
-        {centerEl}
-        <PlayerSide
-          username={awayUsername}
-          country={awayCountry}
-          dimmed={isComplete && winner === 'home'}
-          align="right"
-        />
+    <>
+      <Styles />
+      <div className="ef-st-empty">
+        <div className="ef-st-empty-title">{title}.</div>
+        <p className="ef-st-empty-body">{body}</p>
       </div>
-    </article>
+    </>
   );
 }
 
-function PlayerSide({
-  username,
-  country,
-  dimmed,
-  align,
-}: {
-  username: string | null;
-  country: string;
-  dimmed: boolean;
-  align: 'left' | 'right';
-}) {
-  const wrapperClass = align === 'right'
-    ? 'flex flex-col items-end gap-[7px] flex-1 min-w-0'
-    : 'flex flex-col items-start gap-[7px] flex-1 min-w-0';
-
-  const pillClass = `handle-pill handle-pill-sm ${dimmed ? 'handle-pill-eliminated' : ''} max-w-full`;
-  const countryClass = `text-[15px] font-medium truncate max-w-full ${dimmed ? 'text-subtle' : 'text-default'}`;
-
-  return (
-    <div className={wrapperClass}>
-      {username ? (
-        <span className={pillClass}>
-          <span className="truncate min-w-0">{username}</span>
-        </span>
-      ) : (
-        <span className="label-strong">TBD</span>
-      )}
-      <span className={countryClass}>
-        {country}
-      </span>
-    </div>
-  );
+function extractLetter(name: string): string {
+  const stripped = name.replace(/^group\s+/i, '').trim();
+  if (!stripped) return '?';
+  return stripped.length === 1
+    ? stripped.toUpperCase()
+    : stripped.charAt(0).toUpperCase();
 }
 
-function Banner({ children, tone }: { children: React.ReactNode; tone: 'ok' | 'warn' | 'muted' }) {
-  const cls =
-    tone === 'ok' ? 'bg-status-ok-soft text-status-ok'
-    : tone === 'warn' ? 'bg-status-warn-soft text-status-warn'
-    : 'bg-card-2 text-muted';
+function getRowClass(position: number, groupSize: number): string {
+  if (position <= 2) return 'qualify';
+  if (groupSize === 4 && position === 3) return 'bestthird';
+  if (position === groupSize) return 'eliminated';
+  return '';
+}
+
+function isGroupFinal(g: GroupResult): boolean {
+  const size = g.standings.length;
+  if (size === 0) return false;
+  const expected = (size * (size - 1)) / 2;
+  const played = Math.floor(
+    g.standings.reduce((s, x) => s + (x.played ?? 0), 0) / 2
+  );
+  return played === expected;
+}
+
+function formatGD(gd: number): string {
+  if (gd > 0) return `+${gd}`;
+  return String(gd);
+}
+
+function Styles() {
   return (
-    <div className={`${cls} border border-hairline px-4 py-3 mb-5 text-sm`}>
-      {children}
-    </div>
+    <style>{`
+      .ef-st-page { display: flex; flex-direction: column; gap: 20px; }
+
+      .ef-st-head { padding-bottom: 4px; }
+      .ef-st-title {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 900;
+        font-size: 32px;
+        line-height: 0.92;
+        letter-spacing: -0.03em;
+        color: hsl(var(--ink));
+        margin: 0 0 8px;
+      }
+      @media (min-width: 768px) {
+        .ef-st-title { font-size: 40px; }
+      }
+      .ef-st-ct {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 14px;
+        font-weight: 500;
+        color: hsl(var(--ink) / 0.42);
+        letter-spacing: 0.06em;
+        margin-left: 10px;
+        vertical-align: middle;
+      }
+      .ef-st-sub {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: hsl(var(--ink) / 0.42);
+        line-height: 1.5;
+      }
+
+      .ef-st-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .ef-card {
+        background: hsl(var(--surface));
+        border: 1px solid hsl(var(--ink) / 0.20);
+      }
+
+      .ef-card-head {
+        display: grid;
+        grid-template-columns: 44px minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+        padding: 14px 16px;
+        border-bottom: 1px solid hsl(var(--ink) / 0.08);
+      }
+      .ef-letter {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 900;
+        font-size: 40px;
+        line-height: 1;
+        letter-spacing: -0.04em;
+        text-align: center;
+        color: hsl(var(--ink));
+      }
+      .ef-info {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .ef-info-lbl {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: hsl(var(--ink) / 0.42);
+        line-height: 1;
+      }
+      .ef-info-name {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 800;
+        font-size: 14px;
+        line-height: 1;
+        letter-spacing: -0.01em;
+        color: hsl(var(--ink));
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .ef-pill {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 5px 8px;
+        white-space: nowrap;
+        border: 1px solid hsl(var(--ink) / 0.20);
+        color: hsl(var(--ink) / 0.62);
+        line-height: 1;
+      }
+      .ef-pill-done {
+        background: hsl(var(--ink));
+        border-color: hsl(var(--ink));
+        color: hsl(var(--bg));
+      }
+      .ef-pill-live {
+        background: hsl(var(--live));
+        border-color: hsl(var(--live));
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .ef-pill-live::before {
+        content: '';
+        width: 5px;
+        height: 5px;
+        background: #fff;
+        border-radius: 50%;
+        animation: ef-pulse 1.4s ease-in-out infinite;
+      }
+      @keyframes ef-pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.85); }
+      }
+      .ef-pill-pending { color: hsl(var(--ink) / 0.42); }
+      .ef-pill-prov {
+        background: hsl(var(--warn));
+        border-color: hsl(var(--warn));
+        color: #fff;
+      }
+
+      .ef-table-head {
+        display: grid;
+        grid-template-columns: 22px minmax(0, 1fr) 56px 32px;
+        gap: 6px;
+        align-items: center;
+        padding: 6px 16px;
+        background: hsl(var(--surface-2));
+        border-bottom: 1px solid hsl(var(--ink) / 0.08);
+      }
+      .ef-table-head span {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: hsl(var(--ink) / 0.42);
+        text-align: center;
+      }
+      .ef-table-head span.left { text-align: left; }
+
+      .ef-row {
+        display: grid;
+        grid-template-columns: 22px minmax(0, 1fr) 56px 32px;
+        gap: 6px;
+        align-items: center;
+        padding: 9px 16px;
+        border-bottom: 1px solid hsl(var(--ink) / 0.08);
+      }
+      .ef-row:last-child { border-bottom: none; }
+      .ef-row.qualify {
+        background: hsl(var(--accent) / 0.08);
+        border-left: 3px solid hsl(var(--accent));
+        padding-left: 13px;
+      }
+      .ef-row.bestthird {
+        border-left: 3px solid hsl(var(--warn));
+        padding-left: 13px;
+      }
+      .ef-row.eliminated { opacity: 0.42; }
+
+      .ef-pos {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 900;
+        font-size: 18px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        color: hsl(var(--ink));
+      }
+      .ef-row.qualify .ef-pos { color: hsl(var(--accent)); }
+      .ef-row.bestthird .ef-pos { color: hsl(var(--warn)); }
+
+      .ef-team {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+      }
+      .ef-team-line {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        line-height: 1;
+        min-width: 0;
+      }
+      .ef-cntry {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 800;
+        font-size: 14px;
+        letter-spacing: -0.01em;
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: hsl(var(--ink));
+      }
+      .ef-handle {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 8px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: hsl(var(--ink) / 0.42);
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .ef-tie {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        padding: 1px 4px;
+        background: hsl(var(--warn));
+        color: #fff;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+
+      .ef-rec {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 11px;
+        font-weight: 600;
+        color: hsl(var(--ink) / 0.62);
+        text-align: center;
+        letter-spacing: 0.04em;
+        font-variant-numeric: tabular-nums;
+      }
+      .ef-row.qualify .ef-rec,
+      .ef-bt-row.qualify .ef-rec {
+        color: hsl(var(--ink));
+        font-weight: 700;
+      }
+
+      .ef-pts {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 900;
+        font-size: 22px;
+        text-align: right;
+        line-height: 1;
+        letter-spacing: -0.025em;
+        color: hsl(var(--ink));
+        font-variant-numeric: tabular-nums;
+      }
+      .ef-row.qualify .ef-pts,
+      .ef-bt-row.qualify .ef-pts {
+        color: hsl(var(--accent));
+      }
+
+      .ef-empty-row {
+        padding: 16px;
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: hsl(var(--ink) / 0.42);
+        text-align: center;
+      }
+
+      .ef-st-empty {
+        text-align: center;
+        padding: 48px 24px;
+        border: 1px dashed hsl(var(--ink) / 0.20);
+        background: hsl(var(--surface));
+      }
+      .ef-st-empty-title {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 900;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: -0.025em;
+        color: hsl(var(--ink));
+        margin-bottom: 10px;
+      }
+      .ef-st-empty-body {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        color: hsl(var(--ink) / 0.62);
+        max-width: 440px;
+        margin: 0 auto;
+      }
+
+      .ef-bt-card {
+        margin-top: 8px;
+        border-color: hsl(var(--ink) / 0.30);
+      }
+      .ef-bt-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+        padding: 14px 16px;
+        border-bottom: 1px solid hsl(var(--ink) / 0.08);
+        background: hsl(var(--surface-2));
+      }
+      .ef-bt-table-head {
+        display: grid;
+        grid-template-columns: 22px minmax(0, 1fr) 22px 48px 32px 28px;
+        gap: 6px;
+        align-items: center;
+        padding: 6px 16px;
+        background: hsl(var(--ink));
+        border-bottom: 1px solid hsl(var(--ink));
+      }
+      .ef-bt-table-head span {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: hsl(var(--bg) / 0.7);
+        text-align: center;
+      }
+      .ef-bt-table-head span.left { text-align: left; }
+
+      .ef-bt-row {
+        display: grid;
+        grid-template-columns: 22px minmax(0, 1fr) 22px 48px 32px 28px;
+        gap: 6px;
+        align-items: center;
+        padding: 9px 16px;
+        border-bottom: 1px solid hsl(var(--ink) / 0.08);
+      }
+      .ef-bt-row:last-of-type { border-bottom: none; }
+      .ef-bt-row.qualify {
+        background: hsl(var(--accent) / 0.08);
+        border-left: 3px solid hsl(var(--accent));
+        padding-left: 13px;
+      }
+      .ef-bt-row.qualify .ef-pos { color: hsl(var(--accent)); }
+      .ef-bt-row.eliminated { opacity: 0.42; }
+      .ef-bt-row.cutoff {
+        border-bottom: 2px solid hsl(var(--ink));
+      }
+
+      .ef-bt-grp {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 900;
+        font-size: 14px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        text-align: center;
+        color: hsl(var(--ink));
+      }
+      .ef-bt-row.eliminated .ef-bt-grp { color: hsl(var(--ink) / 0.6); }
+
+      .ef-bt-gd {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: center;
+        letter-spacing: 0.02em;
+        color: hsl(var(--ink) / 0.62);
+        font-variant-numeric: tabular-nums;
+      }
+      .ef-bt-row.qualify .ef-bt-gd { color: hsl(var(--ink)); }
+
+      .ef-bt-foot {
+        padding: 10px 16px;
+        background: hsl(var(--surface-2));
+        border-top: 1px solid hsl(var(--ink) / 0.08);
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        color: hsl(var(--ink) / 0.62);
+        line-height: 1.5;
+      }
+    `}</style>
   );
 }

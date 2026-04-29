@@ -1,4 +1,4 @@
-// PASS-2-PAGE-PLAY
+// PASS-22-PAGE-PLAY
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -11,7 +11,7 @@ export default async function PlayPage({
   searchParams,
 }: {
   params: { slug: string };
-searchParams: { submitted?: string; completed?: string; error?: string };
+  searchParams: { submitted?: string; completed?: string; error?: string };
 }) {
   const player = await getCurrentPlayer();
   if (!player) redirect('/signin');
@@ -25,7 +25,6 @@ searchParams: { submitted?: string; completed?: string; error?: string };
     .maybeSingle();
   if (!tournament) notFound();
 
-  // Find this player's participant record
   const { data: participant } = await supabase
     .from('tournament_participants')
     .select(`
@@ -38,12 +37,10 @@ searchParams: { submitted?: string; completed?: string; error?: string };
 
   if (!participant) {
     return (
-      <main className="auth-shell" style={{ paddingTop: 60 }}>
-        <div style={{ maxWidth: 520, padding: '0 20px' }}>
-          <Link href={`/tournaments/${tournament.slug}`} style={{ color: 'var(--text-2)', fontSize: 13 }}>{tournament.name}</Link>
-          <h1 className="auth-h1" style={{ marginTop: 12 }}>Not registered</h1>
-          <p style={{ color: 'var(--text-2)', fontSize: 14 }}>You are not registered for this tournament.</p>
-        </div>
+      <main style={{ maxWidth: 520, margin: '0 auto', padding: '60px 20px' }}>
+        <Link href={`/tournaments/${tournament.slug}`} style={{ color: 'var(--text-2)', fontSize: 13 }}>{tournament.name}</Link>
+        <h1 className="auth-h1" style={{ marginTop: 12 }}>Not registered</h1>
+        <p style={{ color: 'var(--text-2)', fontSize: 14 }}>You are not registered for this tournament.</p>
       </main>
     );
   }
@@ -52,17 +49,14 @@ searchParams: { submitted?: string; completed?: string; error?: string };
 
   if (!country) {
     return (
-      <main className="auth-shell" style={{ paddingTop: 60 }}>
-        <div style={{ maxWidth: 520, padding: '0 20px' }}>
-          <Link href={`/tournaments/${tournament.slug}`} style={{ color: 'var(--text-2)', fontSize: 13 }}>{tournament.name}</Link>
-          <h1 className="auth-h1" style={{ marginTop: 12 }}>Waiting for the draw</h1>
-          <p style={{ color: 'var(--text-2)', fontSize: 14 }}>You haven&apos;t been drawn yet. Check back after the group draw.</p>
-        </div>
+      <main style={{ maxWidth: 520, margin: '0 auto', padding: '60px 20px' }}>
+        <Link href={`/tournaments/${tournament.slug}`} style={{ color: 'var(--text-2)', fontSize: 13 }}>{tournament.name}</Link>
+        <h1 className="auth-h1" style={{ marginTop: 12 }}>Waiting for the draw</h1>
+        <p style={{ color: 'var(--text-2)', fontSize: 14 }}>You haven&apos;t been drawn yet. Check back after the group draw.</p>
       </main>
     );
   }
 
-  // Find this player's group
   const { data: stage } = await supabase
     .from('stages')
     .select('id')
@@ -87,7 +81,6 @@ searchParams: { submitted?: string; completed?: string; error?: string };
 
   const fixtures = await getParticipantFixtures(participant.id);
 
-  // Compute personal record
   let played = 0, wins = 0, draws = 0, losses = 0;
   for (const f of fixtures) {
     if ((f as any).status !== 'completed') continue;
@@ -102,7 +95,7 @@ searchParams: { submitted?: string; completed?: string; error?: string };
   }
 
   return (
-    <main style={{ minHeight: '100vh', maxWidth: 760, margin: '0 auto', padding: '24px 20px 60px' }}>
+    <main style={{ maxWidth: 760, margin: '0 auto', padding: '24px 20px 60px' }}>
       <Link href={`/tournaments/${tournament.slug}`} style={{ color: 'var(--text-2)', fontSize: 13 }}>← {tournament.name}</Link>
 
       <div style={{ marginTop: 16, marginBottom: 24 }}>
@@ -112,22 +105,21 @@ searchParams: { submitted?: string; completed?: string; error?: string };
       </div>
 
       {searchParams.completed && (
-  <div style={{ padding: '10px 14px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)', color: 'var(--accent)', fontSize: 13, marginBottom: 16 }}>
-    Match recorded.
-  </div>
-)}
-{searchParams.submitted && (
-  <div style={{ padding: '10px 14px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)', color: 'var(--accent)', fontSize: 13, marginBottom: 16 }}>
-    Score submitted. Waiting on opponent confirmation.
-  </div>
-)}
+        <div style={{ padding: '10px 14px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)', color: 'var(--accent)', fontSize: 13, marginBottom: 16 }}>
+          Match recorded.
+        </div>
+      )}
+      {searchParams.submitted && (
+        <div style={{ padding: '10px 14px', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)', color: 'var(--accent)', fontSize: 13, marginBottom: 16 }}>
+          Score submitted. Waiting on opponent confirmation.
+        </div>
+      )}
       {searchParams.error && (
         <div style={{ padding: '10px 14px', background: 'rgba(255,92,92,0.08)', border: '1px solid rgba(255,92,92,0.3)', color: '#ff5c5c', fontSize: 13, marginBottom: 16 }}>
           {searchParams.error}
         </div>
       )}
 
-      {/* Fixtures */}
       <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-2)', marginBottom: 10 }}>Your fixtures</h2>
       {fixtures.length === 0 ? (
         <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 32 }}>Fixtures haven&apos;t been generated yet.</p>
@@ -139,7 +131,6 @@ searchParams: { submitted?: string; completed?: string; error?: string };
         </div>
       )}
 
-      {/* Group standings */}
       {standings.length > 0 && (
         <>
           <h2 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-2)', marginBottom: 10 }}>Group {country.group_label} standings</h2>

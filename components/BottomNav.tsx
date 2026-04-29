@@ -1,4 +1,4 @@
-// PASS-26-BOTTOM-NAV
+// PASS-30-BOTTOM-NAV
 'use client';
 
 import Link from 'next/link';
@@ -129,7 +129,7 @@ export default function BottomNav({ activeSlug }: Props) {
               <span>Bracket</span>
             </Link>
 
-            <Link href="/profile/edit" className="bn-tab" style={{ color: isProfile ? ACTIVE : INACTIVE }}>
+            <Link href="/profile" className="bn-tab" style={{ color: isProfile ? ACTIVE : INACTIVE }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="8" r="4" />
                 <path d="M4 21c0-4 4-7 8-7s8 3 8 7" />

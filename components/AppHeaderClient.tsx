@@ -1,4 +1,4 @@
-// PASS-27-APP-HEADER-CLIENT
+// PASS-31-APP-HEADER-CLIENT
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -135,7 +135,10 @@ export default function AppHeaderClient({
           text-overflow: ellipsis;
           max-width: 160px;
           min-width: 0;
+          text-decoration: none;
+          transition: color 0.15s ease;
         }
+        .ah-username:hover { color: var(--text); }
         .ah-admin-pill {
           font-size: 10px;
           color: var(--accent);
@@ -193,7 +196,7 @@ export default function AppHeaderClient({
           <div className="ah-right">
             {isLoggedIn && <Link href="/play" className="ah-play-cta">▸ PLAY</Link>}
             {isLoggedIn && nameToShow && (
-              <span className="ah-username">{nameToShow}</span>
+              <Link href="/profile" className="ah-username">{nameToShow}</Link>
             )}
             {isAdmin && <span className="ah-admin-pill">ADMIN</span>}
             {isLoggedIn ? (

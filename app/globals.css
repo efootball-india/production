@@ -217,6 +217,7 @@ input, select, textarea { font-family: inherit; }
   .border-hairline       { border: 1px solid var(--hairline); }
   .border-hairline-strong { border: 1px solid var(--hairline-2); }
   .border-ink-strong     { border: 1px solid hsl(var(--ink)); }
+  .border-dashed-hairline { border: 1px dashed var(--hairline-2); }
 
   /* --- Editorial labels (mono captions) --- */
   .label {

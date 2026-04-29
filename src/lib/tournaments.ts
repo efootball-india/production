@@ -13,6 +13,7 @@ export interface Tournament {
   slug: string;
   name: string;
   description: string | null;
+  banner_image_url: string | null;
   format: TournamentFormat;
   status: TournamentStatus;
   max_participants: number | null;
@@ -35,6 +36,7 @@ export async function listTournaments(): Promise<TournamentWithCount[]> {
     .from('tournaments')
     .select('*')
     .order('created_at', { ascending: false });
+
   if (!tournaments) return [];
 
   const { data: counts } = await supabase
@@ -59,6 +61,7 @@ export async function getTournamentBySlug(slug: string) {
     .select('*')
     .eq('slug', slug)
     .maybeSingle();
+
   if (!tournament) return null;
 
   const { data: participants } = await supabase
@@ -89,12 +92,14 @@ export async function isCurrentUserRegistered(tournamentId: string): Promise<boo
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
+
   const { data } = await supabase
     .from('tournament_participants')
     .select('id')
     .eq('tournament_id', tournamentId)
     .eq('player_id', user.id)
     .maybeSingle();
+
   return Boolean(data);
 }
 

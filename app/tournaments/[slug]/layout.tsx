@@ -260,16 +260,7 @@ export default async function TournamentLayout({
   );
 }
 
-function BannerFallback({
-  name,
-  formatLabel,
-  capacityLabel,
-}: {
-  name: string;
-  formatLabel: string;
-  capacityLabel: string;
-}) {
-  const display = name.length > 16 ? name.slice(0, 15) + '…' : name;
+function BannerFallback() {
   return (
     <svg
       viewBox="0 0 1400 440"
@@ -288,35 +279,6 @@ function BannerFallback({
         <rect x="1348" y="170" width="52" height="100" />
       </g>
       <circle cx="700" cy="220" r="4" fill="rgba(255,255,255,0.3)" />
-      <text
-        x="44" y="64"
-        fontFamily="ui-monospace, monospace"
-        fontSize="22"
-        fill="rgba(255,255,255,0.7)"
-        letterSpacing="4"
-      >
-        {`EFTBL · ${formatLabel.toUpperCase()}`}
-      </text>
-      <text
-        x="1356" y="64"
-        fontFamily="ui-monospace, monospace"
-        fontSize="22"
-        fill="rgba(255,255,255,0.7)"
-        letterSpacing="4"
-        textAnchor="end"
-      >
-        {capacityLabel}
-      </text>
-      <text
-        x="44" y="395"
-        fontFamily="system-ui, -apple-system, sans-serif"
-        fontWeight="900"
-        fontSize="120"
-        fill="white"
-        letterSpacing="-3"
-      >
-        {display}
-      </text>
     </svg>
   );
 }

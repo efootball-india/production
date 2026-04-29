@@ -1,4 +1,4 @@
-// PASS-39-TOURNAMENT-TABS
+// PASS-40-TOURNAMENT-TABS (editorial)
 'use client';
 
 import Link from 'next/link';
@@ -23,38 +23,52 @@ export default function TournamentTabs({ slug }: Props) {
       <style>{`
         .tt-wrap {
           position: sticky;
-          top: 56px;
+          top: 0;
           z-index: 40;
-          background: rgba(5, 10, 8, 0.92);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-          margin: 0 -20px;
+          background: hsl(var(--bg));
+          border-bottom: 1px solid hsl(var(--ink));
+          margin-left: -20px;
+          margin-right: -20px;
           overflow-x: auto;
           -webkit-overflow-scrolling: touch;
         }
+        @media (min-width: 768px) {
+          .tt-wrap {
+            margin-left: -32px;
+            margin-right: -32px;
+          }
+        }
+        .tt-wrap::-webkit-scrollbar { display: none; }
+        .tt-wrap { scrollbar-width: none; }
+
         .tt-inner {
           display: flex;
           gap: 24px;
           padding: 0 20px;
           min-width: max-content;
         }
+        @media (min-width: 768px) {
+          .tt-inner { padding: 0 32px; }
+        }
+
         .tt-tab {
-          font-size: 12px;
-          color: var(--text-2);
+          font-family: var(--font-mono), ui-monospace, monospace;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: var(--ink-3-rgba);
           text-decoration: none;
-          padding: 14px 0;
-          letter-spacing: 0.04em;
-          font-weight: 600;
+          padding: 16px 0;
           border-bottom: 2px solid transparent;
           margin-bottom: -1px;
           white-space: nowrap;
           transition: color 0.15s ease;
         }
-        .tt-tab:hover { color: var(--text); }
+        .tt-tab:hover { color: hsl(var(--ink)); }
         .tt-tab[data-active="true"] {
-          color: var(--accent);
-          border-bottom-color: var(--accent);
+          color: hsl(var(--ink));
+          border-bottom-color: hsl(var(--ink));
         }
       `}</style>
 

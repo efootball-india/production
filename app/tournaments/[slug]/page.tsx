@@ -1,4 +1,4 @@
-// PASS-42-FIXTURES-TAB (editorial + username pills)
+// PASS-43-FIXTURES-TAB (Option B + smaller pills + bigger country names)
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { FORMAT_LABELS } from '@/lib/tournaments';
@@ -189,7 +189,7 @@ function Section({
   return (
     <section className="mb-8">
       <SectionHead title={title} count={count} />
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2.5">
         {children}
       </div>
     </section>
@@ -225,7 +225,6 @@ function MatchRow({ match }: { match: any }) {
   const isPending = status === 'awaiting_result' || status === 'scheduled';
   const isAwaiting = status === 'awaiting_confirmation' || status === 'disputed';
   const isComplete = status === 'completed';
-
   const winner = getWinner(match);
 
   let statusEl: React.ReactNode = null;
@@ -241,48 +240,48 @@ function MatchRow({ match }: { match: any }) {
     );
   }
 
-  let scoreEl: React.ReactNode;
+  let centerEl: React.ReactNode;
   if (isComplete || isAwaiting) {
     const hs = match.home_score ?? 0;
     const as_ = match.away_score ?? 0;
     if (match.decided_by === 'penalties' && isComplete) {
       const hp = match.home_pens ?? 0;
       const ap = match.away_pens ?? 0;
-      scoreEl = (
-        <div className="text-center px-1">
-          <div className="font-sans font-black text-xl md:text-2xl tabular-nums tracking-tight leading-none text-default">
+      centerEl = (
+        <div className="text-center flex-shrink-0">
+          <div className="font-sans font-black text-[22px] tabular-nums tracking-tight leading-none whitespace-nowrap text-default">
             {hs} — {as_}
           </div>
           <div className="label mt-1 whitespace-nowrap">{hp}-{ap} PEN</div>
         </div>
       );
     } else {
-      scoreEl = (
-        <span className="font-sans font-black text-xl md:text-2xl tabular-nums tracking-tight leading-none text-default px-1">
+      centerEl = (
+        <span className="font-sans font-black text-[22px] tabular-nums tracking-tight leading-none whitespace-nowrap text-default flex-shrink-0">
           {hs} — {as_}
         </span>
       );
     }
   } else {
-    scoreEl = <span className="label tracking-[0.16em]">VS</span>;
+    centerEl = <span className="label tracking-[0.16em] flex-shrink-0">VS</span>;
   }
 
   return (
-    <article className="bg-card border border-hairline px-4 py-3.5">
+    <article className="bg-card border border-hairline px-4 md:px-5 py-3.5 md:py-4">
       {(groupLabel || statusEl) && (
-        <div className="flex justify-between items-center mb-3 gap-2">
+        <div className="flex justify-between items-center mb-3.5 gap-2">
           <span className="label">{groupLabel ? `Group ${groupLabel}` : ''}</span>
           {statusEl}
         </div>
       )}
-      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-3 items-center">
+      <div className="max-w-[480px] mx-auto flex items-center gap-4 justify-between">
         <PlayerSide
           username={homeUsername}
           country={homeCountry}
           dimmed={isComplete && winner === 'away'}
           align="left"
         />
-        {scoreEl}
+        {centerEl}
         <PlayerSide
           username={awayUsername}
           country={awayCountry}
@@ -306,21 +305,22 @@ function PlayerSide({
   align: 'left' | 'right';
 }) {
   const wrapperClass = align === 'right'
-    ? 'flex flex-col items-end gap-1.5 min-w-0 w-full'
-    : 'flex flex-col items-start gap-1.5 min-w-0 w-full';
+    ? 'flex flex-col items-end gap-[7px] flex-1 min-w-0'
+    : 'flex flex-col items-start gap-[7px] flex-1 min-w-0';
+
+  const pillClass = `handle-pill handle-pill-sm ${dimmed ? 'handle-pill-eliminated' : ''} max-w-full`;
+  const countryClass = `text-[15px] font-medium truncate max-w-full ${dimmed ? 'text-subtle' : 'text-default'}`;
 
   return (
     <div className={wrapperClass}>
       {username ? (
-        <span className={dimmed ? 'handle-pill handle-pill-eliminated' : 'handle-pill'}>
-          {username}
+        <span className={pillClass}>
+          <span className="truncate min-w-0">{username}</span>
         </span>
       ) : (
         <span className="label-strong">TBD</span>
       )}
-      <span
-        className={`text-[13px] truncate max-w-full ${dimmed ? 'text-subtle' : 'text-muted'}`}
-      >
+      <span className={countryClass}>
         {country}
       </span>
     </div>

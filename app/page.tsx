@@ -1,220 +1,387 @@
-export default function HomePage() {
+import Link from 'next/link';
+import { createClient } from '@/lib/supabase/server';
+import { getCurrentPlayer } from '@/lib/player';
+import { listTournaments, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments';
+import { getPlayerStats } from '@/lib/stats';
+import ProfileHero from '../components/ProfileHero';
+
+export default async function HomePage() {
+  const player = await getCurrentPlayer();
+  const isAdmin = player?.role === 'admin' || player?.role === 'super_admin';
+  const isMod = isAdmin || player?.role === 'moderator';
+
+  const tournaments = await listTournaments();
+  const stats = player ? await getPlayerStats(player.id) : null;
+
+  const supabase = createClient();
+  const myParticipations: Map<string, { participantId: string; status: string; countryId: string | null }> = new Map();
+  if (player) {
+    const { data: parts } = await supabase
+      .from('tournament_participants')
+      .select('id, tournament_id, status, country_id')
+      .eq('player_id', player.id);
+    for (const p of (parts ?? [])) {
+      myParticipations.set(p.tournament_id, {
+        participantId: p.id,
+        status: p.status,
+        countryId: p.country_id,
+      });
+    }
+  }
+
+  // Split: one featured (prefer open registration), rest go to active grid (excluding completed)
+  const nonCompleted = tournaments.filter((t: any) => t.status !== 'completed');
+  const featured =
+    nonCompleted.find((t: any) => t.status === 'registration_open') ??
+    nonCompleted[0] ??
+    null;
+  const active = nonCompleted.filter((t: any) => t.id !== featured?.id);
+
   return (
-    <main className="bg-bg text-ink">
-      {/* 1. Top stripe */}
-      <div className="stripe">
-        <span className="stripe-live-dot" aria-hidden="true" />
-        <span>3 LIVE NOW</span>
-        <span className="stripe-sep" aria-hidden="true" />
-        <span>14 MATCHES TODAY</span>
-        <span className="stripe-sep" aria-hidden="true" />
-        <span>87 ACTIVE PLAYERS</span>
-      </div>
-
-      {/* 2 + 3. Hero: headline, subtitle, stat strip */}
-      <section className="max-w-[1400px] mx-auto px-6 md:px-10 pt-12 md:pt-20 pb-16 md:pb-24">
-        <h1 className="display-h1 max-w-5xl">
-          eFootball tournaments,{" "}
-          <span className="display-italic-accent">played for real.</span>
-        </h1>
-
-        <p className="mt-8 md:mt-10 max-w-2xl text-lg md:text-xl text-ink/70 leading-relaxed">
-          Compete in structured cups and ladders with verified results, live
-          brackets, and a community that takes the game seriously. Built for
-          players who want their wins to count.
-        </p>
-
-        <div className="mt-12 md:mt-16 grid grid-cols-3 hairline-strong-t hairline-strong-b">
-          <div className="py-6 pr-6 border-r border-ink/15">
-            <div className="label">Players</div>
-            <div className="mt-2 font-sans font-black text-4xl md:text-5xl tabular-nums">
-              87
-            </div>
-          </div>
-          <div className="py-6 px-6 border-r border-ink/15">
-            <div className="label">Tournaments</div>
-            <div className="mt-2 font-sans font-black text-4xl md:text-5xl tabular-nums">
-              12
-            </div>
-          </div>
-          <div className="py-6 pl-6">
-            <div className="label">Matches</div>
-            <div className="mt-2 font-sans font-black text-4xl md:text-5xl tabular-nums">
-              312
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Featured cup */}
-      <section className="max-w-[1400px] mx-auto px-6 md:px-10 pb-16 md:pb-24">
-        <h2 className="section-head">Featured cup.</h2>
-
-        <div className="card-brutalist mt-10 p-8 md:p-12">
-          <div className="flex flex-wrap items-center gap-3 mb-6">
-            <span className="pill pill-open">OPEN</span>
-            <span className="label">Featured · Season 4</span>
-          </div>
-
-          <h3 className="font-sans font-black text-[40px] md:text-[56px] leading-[0.95] tracking-tight">
-            Summer Cup S4
-          </h3>
-
-          <p className="mt-6 max-w-2xl text-lg text-ink/70 leading-relaxed">
-            Single-elimination World Cup format. 48-player cap, seeded by
-            ladder rating. Live-streamed semifinals and final, with verified
-            results pushed to the global standings.
+    <main className="bg-bg text-ink min-h-screen">
+      {player && stats ? (
+        <ProfileHero
+          displayName={player.display_name ?? player.username}
+          username={player.username}
+          avatarUrl={player.avatar_url ?? null}
+          wins={stats.wins}
+          draws={stats.draws}
+          losses={stats.losses}
+        />
+      ) : (
+        <section className="max-w-[1400px] mx-auto px-6 md:px-10 pt-16 md:pt-24 pb-16">
+          <h1 className="display-h1 max-w-5xl">
+            eFootball tournaments,{' '}
+            <span className="display-italic-accent">played for real.</span>
+          </h1>
+          <p className="mt-8 max-w-2xl text-lg text-ink/70 leading-relaxed">
+            Compete in structured cups and ladders with verified results, live brackets,
+            and a community that takes the game seriously.
           </p>
-
-          <div className="mt-10 grid grid-cols-2 hairline-strong-t hairline-strong-b">
-            <div className="py-5 pr-5 border-r border-b border-ink/15">
-              <div className="label">Players</div>
-              <div className="mt-1 font-sans font-black text-2xl md:text-3xl tabular-nums">
-                38
-                <span className="text-ink/40">/48</span>
-              </div>
-            </div>
-            <div className="py-5 pl-5 border-b border-ink/15">
-              <div className="label">Closes</div>
-              <div className="mt-1 font-sans font-black text-2xl md:text-3xl tabular-nums">
-                18h
-              </div>
-            </div>
-            <div className="py-5 pr-5 border-r border-ink/15">
-              <div className="label">Starts</div>
-              <div className="mt-1 font-sans font-black text-2xl md:text-3xl">
-                May 14
-              </div>
-            </div>
-            <div className="py-5 pl-5">
-              <div className="label">Format</div>
-              <div className="mt-1 font-sans font-black text-2xl md:text-3xl">
-                WC
-              </div>
-            </div>
-          </div>
-
           <div className="mt-8 flex flex-wrap gap-3">
-            <button
-              type="button"
+            <Link
+              href="/signup"
               className="bg-accent text-bg font-sans font-bold uppercase tracking-wider text-sm px-6 py-3 border border-accent hover:bg-ink hover:border-ink transition-colors"
             >
-              Register now →
-            </button>
-            <button
-              type="button"
+              Create account
+            </Link>
+            <Link
+              href="/signin"
               className="bg-transparent text-ink font-sans font-bold uppercase tracking-wider text-sm px-6 py-3 border border-ink hover:bg-ink hover:text-bg transition-colors"
             >
-              Format details
-            </button>
+              Sign in
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* Featured cup */}
+      {featured && (
+        <section className="max-w-[1400px] mx-auto px-6 md:px-10 pb-16 md:pb-24">
+          <h2 className="section-head">Featured cup.</h2>
+          <FeaturedCupCard
+            tournament={featured}
+            player={player}
+            myParticipation={myParticipations.get(featured.id)}
+          />
+        </section>
+      )}
+
+      {/* Active /NN */}
+      {active.length > 0 && (
+        <section className="max-w-[1400px] mx-auto px-6 md:px-10 pb-24">
+          <h2 className="section-head">
+            Active
+            <span className="font-mono text-ink/40 ml-2 text-base align-middle">
+              /{String(active.length).padStart(2, '0')}
+            </span>
+          </h2>
+
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {active.map((t: any) => (
+              <TournamentCard
+                key={t.id}
+                tournament={t}
+                player={player}
+                isAdmin={isAdmin}
+                isMod={isMod}
+                myParticipation={myParticipations.get(t.id)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Empty state */}
+      {!featured && active.length === 0 && (
+        <section className="max-w-[1400px] mx-auto px-6 md:px-10 pb-24">
+          <div className="card-brutalist-sm p-10 text-center">
+            <div className="label mb-3">No tournaments yet</div>
+            <div className="font-sans font-black text-2xl mb-2">Quiet on the pitch.</div>
+            <p className="text-ink/70">
+              {isAdmin ? (
+                <>
+                  Be the first to{' '}
+                  <Link href="/admin/tournaments/new" className="text-accent underline">
+                    create a tournament →
+                  </Link>
+                </>
+              ) : (
+                'Check back soon — new cups drop weekly.'
+              )}
+            </p>
+          </div>
+        </section>
+      )}
+
+      <footer className="hairline-strong-t py-6 px-6 md:px-10 mt-10">
+        <div className="max-w-[1400px] mx-auto flex justify-between flex-wrap gap-4 label">
+          <div>eFTBL · Community 1v1 platform</div>
+          <div className="flex gap-4">
+            {player && (
+              <Link href="/profile/edit" className="text-ink/60 hover:text-ink">
+                Profile
+              </Link>
+            )}
+            <Link href="/tournaments" className="text-ink/60 hover:text-ink">
+              All tournaments
+            </Link>
           </div>
         </div>
-      </section>
-
-      {/* 5. Active /03 */}
-      <section className="max-w-[1400px] mx-auto px-6 md:px-10 pb-24">
-        <h2 className="section-head">
-          Active
-          <span className="font-mono text-ink/40 ml-2 text-base align-middle">
-            /03
-          </span>
-        </h2>
-
-        <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1 — Friday Knockout #15 (LIVE) */}
-          <article className="card-brutalist-sm overflow-hidden flex flex-col">
-            <div className="aspect-[16/9] bg-gradient-to-br from-live via-live/70 to-ink relative">
-              <div className="absolute top-4 left-4">
-                <span className="pill pill-live">● LIVE</span>
-              </div>
-              <div className="absolute bottom-4 left-4 label-strong text-bg/90">
-                Round 2 · Quarterfinals
-              </div>
-            </div>
-            <div className="p-6 flex flex-col flex-1">
-              <h3 className="font-sans font-black text-2xl leading-tight tracking-tight">
-                Friday Knockout #15
-              </h3>
-              <p className="mt-2 text-sm text-ink/70 leading-relaxed">
-                Weekly single-elimination cup. 16 players, 90-minute window,
-                winner-takes-all rating boost.
-              </p>
-              <div className="mt-5 pt-4 hairline-strong-t flex items-center justify-between label">
-                <span>Round 2 of 4</span>
-                <span className="tabular-nums">14/16 active</span>
-              </div>
-              <button
-                type="button"
-                className="mt-5 w-full bg-ink text-bg font-sans font-bold uppercase tracking-wider text-sm px-4 py-3 border border-ink hover:bg-accent hover:border-accent transition-colors"
-              >
-                View tournament →
-              </button>
-            </div>
-          </article>
-
-          {/* Card 2 — Spring Ladder S3 (LIVE) */}
-          <article className="card-brutalist-sm overflow-hidden flex flex-col">
-            <div className="aspect-[16/9] bg-gradient-to-br from-accent via-accent/70 to-ink relative">
-              <div className="absolute top-4 left-4">
-                <span className="pill pill-live">● LIVE</span>
-              </div>
-              <div className="absolute bottom-4 left-4 label-strong text-bg/90">
-                Season 3 · Week 6
-              </div>
-            </div>
-            <div className="p-6 flex flex-col flex-1">
-              <h3 className="font-sans font-black text-2xl leading-tight tracking-tight">
-                Spring Ladder S3
-              </h3>
-              <p className="mt-2 text-sm text-ink/70 leading-relaxed">
-                Rolling Elo ladder. Challenge anyone within 200 rating points.
-                Top 8 qualify for the playoff bracket.
-              </p>
-              <div className="mt-5 pt-4 hairline-strong-t flex items-center justify-between label">
-                <span>Week 6 of 12</span>
-                <span className="tabular-nums">42 players</span>
-              </div>
-              <button
-                type="button"
-                className="mt-5 w-full bg-ink text-bg font-sans font-bold uppercase tracking-wider text-sm px-4 py-3 border border-ink hover:bg-accent hover:border-accent transition-colors"
-              >
-                View tournament →
-              </button>
-            </div>
-          </article>
-
-          {/* Card 3 — Monsoon Cup 2026 (DRAFT) */}
-          <article className="card-brutalist-sm overflow-hidden flex flex-col">
-            <div className="aspect-[16/9] bg-gradient-to-br from-warn via-warn/60 to-surface-2 relative">
-              <div className="absolute top-4 left-4">
-                <span className="pill">DRAFT</span>
-              </div>
-              <div className="absolute bottom-4 left-4 label-strong text-ink/80">
-                Drafting · Opens Jun 1
-              </div>
-            </div>
-            <div className="p-6 flex flex-col flex-1">
-              <h3 className="font-sans font-black text-2xl leading-tight tracking-tight">
-                Monsoon Cup 2026
-              </h3>
-              <p className="mt-2 text-sm text-ink/70 leading-relaxed">
-                Group stage into double-elimination knockouts. Captains drafting
-                rosters now — registration opens after seeding.
-              </p>
-              <div className="mt-5 pt-4 hairline-strong-t flex items-center justify-between label">
-                <span>Drafting</span>
-                <span>Opens Jun 1</span>
-              </div>
-              <button
-                type="button"
-                className="mt-5 w-full bg-ink text-bg font-sans font-bold uppercase tracking-wider text-sm px-4 py-3 border border-ink hover:bg-accent hover:border-accent transition-colors"
-              >
-                View tournament →
-              </button>
-            </div>
-          </article>
-        </div>
-      </section>
+      </footer>
     </main>
+  );
+}
+
+function FeaturedCupCard({ tournament, player, myParticipation }: any) {
+  const t = tournament;
+  const status = t.status as string;
+  const isRegistered = !!myParticipation && myParticipation.status === 'registered';
+
+  let primary: { label: string; href: string };
+  if (status === 'registration_open') {
+    if (!player) primary = { label: 'Sign in to register →', href: '/signin' };
+    else if (isRegistered) primary = { label: "You're in · View →", href: `/tournaments/${t.slug}` };
+    else primary = { label: 'Register now →', href: `/tournaments/${t.slug}` };
+  } else if (status === 'in_progress') {
+    primary = { label: 'View tournament →', href: `/tournaments/${t.slug}` };
+  } else if (status === 'completed') {
+    primary = { label: 'View bracket →', href: `/tournaments/${t.slug}/bracket` };
+  } else {
+    primary = { label: 'View tournament →', href: `/tournaments/${t.slug}` };
+  }
+
+  const startsLabel = t.starts_at
+    ? new Date(t.starts_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    : '—';
+
+  const pillClass =
+    status === 'registration_open'
+      ? 'pill pill-open'
+      : status === 'in_progress'
+      ? 'pill pill-live'
+      : 'pill';
+
+  const pillLabel =
+    status === 'registration_open'
+      ? '● OPEN'
+      : status === 'in_progress'
+      ? '● LIVE'
+      : (STATUS_LABELS[status as keyof typeof STATUS_LABELS] ?? status).toUpperCase();
+
+  const formatLabel = FORMAT_LABELS[t.format as keyof typeof FORMAT_LABELS] ?? t.format;
+
+  return (
+    <div className="card-brutalist mt-10 p-8 md:p-12">
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <span className={pillClass}>{pillLabel}</span>
+        <span className="label">Featured · {formatLabel}</span>
+      </div>
+
+      <h3 className="font-sans font-black text-[40px] md:text-[56px] leading-[0.95] tracking-tight">
+        {t.name}
+      </h3>
+
+      {t.description && (
+        <p className="mt-6 max-w-2xl text-lg text-ink/70 leading-relaxed">{t.description}</p>
+      )}
+
+      <div className="mt-10 grid grid-cols-2 hairline-strong-t hairline-strong-b">
+        <div className="py-5 pr-5 border-r border-b border-ink/15">
+          <div className="label">Players</div>
+          <div className="mt-1 font-sans font-black text-2xl md:text-3xl tabular-nums">
+            {t.participant_count ?? 0}
+            {t.max_participants && <span className="text-ink/40">/{t.max_participants}</span>}
+          </div>
+        </div>
+        <div className="py-5 pl-5 border-b border-ink/15">
+          <div className="label">Status</div>
+          <div className="mt-1 font-sans font-black text-2xl md:text-3xl">
+            {(STATUS_LABELS[status as keyof typeof STATUS_LABELS] ?? status).toString().slice(0, 12)}
+          </div>
+        </div>
+        <div className="py-5 pr-5 border-r border-ink/15">
+          <div className="label">Starts</div>
+          <div className="mt-1 font-sans font-black text-2xl md:text-3xl">{startsLabel}</div>
+        </div>
+        <div className="py-5 pl-5">
+          <div className="label">Format</div>
+          <div className="mt-1 font-sans font-black text-2xl md:text-3xl">{formatLabel}</div>
+        </div>
+      </div>
+
+      <div className="mt-8 flex flex-wrap gap-3">
+        <Link
+          href={primary.href}
+          className="bg-accent text-bg font-sans font-bold uppercase tracking-wider text-sm px-6 py-3 border border-accent hover:bg-ink hover:border-ink transition-colors"
+        >
+          {primary.label}
+        </Link>
+        <Link
+          href={`/tournaments/${t.slug}`}
+          className="bg-transparent text-ink font-sans font-bold uppercase tracking-wider text-sm px-6 py-3 border border-ink hover:bg-ink hover:text-bg transition-colors"
+        >
+          Format details
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function TournamentCard({ tournament, player, isAdmin, isMod, myParticipation }: any) {
+  const t = tournament;
+  const status = t.status as string;
+  const isRegistered = !!myParticipation && myParticipation.status === 'registered';
+  const hasCountry = !!myParticipation?.countryId;
+
+  let primary: { label: string; href: string };
+  const secondary: { label: string; href: string }[] = [];
+
+  if (status === 'registration_open') {
+    if (!player) primary = { label: 'Sign in to register →', href: '/signin' };
+    else if (isRegistered) primary = { label: "You're in · View →", href: `/tournaments/${t.slug}` };
+    else primary = { label: 'Register →', href: `/tournaments/${t.slug}` };
+  } else if (status === 'registration_closed') {
+    primary = { label: 'View tournament →', href: `/tournaments/${t.slug}` };
+  } else if (status === 'in_progress') {
+    if (isRegistered && hasCountry) {
+      primary = { label: 'Your matches →', href: `/play/${t.slug}` };
+      secondary.push({ label: 'Standings', href: `/tournaments/${t.slug}/groups` });
+      secondary.push({ label: 'Bracket', href: `/tournaments/${t.slug}/bracket` });
+    } else {
+      primary = { label: 'View standings →', href: `/tournaments/${t.slug}/groups` };
+      secondary.push({ label: 'Bracket', href: `/tournaments/${t.slug}/bracket` });
+    }
+  } else if (status === 'completed') {
+    primary = { label: 'View bracket →', href: `/tournaments/${t.slug}/bracket` };
+    secondary.push({ label: 'Standings', href: `/tournaments/${t.slug}/groups` });
+  } else {
+    primary = { label: 'View tournament →', href: `/tournaments/${t.slug}` };
+  }
+
+  const adminLinks: { label: string; href: string }[] = [];
+  if (isAdmin) {
+    if (status === 'registration_closed' || status === 'registration_open') {
+      adminLinks.push({ label: 'Draw', href: `/admin/tournaments/${t.slug}/draw` });
+    }
+    if (status === 'in_progress' || status === 'registration_closed') {
+      adminLinks.push({ label: 'Fixtures', href: `/admin/tournaments/${t.slug}/fixtures` });
+      adminLinks.push({ label: 'All matches', href: `/admin/tournaments/${t.slug}/matches` });
+    }
+  }
+  if (isMod && status === 'in_progress') {
+    adminLinks.push({ label: 'Queue', href: `/admin/tournaments/${t.slug}/queue` });
+  }
+
+  const gradientClass =
+    status === 'in_progress'
+      ? 'from-live via-live/70 to-ink'
+      : status === 'registration_open'
+      ? 'from-accent via-accent/70 to-ink'
+      : status === 'registration_closed'
+      ? 'from-warn via-warn/60 to-surface-2'
+      : 'from-surface-2 via-surface-2 to-ink/20';
+
+  const pillClass =
+    status === 'registration_open'
+      ? 'pill pill-open'
+      : status === 'in_progress'
+      ? 'pill pill-live'
+      : 'pill';
+
+  const pillLabel =
+    status === 'in_progress'
+      ? '● LIVE'
+      : status === 'registration_open'
+      ? '● OPEN'
+      : (STATUS_LABELS[status as keyof typeof STATUS_LABELS] ?? status).toUpperCase();
+
+  const formatLabel = FORMAT_LABELS[t.format as keyof typeof FORMAT_LABELS] ?? t.format;
+  const isLightOverlay = status === 'in_progress' || status === 'registration_open';
+
+  return (
+    <article className="card-brutalist-sm overflow-hidden flex flex-col">
+      <div className={`aspect-[16/9] bg-gradient-to-br ${gradientClass} relative`}>
+        <div className="absolute top-4 left-4">
+          <span className={pillClass}>{pillLabel}</span>
+        </div>
+        <div
+          className={`absolute bottom-4 left-4 label-strong ${
+            isLightOverlay ? 'text-bg/90' : 'text-ink/80'
+          }`}
+        >
+          {formatLabel}
+        </div>
+      </div>
+      <div className="p-6 flex flex-col flex-1">
+        <h3 className="font-sans font-black text-2xl leading-tight tracking-tight">{t.name}</h3>
+        {t.description && (
+          <p className="mt-2 text-sm text-ink/70 leading-relaxed line-clamp-3">{t.description}</p>
+        )}
+
+        <div className="mt-5 pt-4 hairline-strong-t flex items-center justify-between label">
+          <span className="tabular-nums">
+            {t.participant_count ?? 0}
+            {t.max_participants ? `/${t.max_participants}` : ''} players
+          </span>
+          {t.starts_at && (
+            <span>
+              {new Date(t.starts_at).toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+              })}
+            </span>
+          )}
+        </div>
+
+        <Link
+          href={primary.href}
+          className="mt-5 w-full bg-ink text-bg font-sans font-bold uppercase tracking-wider text-sm px-4 py-3 border border-ink hover:bg-accent hover:border-accent hover:text-bg transition-colors text-center"
+        >
+          {primary.label}
+        </Link>
+
+        {secondary.length > 0 && (
+          <div className="mt-3 flex gap-4 label">
+            {secondary.map((s) => (
+              <Link key={s.href} href={s.href} className="text-ink/60 hover:text-ink">
+                {s.label}
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {adminLinks.length > 0 && (
+          <div className="mt-4 pt-3 hairline-t flex gap-3 flex-wrap label">
+            <span className="text-accent">ADMIN</span>
+            {adminLinks.map((a) => (
+              <Link key={a.href} href={a.href} className="text-accent hover:text-ink">
+                {a.label}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </article>
   );
 }

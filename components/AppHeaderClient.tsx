@@ -1,4 +1,4 @@
-// PASS-18-APP-HEADER-CLIENT
+// PASS-19-APP-HEADER-CLIENT
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -72,36 +72,15 @@ export default function AppHeaderClient({
         .ah[data-minimal="true"] .ah-inner {
           justify-content: center;
         }
-        .ah-left {
-          display: flex;
-          flex-direction: column;
-          gap: 3px;
-          flex-shrink: 0;
-          line-height: 1;
-        }
         .ah-logo {
           display: inline-flex;
           align-items: center;
           color: #ffffff;
           text-decoration: none;
           line-height: 0;
+          flex-shrink: 0;
         }
         .ah-logo:hover { color: #ffffff; }
-        .ah-username {
-          font-size: 10px;
-          color: var(--text-2);
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-          font-weight: 600;
-          opacity: 0;
-          max-height: 0;
-          overflow: hidden;
-          transition: opacity 0.25s ease, max-height 0.25s ease;
-        }
-        .ah[data-expanded="true"] .ah-username {
-          opacity: 1;
-          max-height: 16px;
-        }
         .ah-nav {
           display: flex;
           gap: 22px;
@@ -128,6 +107,7 @@ export default function AppHeaderClient({
           margin-left: auto;
           opacity: 1;
           transition: opacity 0.2s ease;
+          min-width: 0;
         }
         .ah-play-cta {
           font-size: 12px;
@@ -139,11 +119,24 @@ export default function AppHeaderClient({
           letter-spacing: 0.08em;
           text-decoration: none;
           transition: transform 0.15s ease, box-shadow 0.15s ease;
+          flex-shrink: 0;
         }
         .ah-play-cta:hover {
           color: #050a08 !important;
           box-shadow: 0 0 16px rgba(0, 255, 136, 0.4);
           transform: translateY(-1px);
+        }
+        .ah-username {
+          font-size: 10px;
+          color: var(--text-2);
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          font-weight: 700;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 160px;
+          min-width: 0;
         }
         .ah-admin-pill {
           font-size: 10px;
@@ -165,6 +158,7 @@ export default function AppHeaderClient({
           padding: 0;
           font: inherit;
           letter-spacing: 0.05em;
+          flex-shrink: 0;
         }
         .ah-signout:hover { color: var(--text-2); }
 
@@ -179,18 +173,16 @@ export default function AppHeaderClient({
           .ah-play-cta { display: none; }
           .ah-signout { display: none; }
         }
+        @media (max-width: 420px) {
+          .ah-username { max-width: 110px; font-size: 9px; }
+        }
       `}</style>
 
       <header className="ah" data-expanded={expanded} data-minimal={minimalMode}>
         <div className="ah-inner">
-          <div className="ah-left">
-            <Link href="/" className="ah-logo" aria-label="eFTBL home">
-              <Logo height={22} />
-            </Link>
-            {isLoggedIn && nameToShow && (
-              <span className="ah-username">{nameToShow}</span>
-            )}
-          </div>
+          <Link href="/" className="ah-logo" aria-label="eFTBL home">
+            <Logo height={22} />
+          </Link>
 
           {isLoggedIn && (
             <nav className="ah-nav">
@@ -202,6 +194,9 @@ export default function AppHeaderClient({
 
           <div className="ah-right">
             {isLoggedIn && <Link href={playHref} className="ah-play-cta">▸ PLAY</Link>}
+            {isLoggedIn && nameToShow && (
+              <span className="ah-username">{nameToShow}</span>
+            )}
             {isAdmin && <span className="ah-admin-pill">ADMIN</span>}
             {isLoggedIn ? (
               <form action={signOut}>

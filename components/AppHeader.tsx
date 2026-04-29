@@ -1,4 +1,4 @@
-// PASS-12-APP-HEADER
+// PASS-28-APP-HEADER
 import { getCurrentPlayer } from '@/lib/player';
 import { getActiveTournamentSlug } from '@/lib/match';
 import AppHeaderClient from './AppHeaderClient';
@@ -11,7 +11,6 @@ export default async function AppHeader() {
   const username = player?.username ?? null;
   const displayName = player?.display_name ?? null;
   const activeSlug = player ? await getActiveTournamentSlug(player.id) : null;
-  const playHref = activeSlug ? `/play/${activeSlug}` : '/tournaments';
 
   return (
     <>
@@ -20,7 +19,6 @@ export default async function AppHeader() {
         displayName={displayName}
         isAdmin={isAdmin}
         isLoggedIn={isLoggedIn}
-        playHref={playHref}
       />
       {isLoggedIn && <BottomNav activeSlug={activeSlug} />}
     </>

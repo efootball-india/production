@@ -34,7 +34,7 @@ export default function ProfileHero({ displayName, username, avatarUrl, wins, dr
     : 'linear-gradient(180deg, #2a3a35 0%, #1c2a26 35%, #11201b 65%, #08130f 100%)';
 
   return (
-    <section style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
+    <section style={{ position: 'relative', width: '100%' }}>
       <div
         style={{
           position: 'relative',
@@ -88,17 +88,6 @@ export default function ProfileHero({ displayName, username, avatarUrl, wins, dr
           )}
         </div>
 
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background:
-              'linear-gradient(180deg, transparent 45%, rgba(0,0,0,0.45) 75%, rgba(0,0,0,0.85) 100%)',
-            opacity: imageOpacity,
-            pointerEvents: 'none',
-          }}
-        />
-
         {!avatarUrl && (
           <Link
             href="/profile/edit"
@@ -123,45 +112,40 @@ export default function ProfileHero({ displayName, username, avatarUrl, wins, dr
             + ADD PHOTO
           </Link>
         )}
+      </div>
 
-        <div
+      <div
+        style={{
+          textAlign: 'center',
+          padding: '20px 20px 32px',
+          opacity: textOpacity,
+          willChange: 'opacity',
+        }}
+      >
+        <h1
           style={{
-            position: 'absolute',
-            left: 20,
-            right: 20,
-            bottom: 28,
-            textAlign: 'center',
-            opacity: textOpacity,
-            willChange: 'opacity',
+            fontSize: 'clamp(28px, 7vw, 44px)',
+            color: 'var(--ink)',
+            fontWeight: 900,
+            letterSpacing: '-0.01em',
+            lineHeight: 1,
+            margin: 0,
+            wordBreak: 'break-word',
           }}
         >
-          <h1
-            style={{
-              fontSize: 'clamp(22px, 6vw, 36px)',
-              color: 'var(--accent)',
-              fontWeight: 900,
-              letterSpacing: '0.01em',
-              lineHeight: 1.05,
-              margin: 0,
-              textShadow: '0 1px 10px rgba(0,0,0,0.6)',
-              wordBreak: 'break-word',
-            }}
-          >
-            {nameToShow}
-          </h1>
-          <div
-            style={{
-              marginTop: 10,
-              fontSize: 'clamp(13px, 3.4vw, 18px)',
-              color: 'var(--text)',
-              fontWeight: 800,
-              letterSpacing: '0.14em',
-              fontVariantNumeric: 'tabular-nums',
-              textShadow: '0 1px 8px rgba(0,0,0,0.6)',
-            }}
-          >
-            {wins}W &nbsp;·&nbsp; {draws}D &nbsp;·&nbsp; {losses}L
-          </div>
+          {nameToShow}
+        </h1>
+        <div
+          style={{
+            marginTop: 8,
+            fontSize: 'clamp(20px, 5.2vw, 32px)',
+            color: 'var(--accent)',
+            fontWeight: 900,
+            letterSpacing: '0.01em',
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
+          {wins}W &nbsp;&nbsp;{draws}D &nbsp;&nbsp;{losses}L
         </div>
       </div>
     </section>

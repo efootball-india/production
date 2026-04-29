@@ -1,4 +1,4 @@
-// PASS-41-TOURNAMENT-LAYOUT (editorial)
+// PASS-42-TOURNAMENT-LAYOUT (editorial + banner + Option 2 header)
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTournamentBySlug, isCurrentUserRegistered, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments';
@@ -7,6 +7,28 @@ import { getDrawState } from '@/lib/draw';
 import { fixturesExist } from '@/lib/fixtures';
 import { registerForTournament, withdrawFromTournament } from '../../actions/tournaments';
 import TournamentTabs from '../../../components/TournamentTabs';
+
+type EyebrowTone = 'live' | 'ok' | 'subtle' | 'warn';
+
+function getEyebrow(status: string): { text: string; tone: EyebrowTone } {
+  switch (status) {
+    case 'in_progress':         return { text: 'LIVE NOW', tone: 'live' };
+    case 'registration_open':   return { text: 'REGISTRATION OPEN', tone: 'ok' };
+    case 'registration_closed': return { text: 'REGISTRATION CLOSED', tone: 'subtle' };
+    case 'completed':           return { text: 'FINAL · CHAMPION CROWNED', tone: 'ok' };
+    case 'cancelled':           return { text: 'CANCELLED', tone: 'warn' };
+    default:                    return { text: (status ?? 'DRAFT').toUpperCase().replace(/_/g, ' '), tone: 'subtle' };
+  }
+}
+
+function getDateMeta(status: string, startsAt?: string | null) {
+  if (!startsAt) return null;
+  const formatted = new Date(startsAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  if (status === 'in_progress' || status === 'completed') {
+    return { label: 'Started', value: formatted };
+  }
+  return { label: 'Starts', value: formatted };
+}
 
 export default async function TournamentLayout({
   children,
@@ -32,9 +54,20 @@ export default async function TournamentLayout({
   const regOpen = tournament.status === 'registration_open' &&
     (!tournament.registration_closes_at || new Date(tournament.registration_closes_at) > new Date());
 
-  const statusLabel = STATUS_LABELS[tournament.status as keyof typeof STATUS_LABELS] ?? tournament.status;
   const formatLabel = FORMAT_LABELS[tournament.format as keyof typeof FORMAT_LABELS] ?? tournament.format;
-  const capacityLabel = `${registeredCount}${tournament.max_participants ? ` / ${tournament.max_participants}` : ''} players`;
+  const eyebrow = getEyebrow(tournament.status);
+  const dateMeta = getDateMeta(tournament.status, tournament.starts_at);
+  const capacityValue = `${registeredCount}${tournament.max_participants ? ` / ${tournament.max_participants}` : ''}`;
+  const capacityForBanner = `${registeredCount}${tournament.max_participants ? `/${tournament.max_participants}` : ''} PLAYERS`;
+
+  // Read defensively in case the type hasn't been updated yet
+  const bannerUrl: string | null = (tournament as any).banner_image_url ?? null;
+
+  const eyebrowToneClass =
+    eyebrow.tone === 'live'   ? 'text-status-live'
+    : eyebrow.tone === 'ok'   ? 'text-status-ok'
+    : eyebrow.tone === 'warn' ? 'text-status-warn'
+    : 'text-subtle';
 
   return (
     <main className="max-w-[920px] mx-auto px-5 md:px-8 pt-6 md:pt-10 pb-24">
@@ -42,22 +75,77 @@ export default async function TournamentLayout({
       {/* Breadcrumb */}
       <Link
         href="/tournaments"
-        className="label hover:text-default transition-colors inline-block mb-8"
+        className="label hover:text-default transition-colors inline-block mb-5"
       >
         ← All tournaments
       </Link>
 
-      {/* Header — meta line, then huge name, then description */}
-      <header className="mb-10">
-        <div className="label mb-4 flex flex-wrap items-center gap-x-3 gap-y-1">
-          <span className="text-default font-bold">{statusLabel.toUpperCase()}</span>
-          <span className="text-disabled">·</span>
-          <span>{formatLabel}</span>
-          <span className="text-disabled">·</span>
-          <span className="tabular-nums">{capacityLabel}</span>
+      {/* Banner */}
+      <div className="border border-ink-strong overflow-hidden mb-7 md:mb-8">
+        <div className="relative w-full h-[120px] md:h-[220px] bg-card-2">
+          {bannerUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={bannerUrl}
+              alt={tournament.name}
+              className="w-full h-full object-cover block"
+            />
+          ) : (
+            <BannerFallback
+              name={tournament.name}
+              formatLabel={formatLabel}
+              capacityLabel={capacityForBanner}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Header — Option 2: eyebrow + title + 3-col stat strip */}
+      <header className="mb-7 md:mb-8">
+        <div className={`label-strong mb-2 md:mb-3 flex items-center gap-2 ${eyebrowToneClass}`}>
+          {eyebrow.tone === 'live' && (
+            <span className="stripe-live-dot" aria-hidden="true" />
+          )}
+          {eyebrow.tone === 'ok' && (
+            <span
+              aria-hidden="true"
+              className="inline-block w-[6px] h-[6px] rounded-full bg-accent"
+            />
+          )}
+          <span>{eyebrow.text}</span>
         </div>
 
-        <h1 className="display-h1 mb-6">{tournament.name}.</h1>
+        <h1 className="display-h1 mb-5 md:mb-6">{tournament.name}.</h1>
+
+        <div className="hairline-strong-t pt-4 grid grid-cols-3 gap-3 md:gap-6 mb-5 md:mb-6">
+          <div className="min-w-0">
+            <div className="label mb-1">Format</div>
+            <div className="font-sans font-bold text-xs md:text-base text-default truncate">
+              {formatLabel}
+            </div>
+          </div>
+          <div className="min-w-0">
+            <div className="label mb-1">Capacity</div>
+            <div className="font-sans font-bold text-xs md:text-base text-default tabular-nums truncate">
+              {capacityValue}
+            </div>
+          </div>
+          {dateMeta ? (
+            <div className="min-w-0">
+              <div className="label mb-1">{dateMeta.label}</div>
+              <div className="font-sans font-bold text-xs md:text-base text-default truncate">
+                {dateMeta.value}
+              </div>
+            </div>
+          ) : (
+            <div className="min-w-0">
+              <div className="label mb-1">Status</div>
+              <div className="font-sans font-bold text-xs md:text-base text-default truncate">
+                {STATUS_LABELS[tournament.status as keyof typeof STATUS_LABELS] ?? tournament.status}
+              </div>
+            </div>
+          )}
+        </div>
 
         {tournament.description && (
           <p className="text-muted text-base md:text-lg leading-relaxed max-w-2xl">
@@ -67,7 +155,7 @@ export default async function TournamentLayout({
       </header>
 
       {/* Action row — register / withdraw / sign in / complete profile */}
-      <div className="mb-8">
+      <div className="mb-6 md:mb-8">
         {!player && (
           <Link
             href="/signin"
@@ -173,5 +261,66 @@ export default async function TournamentLayout({
         {children}
       </div>
     </main>
+  );
+}
+
+function BannerFallback({
+  name,
+  formatLabel,
+  capacityLabel,
+}: {
+  name: string;
+  formatLabel: string;
+  capacityLabel: string;
+}) {
+  const display = name.length > 16 ? name.slice(0, 15) + '…' : name;
+  return (
+    <svg
+      viewBox="0 0 1400 440"
+      preserveAspectRatio="xMidYMid slice"
+      className="w-full h-full block"
+      style={{ color: 'hsl(var(--accent))' }}
+      aria-hidden="true"
+    >
+      <rect width="1400" height="440" fill="currentColor" />
+      <g stroke="rgba(255,255,255,0.18)" strokeWidth="2" fill="none">
+        <line x1="700" y1="0" x2="700" y2="440" />
+        <circle cx="700" cy="220" r="92" />
+        <rect x="0" y="116" width="136" height="208" />
+        <rect x="0" y="170" width="52" height="100" />
+        <rect x="1264" y="116" width="136" height="208" />
+        <rect x="1348" y="170" width="52" height="100" />
+      </g>
+      <circle cx="700" cy="220" r="4" fill="rgba(255,255,255,0.3)" />
+      <text
+        x="44" y="64"
+        fontFamily="ui-monospace, monospace"
+        fontSize="22"
+        fill="rgba(255,255,255,0.7)"
+        letterSpacing="4"
+      >
+        {`EFTBL · ${formatLabel.toUpperCase()}`}
+      </text>
+      <text
+        x="1356" y="64"
+        fontFamily="ui-monospace, monospace"
+        fontSize="22"
+        fill="rgba(255,255,255,0.7)"
+        letterSpacing="4"
+        textAnchor="end"
+      >
+        {capacityLabel}
+      </text>
+      <text
+        x="44" y="395"
+        fontFamily="system-ui, -apple-system, sans-serif"
+        fontWeight="900"
+        fontSize="120"
+        fill="white"
+        letterSpacing="-3"
+      >
+        {display}
+      </text>
+    </svg>
   );
 }

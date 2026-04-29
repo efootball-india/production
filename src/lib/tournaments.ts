@@ -29,19 +29,14 @@ export interface TournamentWithCount extends Tournament {
   participant_count: number;
 }
 
-/**
- * List all tournaments, newest first, with participant counts.
- */
 export async function listTournaments(): Promise<TournamentWithCount[]> {
   const supabase = createClient();
   const { data: tournaments } = await supabase
     .from('tournaments')
     .select('*')
     .order('created_at', { ascending: false });
-
   if (!tournaments) return [];
 
-  // Fetch counts in one query — group by tournament_id
   const { data: counts } = await supabase
     .from('tournament_participants')
     .select('tournament_id');
@@ -57,10 +52,6 @@ export async function listTournaments(): Promise<TournamentWithCount[]> {
   }));
 }
 
-/**
- * Fetch one tournament by slug, with participants joined to player records.
- * Returns null if not found.
- */
 export async function getTournamentBySlug(slug: string) {
   const supabase = createClient();
   const { data: tournament } = await supabase
@@ -68,7 +59,6 @@ export async function getTournamentBySlug(slug: string) {
     .select('*')
     .eq('slug', slug)
     .maybeSingle();
-
   if (!tournament) return null;
 
   const { data: participants } = await supabase
@@ -95,28 +85,19 @@ export async function getTournamentBySlug(slug: string) {
   };
 }
 
-/**
- * Has the current user already registered for a tournament?
- */
 export async function isCurrentUserRegistered(tournamentId: string): Promise<boolean> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
-
   const { data } = await supabase
     .from('tournament_participants')
     .select('id')
     .eq('tournament_id', tournamentId)
     .eq('player_id', user.id)
     .maybeSingle();
-
   return Boolean(data);
 }
 
-/**
- * Generate a URL-safe slug from a tournament name.
- * 'Summer Cup S4' -> 'summer-cup-s4'
- */
 export function slugify(name: string): string {
   return name
     .toLowerCase()

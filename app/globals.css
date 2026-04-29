@@ -2,62 +2,146 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================================
-   eFTBL · Editorial Light Theme · v1.1
-   ------------------------------------------------------------
-   1. Editorial design tokens (warm paper, ink, emerald)
-   2. shadcn/ui CSS variable mapping
-   3. Editorial utility classes (handle-pill, stripe, fixture-card, etc.)
-   4. Auth shell classes — translated from dark/phosphor to light editorial
-   5. Welcome / landing classes — translated to light editorial
-   ============================================================ */
+/* ============================================================================
+   eFTBL · THEME CONTRACT · v1
+   ----------------------------------------------------------------------------
+   THIS FILE IS THE SINGLE SOURCE OF TRUTH FOR ALL VISUAL DESIGN.
+
+   Rules — read these before editing any component:
+
+   1. NO HARDCODED VALUES IN COMPONENT FILES.
+      - No hex colors, no rgb()/rgba(), no fixed px sizes for spacing.
+      - No `style={{ color: '#888' }}`. No `style={{ background: 'rgba(...)' }}`.
+      - If you need a color/spacing/shadow, it must come from a token here.
+
+   2. USE SEMANTIC NAMES, NEVER DESCRIPTIVE ONES.
+      - Good: --accent, --ink, --surface, --warn
+      - Bad:  --emerald, --black, --white, --orange
+      - This is what makes "change the entire theme in one file" possible.
+        Renaming the value of --accent re-skins the app. Renaming it to
+        --emerald would force renaming everywhere.
+
+   3. CONSUME TOKENS THROUGH TAILWIND CLASSES OR EDITORIAL UTILITIES.
+      - Prefer: className="text-muted", className="bg-card", className="pill"
+      - Acceptable: style={{ color: 'hsl(var(--ink))' }} (last resort)
+      - Forbidden: style={{ color: '#0a0a0a' }} (locks value out of the theme)
+
+   4. DERIVE VARIANTS, DON'T DEFINE THEM.
+      - Hover state of accent? hsl(var(--accent) / 0.85), not a new --accent-hover.
+      - Muted text? text-ink/60 or .text-muted, not a new --ink-muted token.
+      - Token list stays small. ~20 tokens, not 200.
+
+   5. LAYOUT DECISIONS LIVE IN COMPONENTS, VISUAL STYLE LIVES HERE.
+      - "What goes where" → component file.
+      - "What color/font/shadow/spacing it has" → this file.
+
+   ============================================================================ */
+
+
+/* ============================================================================
+   1. CORE EDITORIAL TOKENS
+   ----------------------------------------------------------------------------
+   Change a value here, the entire app updates. This is the heart of the theme.
+   ============================================================================ */
 
 @layer base {
   :root {
-    --bg: 48 33% 97%;
-    --surface: 0 0% 100%;
-    --surface-2: 44 24% 93%;
+    /* --- Surfaces --- */
+    --bg:           48 33% 97%;   /* warm paper background */
+    --surface:      0 0% 100%;    /* white card surface */
+    --surface-2:    44 24% 93%;   /* alternate / muted card surface */
 
-    --ink: 0 0% 4%;
-    --accent: 160 94% 24%;
-    --accent-2: 161 94% 20%;
+    /* --- Foreground --- */
+    --ink:          0 0% 4%;      /* near-black, primary text */
 
-    --live: 0 73% 50%;
-    --warn: 21 88% 40%;
+    /* --- Brand --- */
+    --accent:       160 94% 24%;  /* emerald — primary action color */
+    --accent-2:     161 94% 20%;  /* darker emerald for hover/press */
 
-    --ink-2-rgba: rgba(10, 10, 10, 0.62);
-    --ink-3-rgba: rgba(10, 10, 10, 0.42);
-    --ink-4-rgba: rgba(10, 10, 10, 0.18);
-    --hairline: rgba(0, 0, 0, 0.08);
-    --hairline-2: rgba(0, 0, 0, 0.20);
-    --accent-dim-rgba: rgba(4, 120, 87, 0.08);
-    --accent-tint-rgba: rgba(4, 120, 87, 0.14);
-    --accent-line-rgba: rgba(4, 120, 87, 0.40);
-    --live-dim-rgba: rgba(220, 38, 38, 0.08);
-    --warn-dim-rgba: rgba(194, 65, 12, 0.10);
+    /* --- Status --- */
+    --live:         0 73% 50%;    /* red — live, errors, disputed */
+    --warn:         21 88% 40%;   /* burnt orange — warnings, in-progress */
 
-    --background: var(--bg);
-    --foreground: var(--ink);
-    --card: var(--surface);
-    --card-foreground: var(--ink);
-    --popover: var(--surface);
+    /* --- Ink-on-paper opacity scale (RGBA strings, used directly) --- */
+    --ink-2-rgba:        rgba(10, 10, 10, 0.62);  /* secondary text */
+    --ink-3-rgba:        rgba(10, 10, 10, 0.42);  /* tertiary / hint text */
+    --ink-4-rgba:        rgba(10, 10, 10, 0.18);  /* disabled / heavy hairline */
+
+    /* --- Hairlines --- */
+    --hairline:          rgba(0, 0, 0, 0.08);
+    --hairline-2:        rgba(0, 0, 0, 0.20);
+
+    /* --- Tinted accent backgrounds (for fills, hovers, banners) --- */
+    --accent-dim-rgba:   rgba(4, 120, 87, 0.08);
+    --accent-tint-rgba:  rgba(4, 120, 87, 0.14);
+    --accent-line-rgba:  rgba(4, 120, 87, 0.40);
+
+    /* --- Tinted status backgrounds --- */
+    --live-dim-rgba:     rgba(220, 38, 38, 0.08);
+    --live-tint-rgba:    rgba(220, 38, 38, 0.14);
+    --warn-dim-rgba:     rgba(194, 65, 12, 0.10);
+    --warn-tint-rgba:    rgba(194, 65, 12, 0.16);
+
+    /* --- Shadows (the editorial brutalist drop) --- */
+    --shadow-card:       6px 6px 0 hsl(var(--ink));
+    --shadow-card-sm:    4px 4px 0 hsl(var(--ink));
+    --shadow-focus:      0 0 0 3px var(--accent-tint-rgba);
+
+    /* --- Layout --- */
+    --radius:            0;       /* editorial = sharp corners. Change here to round everything. */
+
+    /* ----------------------------------------------------------------------
+       LEGACY ALIASES — do not use in new code.
+       These exist so pages that haven't been converted to the editorial
+       system still render correctly. Phase 2 of the theme migration replaces
+       every reference to these with semantic utility classes, after which
+       this entire block can be deleted.
+       ---------------------------------------------------------------------- */
+    --text:              hsl(var(--ink));
+    --text-2:            var(--ink-2-rgba);
+    --text-3:            var(--ink-3-rgba);
+    --glass:             hsl(var(--surface));
+    --glass-2:           hsl(var(--surface-2));
+    --glass-border:      var(--hairline);
+    --glass-border-accent: var(--accent-line-rgba);
+    --border:            var(--hairline);
+    --border-strong:     var(--hairline-2);
+    --bg-2:              hsl(var(--surface-2));
+    --accent-ink:        white;          /* text color when on emerald fills */
+    --accent-glow:       0 0 16px var(--accent-tint-rgba);
+    --accent-glow-strong: 0 0 24px var(--accent-line-rgba);
+    --win:               hsl(var(--accent));
+    --loss:              hsl(var(--live));
+    --draw:              var(--ink-3-rgba);
+    /* End legacy aliases */
+
+    /* shadcn/ui CSS variable mapping (don't touch — wires the design system to shadcn) */
+    --background:        var(--bg);
+    --foreground:        var(--ink);
+    --card:              var(--surface);
+    --card-foreground:   var(--ink);
+    --popover:           var(--surface);
     --popover-foreground: var(--ink);
-    --primary: var(--ink);
+    --primary:           var(--ink);
     --primary-foreground: var(--bg);
-    --secondary: var(--surface-2);
+    --secondary:         var(--surface-2);
     --secondary-foreground: var(--ink);
-    --muted: var(--surface-2);
-    --muted-foreground: 0 0% 30%;
-    --accent-bg: var(--accent);
+    --muted:             var(--surface-2);
+    --muted-foreground:  0 0% 30%;
+    --accent-bg:         var(--accent);
     --accent-foreground: 0 0% 100%;
-    --destructive: var(--live);
+    --destructive:       var(--live);
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 0%;
-    --input: 0 0% 0%;
-    --ring: var(--accent);
-    --radius: 0;
+    --border-shadcn:     0 0% 0%;
+    --input:             0 0% 0%;
+    --ring:              var(--accent);
   }
 }
+
+
+/* ============================================================================
+   2. BASE STYLES
+   ============================================================================ */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -77,6 +161,7 @@ body {
   overflow-x: hidden;
 }
 
+/* Subtle paper grain overlay */
 body::after {
   content: '';
   position: fixed;
@@ -100,12 +185,40 @@ input, select, textarea { font-family: inherit; }
 }
 
 
-/* ============================================================
-   EDITORIAL UTILITIES
-   ============================================================ */
+/* ============================================================================
+   3. SEMANTIC UTILITY CLASSES
+   ----------------------------------------------------------------------------
+   Use these in components instead of inline color/spacing styles.
+   Add a new utility here only when a pattern shows up in 3+ places.
+   ============================================================================ */
 
 @layer components {
 
+  /* --- Text colors --- */
+  .text-default       { color: hsl(var(--ink)); }
+  .text-muted         { color: var(--ink-2-rgba); }
+  .text-subtle        { color: var(--ink-3-rgba); }
+  .text-disabled      { color: var(--ink-4-rgba); }
+
+  .text-status-live   { color: hsl(var(--live)); }
+  .text-status-warn   { color: hsl(var(--warn)); }
+  .text-status-ok     { color: hsl(var(--accent)); }
+
+  /* --- Surface backgrounds --- */
+  .bg-paper           { background: hsl(var(--bg)); }
+  .bg-card            { background: hsl(var(--surface)); }
+  .bg-card-2          { background: hsl(var(--surface-2)); }
+
+  .bg-status-live-soft   { background: var(--live-dim-rgba); }
+  .bg-status-warn-soft   { background: var(--warn-dim-rgba); }
+  .bg-status-ok-soft     { background: var(--accent-dim-rgba); }
+
+  /* --- Borders --- */
+  .border-hairline       { border: 1px solid var(--hairline); }
+  .border-hairline-strong { border: 1px solid var(--hairline-2); }
+  .border-ink-strong     { border: 1px solid hsl(var(--ink)); }
+
+  /* --- Editorial labels (mono captions) --- */
   .label {
     font-family: var(--font-mono), ui-monospace, monospace;
     font-size: 10px;
@@ -123,6 +236,7 @@ input, select, textarea { font-family: inherit; }
     color: hsl(var(--ink));
   }
 
+  /* --- Caption stripe (e.g. "● 3 LIVE NOW · 14 MATCHES TODAY") --- */
   .stripe {
     display: flex;
     align-items: center;
@@ -152,6 +266,7 @@ input, select, textarea { font-family: inherit; }
     50% { opacity: 0.5; transform: scale(0.85); }
   }
 
+  /* --- Status pills --- */
   .pill {
     display: inline-flex;
     align-items: center;
@@ -190,7 +305,18 @@ input, select, textarea { font-family: inherit; }
     border-radius: 50%;
     background: white;
   }
+  .pill-warn {
+    color: white;
+    background: hsl(var(--warn));
+    border-color: hsl(var(--warn));
+  }
+  .pill-muted {
+    color: var(--ink-3-rgba);
+    background: hsl(var(--surface-2));
+    border-color: var(--hairline-2);
+  }
 
+  /* --- Username handle pills (@-prefixed) --- */
   .handle-pill {
     display: inline-flex;
     align-items: center;
@@ -216,11 +342,12 @@ input, select, textarea { font-family: inherit; }
     font-size: 14px;
     letter-spacing: 0.02em;
   }
-  .handle-pill-qualify { background: hsl(var(--accent)); color: white; }
+  .handle-pill-qualify   { background: hsl(var(--accent)); color: white; }
   .handle-pill-qualify::before { color: rgba(255, 255, 255, 0.7); }
   .handle-pill-eliminated { background: var(--ink-3-rgba); color: white; }
-  .handle-pill-warn { background: hsl(var(--warn)); color: white; }
+  .handle-pill-warn       { background: hsl(var(--warn)); color: white; }
 
+  /* --- Editorial display headlines --- */
   .display-h1 {
     font-family: var(--font-archivo), system-ui, sans-serif;
     font-weight: 900;
@@ -241,6 +368,7 @@ input, select, textarea { font-family: inherit; }
     font-style: italic;
   }
 
+  /* --- Section header (h2 with bottom border) --- */
   .section-head {
     display: flex;
     justify-content: space-between;
@@ -250,17 +378,19 @@ input, select, textarea { font-family: inherit; }
     border-bottom: 1px solid hsl(var(--ink));
   }
 
+  /* --- Brutalist drop-shadow cards --- */
   .card-brutalist {
     background: hsl(var(--surface));
     border: 1px solid hsl(var(--ink));
-    box-shadow: 6px 6px 0 hsl(var(--ink));
+    box-shadow: var(--shadow-card);
   }
   .card-brutalist-sm {
     background: hsl(var(--surface));
     border: 1px solid hsl(var(--ink));
-    box-shadow: 4px 4px 0 hsl(var(--ink));
+    box-shadow: var(--shadow-card-sm);
   }
 
+  /* --- Fixture (match preview) cards, FIFA-style --- */
   .fixture-card {
     background: hsl(var(--surface));
     border: 1px solid var(--hairline-2);
@@ -273,7 +403,7 @@ input, select, textarea { font-family: inherit; }
   }
   .fixture-card:hover {
     border-color: hsl(var(--ink));
-    box-shadow: 4px 4px 0 hsl(var(--ink));
+    box-shadow: var(--shadow-card-sm);
     transform: translateY(-2px);
   }
   .fixture-time { text-align: center; padding: 0 12px; }
@@ -307,6 +437,7 @@ input, select, textarea { font-family: inherit; }
     display: block;
   }
 
+  /* --- Inverted table headers --- */
   .table-head-inverted {
     background: hsl(var(--ink));
     color: hsl(var(--bg));
@@ -314,19 +445,21 @@ input, select, textarea { font-family: inherit; }
   }
   .table-head-inverted .label { color: hsl(var(--bg)); opacity: 0.6; }
 
-  .hairline-t { border-top: 1px solid var(--hairline); }
-  .hairline-b { border-bottom: 1px solid var(--hairline); }
-  .hairline-l { border-left: 1px solid var(--hairline); }
-  .hairline-r { border-right: 1px solid var(--hairline); }
-  .hairline-strong-t { border-top: 1px solid var(--hairline-2); }
-  .hairline-strong-b { border-bottom: 1px solid var(--hairline-2); }
+  /* --- Hairline dividers --- */
+  .hairline-t          { border-top: 1px solid var(--hairline); }
+  .hairline-b          { border-bottom: 1px solid var(--hairline); }
+  .hairline-l          { border-left: 1px solid var(--hairline); }
+  .hairline-r          { border-right: 1px solid var(--hairline); }
+  .hairline-strong-t   { border-top: 1px solid var(--hairline-2); }
+  .hairline-strong-b   { border-bottom: 1px solid var(--hairline-2); }
 }
 
 
-/* ============================================================
-   AUTH SHELL · LEGACY classes used by sign-in/sign-up pages
-   Translated from dark phosphor to light editorial
-   ============================================================ */
+/* ============================================================================
+   4. AUTH SHELL CLASSES (sign-in, sign-up, onboarding)
+   ----------------------------------------------------------------------------
+   Used across /signin, /signup, /onboarding, /forgot-password, /profile/edit.
+   ============================================================================ */
 
 .auth-shell {
   min-height: 100vh;
@@ -341,7 +474,7 @@ input, select, textarea { font-family: inherit; }
 .auth-card {
   background: hsl(var(--surface));
   border: 1px solid hsl(var(--ink));
-  box-shadow: 6px 6px 0 hsl(var(--ink));
+  box-shadow: var(--shadow-card);
   width: 100%;
   max-width: 440px;
   padding: 32px 28px;
@@ -388,17 +521,8 @@ input, select, textarea { font-family: inherit; }
   line-height: 1.5;
 }
 
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.auth-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+.auth-form { display: flex; flex-direction: column; gap: 16px; }
+.auth-field { display: flex; flex-direction: column; gap: 6px; }
 
 .auth-label {
   font-family: var(--font-mono), ui-monospace, monospace;
@@ -528,9 +652,9 @@ input, select, textarea { font-family: inherit; }
 .auth-foot a:hover { text-decoration: underline; }
 
 
-/* ============================================================
-   WELCOME / LANDING · translated to light editorial
-   ============================================================ */
+/* ============================================================================
+   5. WELCOME / LANDING CLASSES
+   ============================================================================ */
 
 .welcome {
   min-height: 100vh;

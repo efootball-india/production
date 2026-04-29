@@ -1,8 +1,10 @@
+// PASS-13-PAGE
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentPlayer } from '@/lib/player';
-import { signOut } from './actions/auth';
 import { listTournaments, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments';
+import { getPlayerStats } from '@/lib/stats';
+import ProfileHero from '../components/ProfileHero';
 
 export default async function HomePage() {
   const player = await getCurrentPlayer();
@@ -10,6 +12,7 @@ export default async function HomePage() {
   const isMod = isAdmin || player?.role === 'moderator';
 
   const tournaments = await listTournaments();
+  const stats = player ? await getPlayerStats(player.id) : null;
 
   const supabase = createClient();
   let myParticipations: Map<string, { participantId: string; status: string; countryId: string | null }> = new Map();
@@ -29,123 +32,45 @@ export default async function HomePage() {
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <header style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-        background: 'rgba(5, 10, 8, 0.85)',
-        backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid var(--border)',
-        padding: '14px 20px',
-      }}>
-        <div style={{
+      {player && stats ? (
+        <ProfileHero
+          displayName={player.display_name ?? player.username}
+          username={player.username}
+          avatarUrl={player.avatar_url ?? null}
+          wins={stats.wins}
+          draws={stats.draws}
+          losses={stats.losses}
+        />
+      ) : (
+        <section style={{
           maxWidth: 1200,
           margin: '0 auto',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 16,
+          padding: '60px 20px 40px',
+          textAlign: 'center',
         }}>
-          <Link href="/" style={{
-            fontSize: 18,
+          <div style={{ fontSize: 11, color: 'var(--accent)', letterSpacing: '0.15em', marginBottom: 12 }}>
+            THE COMMUNITY 1V1 PLATFORM
+          </div>
+          <h1 style={{
+            fontSize: 'clamp(36px, 7vw, 64px)',
             fontWeight: 700,
-            letterSpacing: '0.02em',
-            color: 'var(--accent)',
-            textDecoration: 'none',
+            lineHeight: 1.05,
+            letterSpacing: '-0.02em',
+            marginBottom: 16,
           }}>
-            eFTBL
-          </Link>
-
-          <nav style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
-            {!player ? (
-              <>
-                <Link href="/signin" style={{ color: 'var(--text-2)' }}>Sign in</Link>
-                <Link href="/signup" className="auth-button" style={{
-                  padding: '6px 14px',
-                  width: 'auto',
-                  fontSize: 12,
-                }}>
-                  Sign up
-                </Link>
-              </>
-            ) : (
-              <>
-                {isAdmin && (
-                  <span style={{
-                    padding: '3px 8px',
-                    fontSize: 10,
-                    background: 'rgba(0,255,136,0.1)',
-                    border: '1px solid rgba(0,255,136,0.3)',
-                    color: 'var(--accent)',
-                    letterSpacing: '0.05em',
-                  }}>
-                    ADMIN
-                  </span>
-                )}
-                {!isAdmin && isMod && (
-                  <span style={{
-                    padding: '3px 8px',
-                    fontSize: 10,
-                    background: 'rgba(255,149,0,0.1)',
-                    border: '1px solid rgba(255,149,0,0.3)',
-                    color: '#ff9500',
-                    letterSpacing: '0.05em',
-                  }}>
-                    MOD
-                  </span>
-                )}
-                <Link href="/profile/edit" style={{ color: 'var(--text-2)' }}>
-                  {player.display_name ?? player.username}
-                </Link>
-                <form action={signOut} style={{ display: 'inline' }}>
-                  <button type="submit" style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: 'var(--text-3)',
-                    fontSize: 13,
-                    cursor: 'pointer',
-                    padding: 0,
-                  }}>
-                    Sign out
-                  </button>
-                </form>
-              </>
-            )}
-          </nav>
-        </div>
-      </header>
-
-      <section style={{
-        maxWidth: 1200,
-        margin: '0 auto',
-        padding: '60px 20px 40px',
-        textAlign: 'center',
-      }}>
-        <div style={{ fontSize: 11, color: 'var(--accent)', letterSpacing: '0.15em', marginBottom: 12 }}>
-          THE COMMUNITY 1V1 PLATFORM
-        </div>
-        <h1 style={{
-          fontSize: 'clamp(36px, 7vw, 64px)',
-          fontWeight: 700,
-          lineHeight: 1.05,
-          letterSpacing: '-0.02em',
-          marginBottom: 16,
-        }}>
-          eFootball tournaments,<br />
-          <span style={{ color: 'var(--accent)' }}>played the right way</span>
-        </h1>
-        <p style={{
-          fontSize: 16,
-          color: 'var(--text-2)',
-          maxWidth: 540,
-          margin: '0 auto',
-          lineHeight: 1.55,
-        }}>
-          48-player FIFA WC format. Group draws. Knockouts. Real standings.
-          Run by your community, for your community.
-        </p>
-
-        {!player && (
+            eFootball tournaments,<br />
+            <span style={{ color: 'var(--accent)' }}>played the right way</span>
+          </h1>
+          <p style={{
+            fontSize: 16,
+            color: 'var(--text-2)',
+            maxWidth: 540,
+            margin: '0 auto',
+            lineHeight: 1.55,
+          }}>
+            48-player FIFA WC format. Group draws. Knockouts. Real standings.
+            Run by your community, for your community.
+          </p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 28 }}>
             <Link href="/signup" className="auth-button" style={{ padding: '12px 24px', width: 'auto', fontSize: 14 }}>
               Create account
@@ -160,8 +85,8 @@ export default async function HomePage() {
               Sign in
             </Link>
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       <section style={{
         maxWidth: 1200,

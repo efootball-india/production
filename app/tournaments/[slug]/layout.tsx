@@ -192,9 +192,9 @@ export default async function TournamentLayout({
             <input type="hidden" name="tournament_id" value={tournament.id} />
             <div className="flex items-center gap-3 flex-wrap">
               <span className="label-strong text-status-ok">✓ You're in</span>
-              <button
+            <button
                 type="submit"
-                className="border border-hairline-strong hover:border-ink-strong text-muted hover:text-default transition-colors px-3 py-2 font-mono text-[10px] font-bold tracking-[0.14em] uppercase cursor-pointer"
+                className="border border-hairline-strong hover:border-ink-strong text-default hover:bg-ink hover:text-bg transition-colors px-3 py-2 font-mono text-[10px] font-bold tracking-[0.14em] uppercase cursor-pointer"
               >
                 Withdraw
               </button>

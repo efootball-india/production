@@ -133,6 +133,26 @@ export default async function EditProfilePage({
             </div>
 
             <div className="pe-field">
+              <label htmlFor="whatsapp_contact" className="pe-label">
+                WhatsApp contact
+              </label>
+              <input
+                id="whatsapp_contact"
+                name="whatsapp_contact"
+                type="tel"
+                maxLength={32}
+                defaultValue={(player as any).whatsapp_contact ?? ''}
+                className="pe-input pe-input-mono"
+                placeholder="Optional · for match coordination"
+                inputMode="tel"
+                autoComplete="tel"
+              />
+              <div className="pe-hint">
+                Visible to tournament admins only
+              </div>
+            </div>
+
+            <div className="pe-field">
               <label htmlFor="region" className="pe-label">
                 Country
               </label>

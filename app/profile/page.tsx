@@ -1,4 +1,4 @@
-// PASS-29-PROFILE-VIEW
+// PASS-30-PROFILE-VIEW (editorial)
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentPlayer, PLATFORM_LABELS } from '@/lib/player';
@@ -11,149 +11,354 @@ export default async function ProfilePage() {
 
   const stats = await getPlayerStats(player.id);
 
-  const displayName = (player.display_name ?? player.username ?? '').toUpperCase();
-  const initial = displayName.charAt(0) || '?';
+  const displayName =
+    player.display_name ?? player.username ?? '';
+  const initial = (displayName.charAt(0) || '?').toUpperCase();
+  const handle = player.username ? `@${player.username.toUpperCase()}` : '';
 
   const platformLabel = player.platform
     ? (PLATFORM_LABELS as any)[player.platform] ?? player.platform
-    : '—';
+    : null;
+  const region = player.region ? player.region.toUpperCase() : null;
+
+  const metaParts: Array<{ text: string; strong: boolean }> = [];
+  if (platformLabel) metaParts.push({ text: platformLabel, strong: false });
+  if (region) metaParts.push({ text: region, strong: true });
 
   return (
     <>
-      <style>{`
-        .pf-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-          padding: 12px 14px;
-          gap: 12px;
-        }
-        .pf-row + .pf-row {
-          border-top: 1px solid var(--border);
-        }
-      `}</style>
-
-      <main style={{ maxWidth: 560, margin: '0 auto', padding: '32px 20px 40px' }}>
-
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: 28 }}>
-          <div style={{
-            width: 100,
-            height: 100,
-            borderRadius: '50%',
-            background: player.avatar_url
-              ? `url(${player.avatar_url}) center/cover no-repeat`
-              : 'linear-gradient(135deg, rgba(0,255,136,0.18), rgba(0,255,136,0.04))',
-            border: '2px solid rgba(0,255,136,0.35)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 16,
-          }}>
-            {!player.avatar_url && (
-              <span style={{ fontSize: 44, color: 'var(--accent)', fontWeight: 800, lineHeight: 1 }}>
-                {initial}
-              </span>
-            )}
+      <Styles />
+      <main className="pf-page">
+        <div className="pf-hero">
+          <div className="pf-top">
+            <div
+              className="pf-avatar"
+              style={
+                player.avatar_url
+                  ? {
+                      backgroundImage: `url(${player.avatar_url})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }
+                  : undefined
+              }
+            >
+              {!player.avatar_url && (
+                <span className="initial">{initial}</span>
+              )}
+            </div>
+            <div className="pf-id">
+              <h1 className="pf-name">{displayName}</h1>
+              {handle && <div className="pf-handle">{handle}</div>}
+              {metaParts.length > 0 && (
+                <div className="pf-meta">
+                  {metaParts.map((p, i) => (
+                    <span key={i}>
+                      {i > 0 ? ' · ' : ''}
+                      {p.strong ? (
+                        <span className="strong">{p.text}</span>
+                      ) : (
+                        p.text
+                      )}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          <h1 style={{
-            fontSize: 24,
-            color: 'var(--accent)',
-            fontWeight: 800,
-            letterSpacing: '0.01em',
-            margin: 0,
-            marginBottom: 4,
-          }}>
-            {displayName}
-          </h1>
-          <div style={{ fontSize: 12, color: 'var(--text-3)' }}>@{player.username}</div>
-
-          <div style={{
-            marginTop: 12,
-            fontSize: 13,
-            color: 'var(--text)',
-            fontWeight: 700,
-            letterSpacing: '0.14em',
-            fontVariantNumeric: 'tabular-nums',
-          }}>
-            {stats.wins}W · {stats.draws}D · {stats.losses}L
+          <div className="pf-stats">
+            <div className="pf-cell w">
+              <span className="lbl">Wins</span>
+              <span className="val">{stats.wins}</span>
+            </div>
+            <div className="pf-cell">
+              <span className="lbl">Draws</span>
+              <span className="val">{stats.draws}</span>
+            </div>
+            <div className="pf-cell l">
+              <span className="lbl">Losses</span>
+              <span className="val">{stats.losses}</span>
+            </div>
           </div>
 
-          <Link href="/profile/edit" style={{
-            marginTop: 20,
-            display: 'inline-block',
-            fontSize: 12,
-            color: '#050a08',
-            background: 'var(--accent)',
-            padding: '10px 22px',
-            borderRadius: 4,
-            textDecoration: 'none',
-            fontWeight: 700,
-            letterSpacing: '0.08em',
-          }}>
-            EDIT PROFILE →
+          <Link href="/profile/edit" className="pf-edit">
+            Edit profile →
           </Link>
         </div>
 
         {player.bio && (
-          <div style={{ marginBottom: 24, padding: '14px 16px', background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: 6 }}>
-            <div style={{ fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.18em', fontWeight: 700, marginBottom: 6 }}>BIO</div>
-            <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5 }}>{player.bio}</div>
+          <div className="pf-bio">
+            <div className="lbl">BIO</div>
+            <div className="body">{player.bio}</div>
           </div>
         )}
 
-        <div style={{ fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.18em', fontWeight: 700, marginBottom: 10 }}>ACCOUNT</div>
-        <div style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: 6, marginBottom: 24, overflow: 'hidden' }}>
-          <div className="pf-row">
-            <span style={{ fontSize: 12, color: 'var(--text-3)' }}>Platform</span>
-            <span style={{ fontSize: 13, color: 'var(--text)' }}>{platformLabel}</span>
-          </div>
-          <div className="pf-row">
-            <span style={{ fontSize: 12, color: 'var(--text-3)' }}>Country</span>
-            <span style={{ fontSize: 13, color: 'var(--text)' }}>{player.region ?? '—'}</span>
-          </div>
-          <div className="pf-row">
-            <span style={{ fontSize: 12, color: 'var(--text-3)' }}>Friend code</span>
-            <span style={{ fontSize: 13, color: 'var(--text)', fontFamily: 'ui-monospace, monospace', wordBreak: 'break-all', textAlign: 'right' }}>
-              {player.game_id ?? '—'}
-            </span>
-          </div>
-          <div className="pf-row">
-            <span style={{ fontSize: 12, color: 'var(--text-3)' }}>Discord</span>
-            <span style={{ fontSize: 13, color: 'var(--text)', fontFamily: 'ui-monospace, monospace', wordBreak: 'break-all', textAlign: 'right' }}>
-              {player.discord_handle ?? '—'}
-            </span>
+        <div className="pf-section">
+          <div className="pf-section-head">CONNECTIONS</div>
+          <div className="pf-info">
+            <div className="pf-row">
+              <span className="lbl">Friend code</span>
+              <span className="val mono">{player.game_id ?? '—'}</span>
+            </div>
+            <div className="pf-row">
+              <span className="lbl">Discord</span>
+              <span className="val mono">{player.discord_handle ?? '—'}</span>
+            </div>
           </div>
         </div>
 
-        <div style={{ fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.18em', fontWeight: 700, marginBottom: 10 }}>SECURITY</div>
-        <div style={{ background: 'var(--glass)', border: '1px solid var(--glass-border)', borderRadius: 6, marginBottom: 32, overflow: 'hidden' }}>
-          <div className="pf-row">
-            <span style={{ fontSize: 12, color: 'var(--text-3)' }}>Recovery Q</span>
-            <span style={{ fontSize: 13, color: 'var(--text)', textAlign: 'right' }}>
-              {player.security_question ?? '—'}
-            </span>
+        <div className="pf-section">
+          <div className="pf-section-head">SECURITY</div>
+          <div className="pf-info">
+            <div className="pf-row">
+              <span className="lbl">Recovery Q</span>
+              <span className="val small">
+                {player.security_question ?? '—'}
+              </span>
+            </div>
           </div>
         </div>
 
-        <form action={signOut} style={{ textAlign: 'center' }}>
-          <button type="submit" style={{
-            background: 'transparent',
-            border: '1px solid rgba(255, 80, 80, 0.3)',
-            color: '#ff5050',
-            fontSize: 12,
-            padding: '10px 24px',
-            borderRadius: 4,
-            letterSpacing: '0.14em',
-            fontWeight: 600,
-            cursor: 'pointer',
-            font: 'inherit',
-          }}>
-            SIGN OUT
+        <form action={signOut} className="pf-signout">
+          <button type="submit" className="pf-signout-btn">
+            Sign out
           </button>
         </form>
-
       </main>
     </>
+  );
+}
+
+function Styles() {
+  return (
+    <style>{`
+      .pf-page {
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 24px 20px 60px;
+      }
+
+      .pf-hero {
+        background: hsl(var(--surface));
+        border: 1px solid hsl(var(--ink));
+        box-shadow: 4px 4px 0 hsl(var(--ink));
+        padding: 22px 20px;
+        margin-bottom: 22px;
+      }
+      .pf-top {
+        display: grid;
+        grid-template-columns: 80px minmax(0, 1fr);
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .pf-avatar {
+        width: 80px;
+        height: 80px;
+        background: hsl(var(--ink));
+        color: hsl(var(--bg));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .pf-avatar .initial {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 900;
+        font-size: 40px;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+      .pf-id { min-width: 0; }
+      .pf-name {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 900;
+        font-size: 26px;
+        line-height: 0.95;
+        letter-spacing: -0.03em;
+        color: hsl(var(--ink));
+        margin: 0 0 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .pf-handle {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        color: hsl(var(--ink) / 0.42);
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .pf-meta {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 9px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        color: hsl(var(--ink) / 0.42);
+        text-transform: uppercase;
+      }
+      .pf-meta .strong {
+        color: hsl(var(--ink));
+        font-weight: 700;
+      }
+
+      .pf-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        background: hsl(var(--ink));
+        border: 1px solid hsl(var(--ink));
+        margin-bottom: 18px;
+      }
+      .pf-cell {
+        background: hsl(var(--surface));
+        padding: 12px;
+        text-align: center;
+      }
+      .pf-cell .lbl {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 8px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: hsl(var(--ink) / 0.42);
+        margin-bottom: 6px;
+        display: block;
+      }
+      .pf-cell .val {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 900;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: -0.025em;
+        color: hsl(var(--ink));
+        font-variant-numeric: tabular-nums;
+      }
+      .pf-cell.w .val { color: hsl(var(--accent)); }
+      .pf-cell.l .val { color: hsl(var(--ink) / 0.42); }
+
+      .pf-edit {
+        display: block;
+        width: 100%;
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        text-align: center;
+        background: hsl(var(--ink));
+        color: hsl(var(--bg));
+        padding: 12px;
+        text-decoration: none;
+      }
+      .pf-edit:hover {
+        background: hsl(var(--accent));
+      }
+
+      .pf-bio {
+        background: hsl(var(--surface));
+        border: 1px solid hsl(var(--ink) / 0.20);
+        border-left: 3px solid hsl(var(--accent));
+        padding: 14px 16px;
+        margin-bottom: 22px;
+      }
+      .pf-bio .lbl {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        color: hsl(var(--ink) / 0.42);
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+      .pf-bio .body {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        color: hsl(var(--ink) / 0.62);
+      }
+
+      .pf-section { margin-bottom: 22px; }
+      .pf-section-head {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: hsl(var(--ink) / 0.42);
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid hsl(var(--ink));
+      }
+      .pf-info {
+        background: hsl(var(--surface));
+        border: 1px solid hsl(var(--ink) / 0.20);
+      }
+      .pf-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 12px 14px;
+        gap: 12px;
+        border-bottom: 1px solid hsl(var(--ink) / 0.08);
+      }
+      .pf-row:last-child { border-bottom: none; }
+      .pf-row .lbl {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 9px;
+        font-weight: 500;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: hsl(var(--ink) / 0.42);
+        flex-shrink: 0;
+      }
+      .pf-row .val {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        color: hsl(var(--ink));
+        text-align: right;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 60%;
+      }
+      .pf-row .val.mono {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 12px;
+        word-break: break-all;
+        white-space: normal;
+      }
+      .pf-row .val.small {
+        font-size: 12px;
+        max-width: 65%;
+      }
+
+      .pf-signout {
+        margin-top: 8px;
+        text-align: center;
+      }
+      .pf-signout-btn {
+        background: transparent;
+        border: 1px solid hsl(var(--ink) / 0.20);
+        color: hsl(var(--live));
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        padding: 12px 24px;
+        cursor: pointer;
+      }
+      .pf-signout-btn:hover {
+        border-color: hsl(var(--live));
+      }
+    `}</style>
   );
 }

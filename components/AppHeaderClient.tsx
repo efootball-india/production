@@ -1,4 +1,4 @@
-// PASS-31-APP-HEADER-CLIENT
+// PASS-32-APP-HEADER-CLIENT (editorial · cream masthead)
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -49,14 +49,12 @@ export default function AppHeaderClient({
           position: sticky;
           top: 0;
           z-index: 50;
-          background: rgba(5, 10, 8, 0.85);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(255, 255, 255, 0);
+          background: hsl(var(--bg));
+          border-bottom: 1px solid transparent;
           transition: border-color 0.2s ease;
         }
         .ah[data-expanded="true"] {
-          border-bottom-color: rgba(255, 255, 255, 0.08);
+          border-bottom-color: hsl(var(--ink));
         }
         .ah-inner {
           max-width: 1280px;
@@ -70,15 +68,17 @@ export default function AppHeaderClient({
         .ah[data-minimal="true"] .ah-inner {
           justify-content: center;
         }
+
         .ah-logo {
           display: inline-flex;
           align-items: center;
-          color: #ffffff;
+          color: hsl(var(--ink));
           text-decoration: none;
           line-height: 0;
           flex-shrink: 0;
         }
-        .ah-logo:hover { color: #ffffff; }
+        .ah-logo:hover { color: hsl(var(--accent)); }
+
         .ah-nav {
           display: flex;
           gap: 22px;
@@ -89,47 +89,57 @@ export default function AppHeaderClient({
           transition: opacity 0.2s ease;
         }
         .ah-nav a {
-          font-size: 13px;
-          color: var(--text-2);
+          font-family: var(--font-mono), ui-monospace, monospace;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: hsl(var(--ink) / 0.62);
           text-decoration: none;
           height: 100%;
           display: flex;
           align-items: center;
           transition: color 0.15s ease;
         }
-        .ah-nav a:hover { color: var(--text); }
+        .ah-nav a:hover { color: hsl(var(--ink)); }
+        .ah-nav a.active { color: hsl(var(--ink)); }
+
         .ah-right {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 14px;
           margin-left: auto;
           opacity: 1;
           transition: opacity 0.2s ease;
           min-width: 0;
         }
+
         .ah-play-cta {
-          font-size: 12px;
-          color: #050a08 !important;
-          background: var(--accent);
-          padding: 7px 14px;
-          border-radius: 4px;
-          font-weight: 700;
-          letter-spacing: 0.08em;
-          text-decoration: none;
-          transition: transform 0.15s ease, box-shadow 0.15s ease;
-          flex-shrink: 0;
-        }
-        .ah-play-cta:hover {
-          color: #050a08 !important;
-          box-shadow: 0 0 16px rgba(0, 255, 136, 0.4);
-          transform: translateY(-1px);
-        }
-        .ah-username {
+          font-family: var(--font-mono), ui-monospace, monospace;
           font-size: 10px;
-          color: var(--text-2);
+          font-weight: 700;
           letter-spacing: 0.16em;
           text-transform: uppercase;
+          background: hsl(var(--accent));
+          color: hsl(var(--bg));
+          padding: 8px 14px;
+          text-decoration: none;
+          flex-shrink: 0;
+          line-height: 1;
+          transition: background 0.15s ease;
+        }
+        .ah-play-cta:hover {
+          background: hsl(var(--ink));
+          color: hsl(var(--bg));
+        }
+
+        .ah-username {
+          font-family: var(--font-mono), ui-monospace, monospace;
+          font-size: 11px;
           font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: hsl(var(--ink));
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -138,30 +148,48 @@ export default function AppHeaderClient({
           text-decoration: none;
           transition: color 0.15s ease;
         }
-        .ah-username:hover { color: var(--text); }
+        .ah-username:hover { color: hsl(var(--accent)); }
+
         .ah-admin-pill {
+          font-family: var(--font-mono), ui-monospace, monospace;
           font-size: 10px;
-          color: var(--accent);
-          background: rgba(0, 255, 136, 0.12);
-          border: 1px solid rgba(0, 255, 136, 0.4);
-          padding: 4px 10px;
-          border-radius: 3px;
-          letter-spacing: 0.18em;
           font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          background: hsl(var(--ink));
+          color: hsl(var(--bg));
+          padding: 5px 10px;
+          line-height: 1;
           flex-shrink: 0;
         }
+
         .ah-signout {
           background: transparent;
           border: none;
-          color: var(--text-3);
-          font-size: 12px;
+          color: hsl(var(--ink) / 0.42);
+          font-family: var(--font-mono), ui-monospace, monospace;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
           cursor: pointer;
           padding: 0;
-          font: inherit;
-          letter-spacing: 0.05em;
+          flex-shrink: 0;
+          transition: color 0.15s ease;
+        }
+        .ah-signout:hover { color: hsl(var(--ink)); }
+
+        .ah-signin {
+          font-family: var(--font-mono), ui-monospace, monospace;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: hsl(var(--ink));
+          text-decoration: none;
           flex-shrink: 0;
         }
-        .ah-signout:hover { color: var(--text-2); }
+        .ah-signin:hover { color: hsl(var(--accent)); }
 
         .ah[data-minimal="true"] .ah-nav,
         .ah[data-minimal="true"] .ah-right {
@@ -175,11 +203,15 @@ export default function AppHeaderClient({
           .ah-signout { display: none; }
         }
         @media (max-width: 420px) {
-          .ah-username { max-width: 110px; font-size: 9px; }
+          .ah-username { max-width: 110px; font-size: 10px; }
         }
       `}</style>
 
-      <header className="ah" data-expanded={expanded} data-minimal={minimalMode}>
+      <header
+        className="ah"
+        data-expanded={expanded}
+        data-minimal={minimalMode}
+      >
         <div className="ah-inner">
           <Link href="/" className="ah-logo" aria-label="eFTBL home">
             <Logo height={22} />
@@ -187,24 +219,44 @@ export default function AppHeaderClient({
 
           {isLoggedIn && (
             <nav className="ah-nav">
-              <Link href="/">Home</Link>
-              <Link href="/tournaments">Tournaments</Link>
-              <Link href="/play">My matches</Link>
+              <Link href="/" className={pathname === '/' ? 'active' : ''}>
+                Home
+              </Link>
+              <Link
+                href="/tournaments"
+                className={pathname.startsWith('/tournaments') ? 'active' : ''}
+              >
+                Tournaments
+              </Link>
+              <Link
+                href="/play"
+                className={pathname.startsWith('/play') ? 'active' : ''}
+              >
+                My matches
+              </Link>
             </nav>
           )}
 
           <div className="ah-right">
-            {isLoggedIn && <Link href="/play" className="ah-play-cta">▸ PLAY</Link>}
+            {isLoggedIn && (
+              <Link href="/play" className="ah-play-cta">
+                ▸ PLAY
+              </Link>
+            )}
             {isLoggedIn && nameToShow && (
-              <Link href="/profile" className="ah-username">{nameToShow}</Link>
+              <Link href="/profile" className="ah-username">
+                {nameToShow}
+              </Link>
             )}
             {isAdmin && <span className="ah-admin-pill">ADMIN</span>}
             {isLoggedIn ? (
               <form action={signOut}>
-                <button type="submit" className="ah-signout">Sign out</button>
+                <button type="submit" className="ah-signout">
+                  Sign out
+                </button>
               </form>
             ) : (
-              <Link href="/signin" style={{ fontSize: 13, color: 'var(--text-2)', textDecoration: 'none' }}>
+              <Link href="/signin" className="ah-signin">
                 Sign in
               </Link>
             )}

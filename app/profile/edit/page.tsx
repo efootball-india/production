@@ -1,4 +1,5 @@
 // PASS-39-PROFILE-EDIT (editorial)
+import SaveButton from '../../../components/SaveButton';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import {
@@ -36,12 +37,7 @@ export default async function EditProfilePage({
           </h1>
         </header>
 
-        {searchParams.saved && (
-          <div className="pe-banner pe-banner-ok">
-            <span className="dot" />
-            <span>Profile saved.</span>
-          </div>
-        )}
+      
         {searchParams.error && (
           <div className="pe-banner pe-banner-err">
             <span className="dot" />
@@ -198,9 +194,7 @@ export default async function EditProfilePage({
             <Link href="/profile" className="pe-cancel">
               Cancel
             </Link>
-            <button type="submit" className="pe-save">
-              Save changes →
-            </button>
+            <SaveButton />
           </div>
         </form>
       </main>
@@ -419,3 +413,27 @@ function Styles() {
     `}</style>
   );
 }
+.pe-save:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+      .pe-save:disabled:hover {
+        background: hsl(var(--ink));
+        border-color: hsl(var(--ink));
+      }
+      .pe-save-loading {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .pe-save-spinner {
+        width: 12px;
+        height: 12px;
+        border: 2px solid hsl(var(--bg) / 0.3);
+        border-top-color: hsl(var(--bg));
+        border-radius: 50%;
+        animation: pe-spin 0.8s linear infinite;
+      }
+      @keyframes pe-spin {
+        to { transform: rotate(360deg); }
+      }

@@ -111,10 +111,10 @@ export default async function PlayersTab({ params }: { params: { slug: string } 
               </>
             );
 
-            return username ? (
+           return username ? (
               <Link
                 key={p.id}
-                href={`/players/${username}`}
+                href={`/players/${username}?from=/tournaments/${params.slug}/players`}
                 className="ptab-row clickable"
               >
                 {rowContent}

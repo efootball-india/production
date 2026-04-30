@@ -168,7 +168,7 @@ function FixturesEmptyState({ tournament }: { tournament: any }) {
         <div className="font-sans font-black text-2xl md:text-[28px] leading-[1.05] tracking-tight text-default mb-3">
           {headline}
         </div>
-        <p className="text-muted text-sm md:text-base leading-relaxed max-w-[520px] mb-5">
+       <p className="text-ink/70 text-sm md:text-base leading-relaxed max-w-[520px] mb-5">
           {body}
         </p>
         <div className="flex flex-wrap gap-x-7 gap-y-3 pt-4 hairline-t">

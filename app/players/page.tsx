@@ -151,8 +151,8 @@ function PlayerRow({ entry, isMe }: { entry: any; isMe: boolean }) {
   const meClass = isMe ? 'is-me' : '';
 
   return (
-    <Link
-      href={`/players/${entry.username}`}
+   <Link
+      href={`/players/${entry.username}?from=/players`}
       className={`pl-row ${top3Class} ${meClass}`}
     >
       <span className="rank">{String(entry.rank).padStart(2, '0')}</span>

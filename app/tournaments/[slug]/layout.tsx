@@ -208,44 +208,57 @@ export default async function TournamentLayout({
       </div>
 
       {/* Admin shortcuts */}
+{/* Admin shortcuts */}
       {isAdmin && (
-        <div className="border border-hairline bg-status-ok-soft px-4 py-3 mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 label">
-          <span className="text-status-ok font-bold">ADMIN</span>
-          <Link
-            href={`/admin/tournaments/${tournament.slug}/draw`}
-            className="text-status-ok hover:text-default transition-colors"
-          >
-            {drawState.status === 'completed' ? 'Draw' : drawState.status === 'in_progress' ? 'Continue draw' : 'Set up draw'}
-          </Link>
-          {drawState.status === 'completed' && (
+        <div className="mb-3">
+          <div className="font-mono text-[9px] font-bold tracking-[0.18em] uppercase text-status-ok mb-2">
+            ADMIN
+          </div>
+          <div className="flex gap-1.5 flex-wrap">
             <Link
-              href={`/admin/tournaments/${tournament.slug}/fixtures`}
-              className="text-status-ok hover:text-default transition-colors"
+              href={`/admin/tournaments/${tournament.slug}/draw`}
+              className="font-mono text-[10px] font-bold tracking-[0.14em] uppercase border border-ink-strong text-ink hover:bg-status-ok hover:border-status-ok hover:text-white transition-colors px-3 py-2 leading-none"
             >
-              Fixtures
+              {drawState.status === 'completed'
+                ? 'Draw'
+                : drawState.status === 'in_progress'
+                ? 'Continue draw'
+                : 'Set up draw'}
             </Link>
-          )}
-          {hasFixtures && (
-            <Link
-              href={`/admin/tournaments/${tournament.slug}/matches`}
-              className="text-status-ok hover:text-default transition-colors"
-            >
-              All matches
-            </Link>
-          )}
+            {drawState.status === 'completed' && (
+              <Link
+                href={`/admin/tournaments/${tournament.slug}/fixtures`}
+                className="font-mono text-[10px] font-bold tracking-[0.14em] uppercase border border-ink-strong text-ink hover:bg-status-ok hover:border-status-ok hover:text-white transition-colors px-3 py-2 leading-none"
+              >
+                Fixtures
+              </Link>
+            )}
+            {hasFixtures && (
+              <Link
+                href={`/admin/tournaments/${tournament.slug}/matches`}
+                className="font-mono text-[10px] font-bold tracking-[0.14em] uppercase border border-ink-strong text-ink hover:bg-status-ok hover:border-status-ok hover:text-white transition-colors px-3 py-2 leading-none"
+              >
+                All matches
+              </Link>
+            )}
+          </div>
         </div>
       )}
 
       {/* Mod shortcuts */}
       {isMod && hasFixtures && (
-        <div className="border border-hairline bg-status-warn-soft px-4 py-3 mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 label">
-          <span className="text-status-warn font-bold">MOD</span>
-          <Link
-            href={`/admin/tournaments/${tournament.slug}/queue`}
-            className="text-status-warn hover:text-default transition-colors"
-          >
-            Match queue
-          </Link>
+        <div className="mb-3">
+          <div className="font-mono text-[9px] font-bold tracking-[0.18em] uppercase text-status-warn mb-2">
+            MOD
+          </div>
+          <div className="flex gap-1.5 flex-wrap">
+            <Link
+              href={`/admin/tournaments/${tournament.slug}/queue`}
+              className="font-mono text-[10px] font-bold tracking-[0.14em] uppercase border border-ink-strong text-ink hover:bg-status-warn hover:border-status-warn hover:text-white transition-colors px-3 py-2 leading-none"
+            >
+              Match queue
+            </Link>
+          </div>
         </div>
       )}
 

@@ -63,12 +63,12 @@ export async function completeOnboarding(formData: FormData) {
   const result = await saveProfile(formData, true);
   if (!result.ok) redirect(`/onboarding?error=${encodeURIComponent(result.error ?? 'Error')}`);
   revalidatePath('/', 'layout');
-  redirect('/profile/edit?saved=1');
+  redirect('/profile?welcome=1');
 }
 
 export async function updateProfile(formData: FormData) {
   const result = await saveProfile(formData, false);
   if (!result.ok) redirect(`/profile/edit?error=${encodeURIComponent(result.error ?? 'Error')}`);
   revalidatePath('/', 'layout');
-  redirect('/profile/edit?saved=1');
+  redirect('/profile?saved=1');
 }

@@ -1,4 +1,4 @@
-// PASS-47-BRACKET-TAB (editorial · horizontal scroll tree)
+// PASS-48-BRACKET-TAB (editorial · admin inline edit)
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -9,6 +9,7 @@ import {
   R32_PAIRINGS,
   seedToLabel,
 } from '@/lib/knockout';
+import BracketMatchCard from '../../../../components/BracketMatchCard';
 
 const ROUND_INFO: Array<{ round: number; label: string; expectedCount: number }> = [
   { round: 1, label: 'R32', expectedCount: 16 },
@@ -135,6 +136,7 @@ export default async function BracketTab({
   for (const s of seeds ?? []) {
     if (s.participant_id) seedMap.set(s.participant_id, s.source_label ?? '');
   }
+  const seedMapObj = Object.fromEntries(seedMap);
 
   const finalMatch = bracket[5]?.[0];
 
@@ -159,7 +161,7 @@ export default async function BracketTab({
 
   const roundStats = ROUND_INFO.map(({ round, label, expectedCount }) => {
     const matches = bracket[round] ?? [];
-    const played = matches.filter((m: any) => m.status === 'completed').length;
+    const played = matches.filter((m: any) => m.status === 'completed' || m.status === 'walkover').length;
     const live = matches.filter((m: any) => m.status === 'awaiting_result')
       .length;
     const confirm = matches.filter(
@@ -269,13 +271,14 @@ export default async function BracketTab({
                           <PlaceholderMatch key={`ph-${round}-${i}`} />
                         ))
                       : sorted.map((m: any) => (
-                          <MatchCard
+                          <BracketMatchCard
                             key={m.id}
                             match={m}
-                            seedMap={seedMap}
-                            isOnPath={championPath.has(m.id)}
-                            isMod={isMod}
                             slug={tournament.slug}
+                            isMod={isMod}
+                            isOnPath={championPath.has(m.id)}
+                            seedMap={seedMapObj}
+                            roundLabel={label}
                           />
                         ))}
                   </div>
@@ -362,158 +365,6 @@ function RoundMeta({ stats }: { stats: any }) {
     );
   }
   return <span className="meta">PENDING</span>;
-}
-
-function MatchCard({
-  match,
-  seedMap,
-  isOnPath,
-  isMod,
-  slug,
-}: {
-  match: any;
-  seedMap: Map<string, string>;
-  isOnPath: boolean;
-  isMod: boolean;
-  slug: string;
-}) {
-  const m = match;
-  const winnerId = m.winner_participant_id ?? null;
-  const homeIsWinner = !!winnerId && m.home?.id === winnerId;
-  const awayIsWinner = !!winnerId && m.away?.id === winnerId;
-  const isAwait = m.status === 'awaiting_result';
-  const isConfirm = m.status === 'awaiting_confirmation';
-  const isDisputed = m.status === 'disputed';
-  const isCompleted = m.status === 'completed';
-  const hasBothPlayers = !!m.home && !!m.away;
-
-  let cardClass = 'efb-match';
-  if (isAwait && hasBothPlayers) cardClass += ' live';
-  else if (isConfirm) cardClass += ' confirm';
-  else if (isDisputed) cardClass += ' disputed';
-  if (isOnPath) cardClass += ' path-win';
-
-  let footText = '';
-  let footClass = '';
-  if (isCompleted) {
-    if (m.decided_by === 'penalties') {
-      footText = 'FINAL · PEN';
-      footClass = 'aet';
-    } else if (m.decided_by === 'extra_time') {
-      footText = 'FINAL · A.E.T.';
-      footClass = 'aet';
-    } else if (m.decided_by === 'walkover') {
-      footText = 'WALKOVER';
-      footClass = 'aet';
-    } else {
-      footText = 'FINAL';
-    }
-  } else if (isAwait) {
-    footText = hasBothPlayers ? 'AWAITING RESULT' : 'PENDING';
-    footClass = hasBothPlayers ? 'live' : '';
-  } else if (isConfirm) {
-    footText = '⚠ AWAITING CONFIRMATION';
-    footClass = 'confirm';
-  } else if (isDisputed) {
-    footText = 'DISPUTED · ADMIN';
-    footClass = 'confirm';
-  } else if (m.status === 'pending') {
-    footText = 'TBD';
-  } else if (m.status === 'scheduled') {
-    footText = 'SCHEDULED';
-  } else if (m.status === 'walkover') {
-    footText = 'WALKOVER';
-    footClass = 'aet';
-  } else {
-    footText =
-      String(m.status ?? '').toUpperCase().replace(/_/g, ' ') || 'TBD';
-  }
-
-  const showModLink = isMod && hasBothPlayers;
-
-  return (
-    <div className={cardClass}>
-      <Side
-        side={m.home}
-        score={m.home_score}
-        pens={m.decided_by === 'penalties' ? m.home_pens : null}
-        isWin={homeIsWinner}
-        isLoss={!!winnerId && !homeIsWinner}
-        seedMap={seedMap}
-      />
-      <Side
-        side={m.away}
-        score={m.away_score}
-        pens={m.decided_by === 'penalties' ? m.away_pens : null}
-        isWin={awayIsWinner}
-        isLoss={!!winnerId && !awayIsWinner}
-        seedMap={seedMap}
-      />
-      <div className={`efb-foot ${footClass}`.trim()}>
-        <span className="foot-text">{footText}</span>
-        {showModLink && (
-          <Link
-            href={`/admin/tournaments/${slug}/ko-match/${m.id}`}
-            className="foot-mod"
-          >
-            {isCompleted ? 'Edit' : 'Set'} →
-          </Link>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Side({
-  side,
-  score,
-  pens,
-  isWin,
-  isLoss,
-  seedMap,
-}: {
-  side: any;
-  score: number | null;
-  pens: number | null;
-  isWin: boolean;
-  isLoss: boolean;
-  seedMap: Map<string, string>;
-}) {
-  if (!side) {
-    return (
-      <div className="efb-side tbd">
-        <div className="efb-team">
-          <span className="efb-name">TBD</span>
-        </div>
-        <span className="efb-score">—</span>
-      </div>
-    );
-  }
-  const country = side.country?.name ?? 'TBD';
-  const handle = side.player?.username ?? side.player?.display_name ?? '';
-  const seed = seedMap.get(side.id) ?? '';
-  const handleStr = [seed, handle].filter(Boolean).join(' · ');
-
-  let className = 'efb-side';
-  if (isWin) className += ' win';
-  else if (isLoss) className += ' loss';
-
-  return (
-    <div className={className}>
-      <div className="efb-team">
-        <span className="efb-name">{country}</span>
-        {handleStr && <span className="efb-handle">{handleStr}</span>}
-      </div>
-      {score == null ? (
-        <span className="efb-score efb-score-empty">—</span>
-      ) : (
-        <span className="efb-score">
-          {score}
-          {pens != null && <span className="pen">{pens}</span>}
-        </span>
-      )}
-    </div>
-  );
 }
 
 function PlaceholderMatch() {
@@ -769,6 +620,8 @@ function Styles() {
         font-size: 8px; font-weight: 700; letter-spacing: 0.14em;
       }
       .efb-match.path-win { box-shadow: 0 0 0 2px hsl(var(--accent)); }
+      .efb-match.editable { cursor: pointer; }
+      .efb-match.editable:hover { border-color: hsl(var(--ink)); }
 
       .efb-side {
         display: grid; grid-template-columns: minmax(0, 1fr) auto;
@@ -844,9 +697,7 @@ function Styles() {
         color: hsl(var(--accent));
         font-weight: 700;
         flex-shrink: 0;
-        text-decoration: none;
       }
-      .efb-foot .foot-mod:hover { color: hsl(var(--ink)); }
 
       .efb-empty {
         text-align: center;

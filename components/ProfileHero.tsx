@@ -1,7 +1,8 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+
+type Tier = 'diamond' | 'platinum' | 'gold' | 'silver' | 'bronze' | 'unranked';
 
 type Props = {
   displayName: string;
@@ -10,6 +11,10 @@ type Props = {
   wins: number;
   draws: number;
   losses: number;
+  rank?: number | null;
+  tier?: Tier | null;
+  points?: number | null;
+  seasonLabel?: string | null;
 };
 
 export default function ProfileHero({
@@ -19,25 +24,28 @@ export default function ProfileHero({
   wins,
   draws,
   losses,
+  rank,
+  tier,
+  points,
+  seasonLabel,
 }: Props) {
   const [scrollY, setScrollY] = useState(0);
-
   useEffect(() => {
     const handler = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handler, { passive: true });
     handler();
     return () => window.removeEventListener('scroll', handler);
   }, []);
-
   const parallax = scrollY * 0.4;
   const imageOpacity = Math.max(0, 1 - scrollY / 350);
   const textOpacity = Math.max(0, 1 - scrollY / 240);
-
   const nameToShow = (displayName || username || '').toUpperCase();
-
   const photoBg = avatarUrl
     ? `url(${avatarUrl}) center/cover no-repeat`
     : 'linear-gradient(180deg, #2a3a35 0%, #1c2a26 35%, #11201b 65%, #08130f 100%)';
+
+  const showRank = tier !== null && tier !== undefined;
+  const isUnranked = tier === 'unranked' || (points ?? 0) < 100;
 
   return (
     <section style={{ position: 'relative', width: '100%' }}>
@@ -71,13 +79,75 @@ export default function ProfileHero({
           font-variant-numeric: tabular-nums;
           font-size: clamp(20px, 5.2vw, 32px);
         }
+
+        .ph-rank-link {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          margin-top: 14px;
+          padding: 8px 14px;
+          text-decoration: none;
+          color: inherit;
+          border: 1px solid hsl(var(--ink) / 0.20);
+          background: hsl(var(--surface));
+          transition: border-color 0.15s ease, background 0.15s ease;
+        }
+        .ph-rank-link:hover {
+          border-color: hsl(var(--ink));
+          background: hsl(var(--ink) / 0.04);
+        }
+        .ph-rank-pill {
+          display: inline-block;
+          padding: 3px 8px;
+          font-family: var(--font-mono), ui-monospace, monospace;
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          line-height: 1.4;
+          text-transform: uppercase;
+        }
+        .ph-rank-pill.tier-diamond { background: #C7A4DD; color: #3C2A4D; }
+        .ph-rank-pill.tier-platinum { background: #B5D4F4; color: #042C53; }
+        .ph-rank-pill.tier-gold { background: #FAC775; color: #633806; }
+        .ph-rank-pill.tier-silver { background: #D3D1C7; color: #2C2C2A; }
+        .ph-rank-pill.tier-bronze { background: #F5C4B3; color: #4A1B0C; }
+        .ph-rank-pill.tier-unranked {
+          background: transparent;
+          color: hsl(var(--ink) / 0.42);
+          border: 1px solid hsl(var(--ink) / 0.20);
+        }
+        .ph-rank-num {
+          font-family: var(--font-mono), ui-monospace, monospace;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.10em;
+          color: hsl(var(--ink));
+          text-transform: uppercase;
+        }
+        .ph-rank-pts {
+          font-family: var(--font-sans), system-ui, sans-serif;
+          font-weight: 900;
+          font-size: 14px;
+          color: hsl(var(--accent));
+          font-variant-numeric: tabular-nums;
+        }
+        .ph-season {
+          margin-top: 6px;
+          font-family: var(--font-mono), ui-monospace, monospace;
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: hsl(var(--ink) / 0.42);
+        }
+
         @media (min-width: 768px) {
           .ph-wrap { max-width: 480px; margin: 0 auto; padding-top: 24px; }
           .ph-name { font-size: 44px; }
           .ph-record { font-size: 32px; }
         }
       `}</style>
-
       <div className="ph-wrap">
         <div className="ph-frame" style={{ transform: `translateY(${-parallax}px)` }}>
           <div className="ph-photo" style={{ background: photoBg, opacity: imageOpacity }}>
@@ -93,7 +163,6 @@ export default function ProfileHero({
               </svg>
             )}
           </div>
-
           {!avatarUrl && (
             <Link
               href="/profile/edit"
@@ -116,12 +185,32 @@ export default function ProfileHero({
             </Link>
           )}
         </div>
-
         <div className="ph-text" style={{ opacity: textOpacity }}>
           <h1 className="ph-name">{nameToShow}</h1>
           <div className="ph-record">
             {wins}W &nbsp;&nbsp;{draws}D &nbsp;&nbsp;{losses}L
           </div>
+
+          {showRank && (
+            <Link href="/players" className="ph-rank-link">
+              <span className={`ph-rank-pill tier-${tier}`}>
+                {(tier ?? 'unranked').toUpperCase()}
+              </span>
+              {!isUnranked && rank != null && (
+                <span className="ph-rank-num">RANK #{rank}</span>
+              )}
+              {!isUnranked && points != null && (
+                <span className="ph-rank-pts">{points}</span>
+              )}
+              {isUnranked && (
+                <span className="ph-rank-num">SEE LEADERBOARD →</span>
+              )}
+            </Link>
+          )}
+
+          {showRank && seasonLabel && (
+            <div className="ph-season">SEASON {seasonLabel}</div>
+          )}
         </div>
       </div>
     </section>

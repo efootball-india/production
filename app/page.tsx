@@ -4,6 +4,7 @@ import { getCurrentPlayer } from '@/lib/player';
 import { listTournaments, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments';
 import { getPlayerStats } from '@/lib/stats';
 import ProfileHero from '../components/ProfileHero';
+import { getPlayerConsistency, seasonWindow } from '@/lib/consistency';
 
 export default async function HomePage() {
   const player = await getCurrentPlayer();
@@ -12,6 +13,9 @@ export default async function HomePage() {
 
   const tournaments = await listTournaments();
   const stats = player ? await getPlayerStats(player.id) : null;
+  const consistency = player ? await getPlayerConsistency(player.id) : null;
+  const { label: seasonLabel } = seasonWindow();
+  
 
   const supabase = createClient();
   const myParticipations: Map<string, { participantId: string; status: string; countryId: string | null }> = new Map();
@@ -38,7 +42,7 @@ export default async function HomePage() {
 
   return (
     <main className="bg-bg text-ink min-h-screen">
-      {player && stats ? (
+     {player && stats ? (
         <ProfileHero
           displayName={player.display_name ?? player.username}
           username={player.username}
@@ -46,6 +50,10 @@ export default async function HomePage() {
           wins={stats.wins}
           draws={stats.draws}
           losses={stats.losses}
+          rank={consistency?.rank ?? null}
+          tier={consistency?.tier ?? null}
+          points={consistency?.points ?? null}
+          seasonLabel={seasonLabel}
         />
       ) : (
         <section className="max-w-[920px] mx-auto px-6 md:px-10 pt-16 md:pt-24 pb-16">

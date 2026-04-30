@@ -7,8 +7,10 @@ import { getMatchHistory, getTournamentsForPlayer, getHeadToHead } from '@/lib/p
 
 export default async function PublicPlayerProfilePage({
   params,
+  searchParams,
 }: {
   params: { username: string };
+  searchParams: { from?: string };
 }) {
   const viewer = await getCurrentPlayer();
   const player = await getPlayerByUsername(params.username);
@@ -54,7 +56,9 @@ export default async function PublicPlayerProfilePage({
     <>
       <Styles />
       <main className="pp-page">
-        <Link href="/players" className="pp-back">← All players</Link>
+        <Link href={searchParams.from ?? '/players'} className="pp-back">
+          ← Back
+        </Link>
 
         {/* Hero */}
         <div className="pp-hero">

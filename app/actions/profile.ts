@@ -19,6 +19,7 @@ async function saveProfile(formData: FormData, requireSecurityQuestion: boolean)
   const display_name = (formData.get('display_name') as string ?? '').trim() || username;
   const platform = (formData.get('platform') as string ?? '').trim();
   const game_id = (formData.get('game_id') as string ?? '').trim() || null;
+  const whatsapp_contact = (formData.get('whatsapp_contact') as string ?? '').trim() || null;
   const region_raw = (formData.get('region') as string ?? '').trim().toUpperCase();
   const region = region_raw || null;
   const security_question = (formData.get('security_question') as string ?? '').trim();
@@ -29,6 +30,9 @@ async function saveProfile(formData: FormData, requireSecurityQuestion: boolean)
   if (!/^[A-Za-z0-9_]+$/.test(username)) return { ok: false, error: 'Username: letters, numbers, underscore only' };
   if (platform && !VALID_PLATFORMS.includes(platform as Platform)) return { ok: false, error: 'Invalid platform' };
   if (region && !/^[A-Z]{2}$/.test(region)) return { ok: false, error: 'Country must be a 2-letter code' };
+  if (whatsapp_contact && (whatsapp_contact.length > 32 || !/^[0-9+\-() ]+$/.test(whatsapp_contact))) {
+    return { ok: false, error: 'WhatsApp must be digits, spaces, hyphens, parens, or +' };
+  }
 
   if (requireSecurityQuestion) {
     if (!security_question) return { ok: false, error: 'Security question is required' };
@@ -43,6 +47,7 @@ async function saveProfile(formData: FormData, requireSecurityQuestion: boolean)
     platform: (platform || null) as Platform | null,
     region,
     game_id,
+    whatsapp_contact,
   };
 
   // Only set the security question/answer if provided (so updateProfile can leave them alone)

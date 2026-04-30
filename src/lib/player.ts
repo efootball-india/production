@@ -40,7 +40,15 @@ export async function getCurrentPlayer(): Promise<Player | null> {
     .maybeSingle();
   return (data as Player) ?? null;
 }
-
+export async function getPlayerByUsername(username: string): Promise<Player | null> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('players')
+    .select('*')
+    .eq('username', username)
+    .maybeSingle();
+  return (data as Player) ?? null;
+}
 export async function requireCompleteProfile(): Promise<Player> {
   const player = await getCurrentPlayer();
   if (!player) {

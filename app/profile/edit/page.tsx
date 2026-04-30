@@ -410,10 +410,7 @@ function Styles() {
         background: hsl(var(--accent));
         border-color: hsl(var(--accent));
       }
-    `}</style>
-  );
-}
-.pe-save:disabled {
+      .pe-save:disabled {
         opacity: 0.7;
         cursor: not-allowed;
       }
@@ -437,3 +434,6 @@ function Styles() {
       @keyframes pe-spin {
         to { transform: rotate(360deg); }
       }
+    `}</style>
+  );
+}

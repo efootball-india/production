@@ -44,10 +44,7 @@ export default async function StatsTab({ params }: { params: { slug: string } })
   let biggestMargin: any = null;
   let biggestMarginValue = -1;
 
-  const winsByParticipant = new Map
-    string,
-    { count: number; name: string; player: string }
-  >();
+  const winsByParticipant = new Map<string, { count: number; name: string; player: string }>();
 
   for (const m of completedMatches ?? []) {
     const total = (m.home_score ?? 0) + (m.away_score ?? 0);

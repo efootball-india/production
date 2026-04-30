@@ -288,3 +288,85 @@ export async function overrideMatchScore(formData: FormData) {
   revalidatePath(`/admin/tournaments/${slug}/queue`);
   redirect(`/admin/tournaments/${slug}/queue?overridden=${matchId}`);
 }
+
+export async function recordWalkover(formData: FormData) {
+  const { supabase } = await requireMod();
+  const matchId = formData.get('match_id') as string;
+  const slug = formData.get('slug') as string;
+  const winnerSide = formData.get('winner_side') as string; // 'home' | 'away'
+  const isKnockout = (formData.get('is_knockout') as string ?? '') === '1';
+
+  if (!matchId || !slug || !['home', 'away'].includes(winnerSide)) {
+    redirect(`/tournaments/${slug}?error=${encodeURIComponent('Invalid walkover data')}`);
+  }
+
+  const { data: match } = await supabase
+    .from('matches')
+    .select('tournament_id, home_participant_id, away_participant_id, round')
+    .eq('id', matchId)
+    .maybeSingle();
+  if (!match) redirect(`/tournaments/${slug}?error=${encodeURIComponent('Match not found')}`);
+
+  const winnerId = winnerSide === 'home'
+    ? match.home_participant_id
+    : match.away_participant_id;
+
+  const homeScore = winnerSide === 'home' ? 3 : 0;
+  const awayScore = winnerSide === 'home' ? 0 : 3;
+
+  await supabase
+    .from('matches')
+    .update({
+      home_score: homeScore,
+      away_score: awayScore,
+      home_pens: null,
+      away_pens: null,
+      decided_by: 'walkover',
+      status: 'walkover',
+      winner_participant_id: winnerId,
+      confirmed_at: new Date().toISOString(),
+    })
+    .eq('id', matchId);
+
+  // For KO matches, advance the winner to the next round
+  if (isKnockout && match.round) {
+    const { data: feeder } = await supabase
+      .from('match_feeders')
+      .select('target_match_id, target_slot')
+      .eq('source_match_id', matchId)
+      .eq('source_role', 'winner')
+      .maybeSingle();
+
+    if (feeder) {
+      const updates: Record<string, unknown> = {};
+      if (feeder.target_slot === 'home') updates.home_participant_id = winnerId;
+      else updates.away_participant_id = winnerId;
+      await supabase.from('matches').update(updates).eq('id', feeder.target_match_id);
+
+      const { data: target } = await supabase
+        .from('matches')
+        .select('home_participant_id, away_participant_id')
+        .eq('id', feeder.target_match_id)
+        .maybeSingle();
+      if (target?.home_participant_id && target?.away_participant_id) {
+        await supabase.from('matches').update({ status: 'awaiting_result' }).eq('id', feeder.target_match_id);
+      }
+    }
+
+    // If this was the final, declare champion
+    if (match.round === 5) {
+      await supabase.from('tournaments').update({
+        champion_participant_id: winnerId,
+        champion_declared_at: new Date().toISOString(),
+        status: 'completed',
+      }).eq('id', match.tournament_id);
+    }
+  } else {
+    // Group match — try to auto-generate bracket if group stage now done
+    await tryAutoGenerateBracket(match.tournament_id);
+  }
+
+  revalidatePath(`/tournaments/${slug}`);
+  revalidatePath(`/tournaments/${slug}/bracket`);
+  redirect(`/tournaments/${slug}?walkover=${matchId}`);
+}

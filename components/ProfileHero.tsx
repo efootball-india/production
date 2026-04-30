@@ -1,4 +1,4 @@
-// PASS-15-PROFILE-HERO
+// PASS-16-PROFILE-HERO (responsive · desktop cap)
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -13,7 +13,14 @@ type Props = {
   losses: number;
 };
 
-export default function ProfileHero({ displayName, username, avatarUrl, wins, draws, losses }: Props) {
+export default function ProfileHero({
+  displayName,
+  username,
+  avatarUrl,
+  wins,
+  draws,
+  losses,
+}: Props) {
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -34,120 +41,92 @@ export default function ProfileHero({ displayName, username, avatarUrl, wins, dr
     : 'linear-gradient(180deg, #2a3a35 0%, #1c2a26 35%, #11201b 65%, #08130f 100%)';
 
   return (
-    <section style={{ position: 'relative', width: '100%' }}>
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          aspectRatio: '1 / 1',
-          overflow: 'hidden',
-          borderBottomLeftRadius: '50% 30%',
-          borderBottomRightRadius: '50% 30%',
-          transform: `translateY(${-parallax}px)`,
-          willChange: 'transform',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: photoBg,
-            opacity: imageOpacity,
-            willChange: 'opacity',
-          }}
-        >
-          {!avatarUrl && (
-            <svg
-              viewBox="0 0 200 200"
-              preserveAspectRatio="xMidYMid slice"
-              style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                opacity: 0.5,
-              }}
-              aria-hidden="true"
-            >
-              <ellipse
-                cx="100"
-                cy="76"
-                rx="24"
-                ry="28"
-                fill="none"
-                stroke="rgba(0,255,136,0.35)"
-                strokeWidth="1.5"
-              />
-              <path
-                d="M 44 200 Q 44 128 100 128 Q 156 128 156 200 Z"
-                fill="none"
-                stroke="rgba(0,255,136,0.35)"
-                strokeWidth="1.5"
-              />
-            </svg>
-          )}
-        </div>
+    <>
+      <style>{`
+        .ph-section {
+          position: relative;
+          width: 100%;
+        }
+        .ph-frame {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 1 / 1;
+          overflow: hidden;
+          border-bottom-left-radius: 50% 30%;
+          border-bottom-right-radius: 50% 30%;
+          will-change: transform;
+        }
+        .ph-photo {
+          position: absolute;
+          inset: 0;
+          will-change: opacity;
+        }
+        .ph-text {
+          text-align: center;
+          padding: 20px 20px 32px;
+          will-change: opacity;
+        }
+        .ph-name {
+          color: hsl(var(--ink));
+          font-weight: 900;
+          letter-spacing: -0.01em;
+          line-height: 1;
+          margin: 0;
+          word-break: break-word;
+          font-size: clamp(28px, 7vw, 44px);
+        }
+        .ph-record {
+          margin-top: 8px;
+          color: hsl(var(--accent));
+          font-weight: 900;
+          letter-spacing: 0.01em;
+          font-variant-numeric: tabular-nums;
+          font-size: clamp(20px, 5.2vw, 32px);
+        }
 
-        {!avatarUrl && (
-          <Link
-            href="/profile/edit"
+        /* Desktop: cap the hero at ~480px and center it */
+        @media (min-width: 768px) {
+          .ph-section {
+            max-width: 480px;
+            margin: 0 auto;
+            padding-top: 24px;
+          }
+          .ph-frame {
+            aspect-ratio: 1 / 1;
+            border-bottom-left-radius: 50% 30%;
+            border-bottom-right-radius: 50% 30%;
+          }
+          .ph-name { font-size: 44px; }
+          .ph-record { font-size: 32px; }
+        }
+      `}</style>
+
+      <section className="ph-section">
+        <div
+          className="ph-frame"
+          style={{ transform: `translateY(${-parallax}px)` }}
+        >
+          <div
+            className="ph-photo"
             style={{
-              position: 'absolute',
-              top: 16,
-              right: 16,
-              fontSize: 11,
-              color: 'var(--accent)',
-              background: 'rgba(0, 255, 136, 0.12)',
-              border: '1px solid rgba(0, 255, 136, 0.4)',
-              padding: '6px 12px',
-              borderRadius: 4,
-              letterSpacing: '0.12em',
-              textDecoration: 'none',
-              fontWeight: 700,
-              backdropFilter: 'blur(6px)',
-              WebkitBackdropFilter: 'blur(6px)',
-              opacity: textOpacity,
+              background: photoBg,
+              opacity: imageOpacity,
             }}
           >
-            + ADD PHOTO
-          </Link>
-        )}
-      </div>
-
-      <div
-        style={{
-          textAlign: 'center',
-          padding: '20px 20px 32px',
-          opacity: textOpacity,
-          willChange: 'opacity',
-        }}
-      >
-        <h1
-          style={{
-            fontSize: 'clamp(28px, 7vw, 44px)',
-            color: 'var(--ink)',
-            fontWeight: 900,
-            letterSpacing: '-0.01em',
-            lineHeight: 1,
-            margin: 0,
-            wordBreak: 'break-word',
-          }}
-        >
-          {nameToShow}
-        </h1>
-        <div
-          style={{
-            marginTop: 8,
-            fontSize: 'clamp(20px, 5.2vw, 32px)',
-            color: 'var(--accent)',
-            fontWeight: 900,
-            letterSpacing: '0.01em',
-            fontVariantNumeric: 'tabular-nums',
-          }}
-        >
-          {wins}W &nbsp;&nbsp;{draws}D &nbsp;&nbsp;{losses}L
-        </div>
-      </div>
-    </section>
-  );
-}
+            {!avatarUrl && (
+              <svg
+                viewBox="0 0 200 200"
+                preserveAspectRatio="xMidYMid slice"
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  opacity: 0.5,
+                }}
+                aria-hidden="true"
+              >
+                <ellipse
+                  cx="100"
+                  cy="76"
+                  rx="2

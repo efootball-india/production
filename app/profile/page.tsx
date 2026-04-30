@@ -113,6 +113,10 @@ export default async function ProfilePage({
 
         <div className="pf-section">
           <div className="pf-section-head">CONNECTIONS</div>
+          <div className="pf-row">
+              <span className="lbl">WhatsApp</span>
+              <span className="val mono">{(player as any).whatsapp_contact ?? '—'}</span>
+            </div>
           <div className="pf-info">
             <div className="pf-row">
               <span className="lbl">Friend code</span>

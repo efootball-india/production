@@ -49,7 +49,7 @@ export default async function HomePage() {
           losses={stats.losses}
         />
       ) : (
-        <section className="max-w-[1400px] mx-auto px-6 md:px-10 pt-16 md:pt-24 pb-16">
+        <section className="max-w-[920px] mx-auto px-6 md:px-10 pt-16 md:pt-24 pb-16">
           <h1 className="display-h1 max-w-5xl">
             eFootball tournaments,{' '}
             <span className="display-italic-accent">played for real.</span>
@@ -77,7 +77,7 @@ export default async function HomePage() {
 
       {/* Featured cup */}
       {featured && (
-        <section className="max-w-[1400px] mx-auto px-6 md:px-10 pb-16 md:pb-24">
+        <section className="max-w-[920px] mx-auto px-6 md:px-10 pb-16 md:pb-24">
           <h2 className="section-head">Featured cup.</h2>
           <FeaturedCupCard
             tournament={featured}
@@ -89,7 +89,7 @@ export default async function HomePage() {
 
       {/* Active /NN */}
       {active.length > 0 && (
-        <section className="max-w-[1400px] mx-auto px-6 md:px-10 pb-24">
+        <section className="max-w-[920px] mx-auto px-6 md:px-10 pb-24">
           <h2 className="section-head">
             Active
             <span className="font-mono text-ink/40 ml-2 text-base align-middle">
@@ -114,7 +114,7 @@ export default async function HomePage() {
 
       {/* Empty state */}
       {!featured && active.length === 0 && (
-        <section className="max-w-[1400px] mx-auto px-6 md:px-10 pb-24">
+        <section className="max-w-[920px] mx-auto px-6 md:px-10 pb-24">
           <div className="card-brutalist-sm p-10 text-center">
             <div className="label mb-3">No tournaments yet</div>
             <div className="font-sans font-black text-2xl mb-2">Quiet on the pitch.</div>
@@ -135,7 +135,7 @@ export default async function HomePage() {
       )}
 
       <footer className="hairline-strong-t py-6 px-6 md:px-10 mt-10">
-        <div className="max-w-[1400px] mx-auto flex justify-between flex-wrap gap-4 label">
+        <div className="max-w-[920px] mx-auto flex justify-between flex-wrap gap-4 label">
           <div>eFTBL · Community 1v1 platform</div>
           <div className="flex gap-4">
             {player && (

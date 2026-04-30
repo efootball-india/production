@@ -122,7 +122,6 @@ export default async function PlayIndexPage() {
             )}
           </>
         )}
-        )}
 
         <Link href="/players" className="efp-discover">
           <div className="efp-discover-body">
@@ -134,7 +133,6 @@ export default async function PlayIndexPage() {
           </div>
           <span className="efp-discover-arrow">→</span>
         </Link>
-      </main>
       </main>
     </>
   );

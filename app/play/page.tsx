@@ -1,4 +1,5 @@
 // PASS-26-PAGE-PLAY-INDEX (editorial)
+import { getConsistencyRanking, seasonWindow } from '@/lib/consistency';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentPlayer } from '@/lib/player';
@@ -45,6 +46,8 @@ export default async function PlayIndexPage() {
   if (!player) redirect('/signin');
 
   const { upcoming, played } = await getMatchesForPlayer(player.id);
+  const ranking = await getConsistencyRanking();
+  const { label: seasonLabel } = seasonWindow();
   const total = upcoming.length + played.length;
 
   const action: PlayerMatch[] = [];
@@ -119,6 +122,19 @@ export default async function PlayIndexPage() {
             )}
           </>
         )}
+        )}
+
+        <Link href="/players" className="efp-discover">
+          <div className="efp-discover-body">
+            <div className="efp-discover-eye">DISCOVER</div>
+            <div className="efp-discover-ttl">See all players</div>
+            <div className="efp-discover-meta">
+              {ranking.length} ranked · season {seasonLabel}
+            </div>
+          </div>
+          <span className="efp-discover-arrow">→</span>
+        </Link>
+      </main>
       </main>
     </>
   );
@@ -588,9 +604,54 @@ function Styles() {
         padding: 10px 18px;
         text-decoration: none;
       }
-      .efp-empty-cta:hover {
+     .efp-empty-cta:hover {
         background: hsl(var(--accent));
         color: #fff;
+      }
+
+      .efp-discover {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 12px;
+        margin-top: 24px;
+        background: hsl(var(--surface));
+        border: 1px solid hsl(var(--ink));
+        padding: 14px 16px;
+        text-decoration: none;
+        color: inherit;
+        transition: background 0.15s ease;
+      }
+      .efp-discover:hover {
+        background: hsl(var(--accent) / 0.06);
+      }
+      .efp-discover-body {
+        display: flex; flex-direction: column; gap: 2px;
+        min-width: 0;
+      }
+      .efp-discover-eye {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 9px; font-weight: 700;
+        letter-spacing: 0.18em; text-transform: uppercase;
+        color: hsl(var(--accent));
+        margin-bottom: 4px;
+      }
+      .efp-discover-ttl {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 800; font-size: 16px;
+        letter-spacing: -0.015em;
+        color: hsl(var(--ink));
+      }
+      .efp-discover-meta {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 10px; font-weight: 500;
+        letter-spacing: 0.06em;
+        color: hsl(var(--ink) / 0.42);
+        text-transform: lowercase;
+      }
+      .efp-discover-arrow {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 900; font-size: 22px;
+        color: hsl(var(--accent));
+        flex-shrink: 0;
       }
     `}</style>
   );

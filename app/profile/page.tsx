@@ -34,6 +34,18 @@ export default async function ProfilePage({
     <>
       <Styles />
       <main className="pf-page">
+        {searchParams.saved && (
+          <div className="pf-banner pf-banner-ok">
+            <span className="dot" />
+            <span>Profile saved.</span>
+          </div>
+        )}
+        {searchParams.welcome && (
+          <div className="pf-banner pf-banner-ok">
+            <span className="dot" />
+            <span>Welcome to eFTBL.</span>
+          </div>
+        )}
         <div className="pf-hero">
           <div className="pf-top">
             <div
@@ -138,6 +150,30 @@ export default async function ProfilePage({
 function Styles() {
   return (
     <style>{`
+    .pf-banner {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        margin-bottom: 18px;
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.10em;
+        text-transform: uppercase;
+      }
+      .pf-banner .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+        flex-shrink: 0;
+      }
+      .pf-banner-ok {
+        background: hsl(var(--accent) / 0.08);
+        border: 1px solid hsl(var(--accent) / 0.30);
+        color: hsl(var(--accent));
+      }
       .pf-page {
         max-width: 560px;
         margin: 0 auto;

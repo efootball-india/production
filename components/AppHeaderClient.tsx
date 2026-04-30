@@ -214,7 +214,7 @@ export default function AppHeaderClient({
       >
         <div className="ah-inner">
           <Link href="/" className="ah-logo" aria-label="eFTBL home">
-            <Logo height={22} />
+            <Logo height={28} />
           </Link>
 
           {isLoggedIn && (

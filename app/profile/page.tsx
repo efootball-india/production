@@ -5,11 +5,16 @@ import { getCurrentPlayer, PLATFORM_LABELS } from '@/lib/player';
 import { getPlayerStats } from '@/lib/stats';
 import { signOut } from '../actions/auth';
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: { saved?: string; welcome?: string };
+}) {
   const player = await getCurrentPlayer();
   if (!player) redirect('/signin');
 
   const stats = await getPlayerStats(player.id);
+  // ...rest stays the same
 
   const displayName =
     player.display_name ?? player.username ?? '';

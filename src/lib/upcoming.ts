@@ -42,11 +42,10 @@ export type PlayerMatchesResult = {
 export async function getMatchesForPlayer(userId: string): Promise<PlayerMatchesResult> {
   const supabase = createClient();
 
-  const { data: participations } = await supabase
+ const { data: participations } = await supabase
     .from('tournament_participants')
     .select('id')
-    .eq('player_id', userId)
-    .eq('status', 'registered');
+    .eq('player_id', userId);
 
   if (!participations || participations.length === 0) {
     return { upcoming: [], played: [] };

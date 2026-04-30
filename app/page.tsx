@@ -29,7 +29,6 @@ export default async function HomePage() {
     }
   }
 
-  // Split: one featured (prefer open registration), rest go to active grid (excluding completed)
   const nonCompleted = tournaments.filter((t: any) => t.status !== 'completed');
   const featured =
     nonCompleted.find((t: any) => t.status === 'registration_open') ??
@@ -112,7 +111,6 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Empty state */}
       {!featured && active.length === 0 && (
         <section className="max-w-[920px] mx-auto px-6 md:px-10 pb-24">
           <div className="card-brutalist-sm p-10 text-center">
@@ -157,6 +155,7 @@ function FeaturedCupCard({ tournament, player, myParticipation }: any) {
   const t = tournament;
   const status = t.status as string;
   const isRegistered = !!myParticipation && myParticipation.status === 'registered';
+  const bannerUrl: string | null = t.banner_image_url ?? null;
 
   let primary: { label: string; href: string };
   if (status === 'registration_open') {
@@ -192,57 +191,73 @@ function FeaturedCupCard({ tournament, player, myParticipation }: any) {
   const formatLabel = FORMAT_LABELS[t.format as keyof typeof FORMAT_LABELS] ?? t.format;
 
   return (
-    <div className="card-brutalist mt-10 p-8 md:p-12">
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <span className={pillClass}>{pillLabel}</span>
-        <span className="label">Featured · {formatLabel}</span>
+    <div className="card-brutalist mt-10 overflow-hidden">
+      {/* Banner */}
+      <div className="relative w-full h-[180px] md:h-[280px] bg-card-2 border-b border-ink">
+        {bannerUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={bannerUrl}
+            alt={t.name}
+            className="w-full h-full object-cover block"
+          />
+        ) : (
+          <BannerFallback />
+        )}
       </div>
 
-      <h3 className="font-sans font-black text-[40px] md:text-[56px] leading-[0.95] tracking-tight">
-        {t.name}
-      </h3>
+      <div className="p-8 md:p-12">
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <span className={pillClass}>{pillLabel}</span>
+          <span className="label">Featured · {formatLabel}</span>
+        </div>
 
-      {t.description && (
-        <p className="mt-6 max-w-2xl text-lg text-ink/70 leading-relaxed">{t.description}</p>
-      )}
+        <h3 className="font-sans font-black text-[40px] md:text-[56px] leading-[0.95] tracking-tight">
+          {t.name}
+        </h3>
 
-      <div className="mt-10 grid grid-cols-2 hairline-strong-t hairline-strong-b">
-        <div className="py-5 pr-5 border-r border-b border-ink/15">
-          <div className="label">Players</div>
-          <div className="mt-1 font-sans font-black text-2xl md:text-3xl tabular-nums">
-            {t.participant_count ?? 0}
-            {t.max_participants && <span className="text-ink/40">/{t.max_participants}</span>}
+        {t.description && (
+          <p className="mt-6 max-w-2xl text-lg text-ink/70 leading-relaxed">{t.description}</p>
+        )}
+
+        <div className="mt-10 grid grid-cols-2 hairline-strong-t hairline-strong-b">
+          <div className="py-5 pr-5 border-r border-b border-ink/15">
+            <div className="label">Players</div>
+            <div className="mt-1 font-sans font-black text-2xl md:text-3xl tabular-nums">
+              {t.participant_count ?? 0}
+              {t.max_participants && <span className="text-ink/40">/{t.max_participants}</span>}
+            </div>
+          </div>
+          <div className="py-5 pl-5 border-b border-ink/15">
+            <div className="label">Status</div>
+            <div className="mt-1 font-sans font-black text-2xl md:text-3xl">
+              {(STATUS_LABELS[status as keyof typeof STATUS_LABELS] ?? status).toString().slice(0, 12)}
+            </div>
+          </div>
+          <div className="py-5 pr-5 border-r border-ink/15">
+            <div className="label">Starts</div>
+            <div className="mt-1 font-sans font-black text-2xl md:text-3xl">{startsLabel}</div>
+          </div>
+          <div className="py-5 pl-5">
+            <div className="label">Format</div>
+            <div className="mt-1 font-sans font-black text-2xl md:text-3xl">{formatLabel}</div>
           </div>
         </div>
-        <div className="py-5 pl-5 border-b border-ink/15">
-          <div className="label">Status</div>
-          <div className="mt-1 font-sans font-black text-2xl md:text-3xl">
-            {(STATUS_LABELS[status as keyof typeof STATUS_LABELS] ?? status).toString().slice(0, 12)}
-          </div>
-        </div>
-        <div className="py-5 pr-5 border-r border-ink/15">
-          <div className="label">Starts</div>
-          <div className="mt-1 font-sans font-black text-2xl md:text-3xl">{startsLabel}</div>
-        </div>
-        <div className="py-5 pl-5">
-          <div className="label">Format</div>
-          <div className="mt-1 font-sans font-black text-2xl md:text-3xl">{formatLabel}</div>
-        </div>
-      </div>
 
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Link
-          href={primary.href}
-          className="bg-accent text-bg font-sans font-bold uppercase tracking-wider text-sm px-6 py-3 border border-accent hover:bg-ink hover:border-ink transition-colors"
-        >
-          {primary.label}
-        </Link>
-        <Link
-          href={`/tournaments/${t.slug}`}
-          className="bg-transparent text-ink font-sans font-bold uppercase tracking-wider text-sm px-6 py-3 border border-ink hover:bg-ink hover:text-bg transition-colors"
-        >
-          Format details
-        </Link>
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link
+            href={primary.href}
+            className="bg-accent text-bg font-sans font-bold uppercase tracking-wider text-sm px-6 py-3 border border-accent hover:bg-ink hover:border-ink transition-colors"
+          >
+            {primary.label}
+          </Link>
+          <Link
+            href={`/tournaments/${t.slug}`}
+            className="bg-transparent text-ink font-sans font-bold uppercase tracking-wider text-sm px-6 py-3 border border-ink hover:bg-ink hover:text-bg transition-colors"
+          >
+            Format details
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -253,6 +268,7 @@ function TournamentCard({ tournament, player, isAdmin, isMod, myParticipation }:
   const status = t.status as string;
   const isRegistered = !!myParticipation && myParticipation.status === 'registered';
   const hasCountry = !!myParticipation?.countryId;
+  const bannerUrl: string | null = t.banner_image_url ?? null;
 
   let primary: { label: string; href: string };
   const secondary: { label: string; href: string }[] = [];
@@ -321,13 +337,21 @@ function TournamentCard({ tournament, player, isAdmin, isMod, myParticipation }:
 
   return (
     <article className="card-brutalist-sm overflow-hidden flex flex-col">
-      <div className={`aspect-[16/9] bg-gradient-to-br ${gradientClass} relative`}>
-        <div className="absolute top-4 left-4">
+      <div className={`aspect-[16/9] relative ${bannerUrl ? '' : `bg-gradient-to-br ${gradientClass}`}`}>
+        {bannerUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={bannerUrl}
+            alt={t.name}
+            className="absolute inset-0 w-full h-full object-cover block"
+          />
+        )}
+        <div className="absolute top-4 left-4 z-10">
           <span className={pillClass}>{pillLabel}</span>
         </div>
         <div
-          className={`absolute bottom-4 left-4 label-strong ${
-            isLightOverlay ? 'text-bg/90' : 'text-ink/80'
+          className={`absolute bottom-4 left-4 label-strong z-10 ${
+            bannerUrl ? 'text-bg drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]' : isLightOverlay ? 'text-bg/90' : 'text-ink/80'
           }`}
         >
           {formatLabel}
@@ -383,5 +407,28 @@ function TournamentCard({ tournament, player, isAdmin, isMod, myParticipation }:
         )}
       </div>
     </article>
+  );
+}
+
+function BannerFallback() {
+  return (
+    <svg
+      viewBox="0 0 1400 440"
+      preserveAspectRatio="xMidYMid slice"
+      className="w-full h-full block"
+      style={{ color: 'hsl(var(--accent))' }}
+      aria-hidden="true"
+    >
+      <rect width="1400" height="440" fill="currentColor" />
+      <g stroke="rgba(255,255,255,0.18)" strokeWidth="2" fill="none">
+        <line x1="700" y1="0" x2="700" y2="440" />
+        <circle cx="700" cy="220" r="92" />
+        <rect x="0" y="116" width="136" height="208" />
+        <rect x="0" y="170" width="52" height="100" />
+        <rect x="1264" y="116" width="136" height="208" />
+        <rect x="1348" y="170" width="52" height="100" />
+      </g>
+      <circle cx="700" cy="220" r="4" fill="rgba(255,255,255,0.3)" />
+    </svg>
   );
 }

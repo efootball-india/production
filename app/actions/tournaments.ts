@@ -270,3 +270,276 @@ export async function cancelTournament(formData: FormData) {
   revalidatePath(`/admin/tournaments/${slug}/manage`);
   redirect(`/admin/tournaments/${slug}/manage?cancelled=1`);
 }
+
+export async function addPlayersToTournament(formData: FormData) {
+  const { supabase, user } = await requireAdmin();
+  const slug = formData.get('slug') as string;
+  if (!slug) redirect('/');
+
+  const playerIds = formData.getAll('player_ids') as string[];
+  if (playerIds.length === 0) {
+    redirect(`/admin/tournaments/${slug}/manage?tab=players&error=${encodeURIComponent('No players selected')}`);
+  }
+
+  const { data: tournament } = await supabase
+    .from('tournaments')
+    .select('id, max_participants, status')
+    .eq('slug', slug)
+    .maybeSingle();
+  if (!tournament) redirect('/admin/tournaments');
+
+  // Capacity check
+  if (tournament.max_participants) {
+    const { count } = await supabase
+      .from('tournament_participants')
+      .select('*', { count: 'exact', head: true })
+      .eq('tournament_id', tournament.id)
+      .eq('status', 'registered');
+    if ((count ?? 0) + playerIds.length > tournament.max_participants) {
+      redirect(`/admin/tournaments/${slug}/manage?tab=players&error=${encodeURIComponent(`Adding ${playerIds.length} would exceed capacity`)}`);
+    }
+  }
+
+  // Insert (skip duplicates silently — Postgres will reject them, we filter first)
+  const { data: existing } = await supabase
+    .from('tournament_participants')
+    .select('player_id')
+    .eq('tournament_id', tournament.id)
+    .in('player_id', playerIds);
+  const existingIds = new Set((existing ?? []).map((p) => p.player_id));
+  const newIds = playerIds.filter((id) => !existingIds.has(id));
+
+  if (newIds.length === 0) {
+    redirect(`/admin/tournaments/${slug}/manage?tab=players&error=${encodeURIComponent('All selected players are already registered')}`);
+  }
+
+  const rows = newIds.map((pid) => ({
+    tournament_id: tournament.id,
+    player_id: pid,
+    status: 'registered',
+  }));
+
+  const { error } = await supabase.from('tournament_participants').insert(rows);
+  if (error) {
+    redirect(`/admin/tournaments/${slug}/manage?tab=players&error=${encodeURIComponent(error.message)}`);
+  }
+
+  await logAdminAction({
+    tournamentId: tournament.id,
+    actorPlayerId: user.id,
+    actionType: 'add_players',
+    targetType: 'tournament',
+    targetId: tournament.id,
+    metadata: { count: newIds.length, player_ids: newIds },
+  });
+
+  revalidatePath(`/tournaments/${slug}`);
+  revalidatePath(`/admin/tournaments/${slug}/manage`);
+  redirect(`/admin/tournaments/${slug}/manage?tab=players&added=${newIds.length}`);
+}
+
+export async function removePlayerFromTournament(formData: FormData) {
+  const { supabase, user } = await requireAdmin();
+  const slug = formData.get('slug') as string;
+  const participantId = formData.get('participant_id') as string;
+  if (!slug || !participantId) redirect('/');
+
+  const { data: tournament } = await supabase
+    .from('tournaments').select('id').eq('slug', slug).maybeSingle();
+  if (!tournament) redirect('/admin/tournaments');
+
+  // Auto-walkover all pending matches
+  await cascadeWalkoverForParticipant(supabase, tournament.id, participantId);
+
+  // Delete the participant row entirely (admin "remove" not "withdraw")
+  await supabase
+    .from('tournament_participants')
+    .delete()
+    .eq('id', participantId);
+
+  await logAdminAction({
+    tournamentId: tournament.id,
+    actorPlayerId: user.id,
+    actionType: 'remove_player',
+    targetType: 'participant',
+    targetId: participantId,
+  });
+
+  revalidatePath(`/tournaments/${slug}`);
+  revalidatePath(`/admin/tournaments/${slug}/manage`);
+  redirect(`/admin/tournaments/${slug}/manage?tab=players&removed=1`);
+}
+
+export async function withdrawPlayer(formData: FormData) {
+  const { supabase, user } = await requireAdmin();
+  const slug = formData.get('slug') as string;
+  const participantId = formData.get('participant_id') as string;
+  if (!slug || !participantId) redirect('/');
+
+  const { data: tournament } = await supabase
+    .from('tournaments').select('id').eq('slug', slug).maybeSingle();
+  if (!tournament) redirect('/admin/tournaments');
+
+  // Auto-walkover pending matches
+  await cascadeWalkoverForParticipant(supabase, tournament.id, participantId);
+
+  // Mark participant as withdrawn (preserves history)
+  await supabase
+    .from('tournament_participants')
+    .update({ status: 'withdrawn' })
+    .eq('id', participantId);
+
+  await logAdminAction({
+    tournamentId: tournament.id,
+    actorPlayerId: user.id,
+    actionType: 'withdraw_player',
+    targetType: 'participant',
+    targetId: participantId,
+  });
+
+  revalidatePath(`/tournaments/${slug}`);
+  revalidatePath(`/admin/tournaments/${slug}/manage`);
+  redirect(`/admin/tournaments/${slug}/manage?tab=players&withdrew=1`);
+}
+
+export async function editParticipantCountry(formData: FormData) {
+  const { supabase, user } = await requireAdmin();
+  const slug = formData.get('slug') as string;
+  const participantId = formData.get('participant_id') as string;
+  const countryId = (formData.get('country_id') as string ?? '').trim() || null;
+  if (!slug || !participantId) redirect('/');
+
+  const { data: tournament } = await supabase
+    .from('tournaments').select('id').eq('slug', slug).maybeSingle();
+  if (!tournament) redirect('/admin/tournaments');
+
+  // Block if any group match has been played for this participant
+  const { count: playedCount } = await supabase
+    .from('matches')
+    .select('*', { count: 'exact', head: true })
+    .eq('tournament_id', tournament.id)
+    .not('matchday', 'is', null)
+    .or(`home_participant_id.eq.${participantId},away_participant_id.eq.${participantId}`)
+    .in('status', ['completed', 'walkover']);
+
+  if ((playedCount ?? 0) > 0) {
+    redirect(`/admin/tournaments/${slug}/manage?tab=players&error=${encodeURIComponent('Cannot change country: matches already played')}`);
+  }
+
+  await supabase
+    .from('tournament_participants')
+    .update({ country_id: countryId })
+    .eq('id', participantId);
+
+  await logAdminAction({
+    tournamentId: tournament.id,
+    actorPlayerId: user.id,
+    actionType: 'edit_country',
+    targetType: 'participant',
+    targetId: participantId,
+    metadata: { country_id: countryId },
+  });
+
+  revalidatePath(`/tournaments/${slug}`);
+  revalidatePath(`/admin/tournaments/${slug}/manage`);
+  redirect(`/admin/tournaments/${slug}/manage?tab=players&country_changed=1`);
+}
+
+export async function changePlayerRole(formData: FormData) {
+  const { supabase, user } = await requireAdmin();
+  const slug = formData.get('slug') as string;
+  const playerId = formData.get('player_id') as string;
+  const newRole = formData.get('role') as string;
+
+  if (!playerId || !['player', 'moderator', 'admin'].includes(newRole)) {
+    redirect(`/admin/tournaments/${slug}/manage?tab=players&error=${encodeURIComponent('Invalid role')}`);
+  }
+
+  // Don't allow demoting yourself
+  if (playerId === user.id) {
+    redirect(`/admin/tournaments/${slug}/manage?tab=players&error=${encodeURIComponent('Cannot change your own role')}`);
+  }
+
+  await supabase
+    .from('players')
+    .update({ role: newRole })
+    .eq('id', playerId);
+
+  await logAdminAction({
+    tournamentId: null,
+    actorPlayerId: user.id,
+    actionType: 'change_role',
+    targetType: 'player',
+    targetId: playerId,
+    metadata: { new_role: newRole },
+  });
+
+  if (slug) {
+    revalidatePath(`/admin/tournaments/${slug}/manage`);
+    redirect(`/admin/tournaments/${slug}/manage?tab=players&role_changed=1`);
+  } else {
+    redirect('/');
+  }
+}
+
+/**
+ * Helper: when a player is removed/withdrawn mid-tournament,
+ * auto-walkover all their pending matches with the opponent winning 3-0.
+ */
+async function cascadeWalkoverForParticipant(
+  supabase: ReturnType<typeof createClient>,
+  tournamentId: string,
+  participantId: string
+): Promise<void> {
+  const { data: pendingMatches } = await supabase
+    .from('matches')
+    .select('id, home_participant_id, away_participant_id, round, status')
+    .eq('tournament_id', tournamentId)
+    .or(`home_participant_id.eq.${participantId},away_participant_id.eq.${participantId}`)
+    .in('status', ['awaiting_result', 'awaiting_confirmation', 'scheduled', 'pending']);
+
+  for (const m of pendingMatches ?? []) {
+    const isHome = m.home_participant_id === participantId;
+    const opponentId = isHome ? m.away_participant_id : m.home_participant_id;
+    if (!opponentId) continue; // Opponent not assigned yet — leave the match
+
+    const homeScore = isHome ? 0 : 3;
+    const awayScore = isHome ? 3 : 0;
+
+    await supabase
+      .from('matches')
+      .update({
+        home_score: homeScore,
+        away_score: awayScore,
+        decided_by: 'walkover',
+        status: 'walkover',
+        winner_participant_id: opponentId,
+        confirmed_at: new Date().toISOString(),
+      })
+      .eq('id', m.id);
+
+    // For KO matches, advance the opponent forward
+    if (m.round) {
+      const { data: feeder } = await supabase
+        .from('match_feeders')
+        .select('target_match_id, target_slot')
+        .eq('source_match_id', m.id)
+        .eq('source_role', 'winner')
+        .maybeSingle();
+      if (feeder) {
+        const updates: Record<string, unknown> = {};
+        if (feeder.target_slot === 'home') updates.home_participant_id = opponentId;
+        else updates.away_participant_id = opponentId;
+        await supabase.from('matches').update(updates).eq('id', feeder.target_match_id);
+        const { data: target } = await supabase
+          .from('matches')
+          .select('home_participant_id, away_participant_id')
+          .eq('id', feeder.target_match_id)
+          .maybeSingle();
+        if (target?.home_participant_id && target?.away_participant_id) {
+          await supabase.from('matches').update({ status: 'awaiting_result' }).eq('id', feeder.target_match_id);
+        }
+      }
+    }
+  }
+}

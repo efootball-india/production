@@ -8,33 +8,7 @@ import { updateTournament, cancelTournament } from '../../../../actions/tourname
 import { resetKnockoutBracket } from '../../../../actions/knockout';
 import AddPlayersSheet from '../../../../../components/AddPlayersSheet';
 import PlayerRowActions from '../../../../../components/PlayerRowActions';
-// Players tab data
-  let participants: any[] = [];
-  let allPlayers: any[] = [];
-  if (tab === 'players') {
-    const [pResult, allResult] = await Promise.all([
-      supabase
-        .from('tournament_participants')
-        .select(`
-          id, status, player_id, country_id,
-          player:players(username, display_name, avatar_url, role, platform),
-          country:countries(name, group_label)
-        `)
-        .eq('tournament_id', tournament.id)
-        .order('id'),
-      supabase
-        .from('players')
-        .select('id, username, display_name, avatar_url')
-        .order('username'),
-    ]);
-    participants = pResult.data ?? [];
-    allPlayers = (allResult.data ?? []).map((p: any) => ({
-      id: p.id,
-      username: p.username,
-      displayName: p.display_name,
-      avatarUrl: p.avatar_url,
-    }));
-  }
+
 
 export default async function ManageTournamentPage({
   params,
@@ -79,7 +53,33 @@ export default async function ManageTournamentPage({
     .eq('status', 'registered');
 
   const tab = searchParams.tab === 'players' ? 'players' : searchParams.tab === 'activity' ? 'activity' : 'settings';
-
+// Players tab data
+  let participants: any[] = [];
+  let allPlayers: any[] = [];
+  if (tab === 'players') {
+    const [pResult, allResult] = await Promise.all([
+      supabase
+        .from('tournament_participants')
+        .select(`
+          id, status, player_id, country_id,
+          player:players(username, display_name, avatar_url, role, platform),
+          country:countries(name, group_label)
+        `)
+        .eq('tournament_id', tournament.id)
+        .order('id'),
+      supabase
+        .from('players')
+        .select('id, username, display_name, avatar_url')
+        .order('username'),
+    ]);
+    participants = pResult.data ?? [];
+    allPlayers = (allResult.data ?? []).map((p: any) => ({
+      id: p.id,
+      username: p.username,
+      displayName: p.display_name,
+      avatarUrl: p.avatar_url,
+    }));
+  }
   return (
     <>
       <Styles />

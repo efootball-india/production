@@ -241,6 +241,12 @@ export default async function TournamentLayout({
                 All matches
               </Link>
             )}
+            <Link
+              href={`/admin/tournaments/${tournament.slug}/manage`}
+              className="font-mono text-[10px] font-bold tracking-[0.14em] uppercase border border-ink-strong text-ink hover:bg-status-ok hover:border-status-ok hover:text-white transition-colors px-3 py-2 leading-none"
+            >
+              Manage
+            </Link>
           </div>
         </div>
       )}

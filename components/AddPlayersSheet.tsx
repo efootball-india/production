@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { addPlayersToTournament } from '../app/actions/tournaments';
+import SubmitButton from './SubmitButton';
 
 type PlayerOption = {
   id: string;
@@ -330,18 +331,36 @@ export default function AddPlayersSheet({ slug, allPlayers, alreadyRegisteredIds
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                form="aps-form"
-                className="aps-add"
-                disabled={selected.size === 0}
-              >
-                Add {selected.size > 0 ? selected.size : ''} player{selected.size === 1 ? '' : 's'} →
-              </button>
+              <AddPlayersSubmit selectedCount={selected.size} />
             </div>
           </div>
         </>
       )}
     </>
+  );
+}
+
+function AddPlayersSubmit({ selectedCount }: { selectedCount: number }) {
+  // SubmitButton must be inside <form> for useFormStatus to work, but our
+  // button is in the foot OUTSIDE the form (uses form="aps-form"). To make
+  // useFormStatus see the form, we wrap in a tiny one-button form that
+  // submits the parent form via JS. Simpler: just use a local form here
+  // with form-attribute on the button.
+  return (
+    <form
+      action={(fd) => {
+        // Forward submit to the actual form
+        const realForm = document.getElementById('aps-form') as HTMLFormElement | null;
+        if (realForm) realForm.requestSubmit();
+      }}
+    >
+      <SubmitButton
+        className="aps-add"
+        disabled={selectedCount === 0}
+        loadingChildren="Adding…"
+      >
+        Add {selectedCount > 0 ? selectedCount : ''} player{selectedCount === 1 ? '' : 's'} →
+      </SubmitButton>
+    </form>
   );
 }

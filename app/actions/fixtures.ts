@@ -256,8 +256,8 @@ export async function submitScore(formData: FormData) {
   redirect(`/play/${slug}?submitted=${matchId}`);
 }
 
-export async function overrideMatchScore(formData: FormData) {
-const { supabase, user } = await requireMod();
+export async function recordWalkover(formData: FormData) {
+  const { supabase, user } = await requireMod();   // ← fixed
   const matchId = formData.get('match_id') as string;
   const slug = formData.get('slug') as string;
   const homeScoreRaw = (formData.get('home_score') as string ?? '').trim();

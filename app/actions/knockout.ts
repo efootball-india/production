@@ -121,6 +121,15 @@ export async function submitKnockoutScore(formData: FormData) {
     confirmed_at: new Date().toISOString(),
   }).eq('id', matchId);
 
+  await logAdminAction({
+    tournamentId: match.tournament_id,
+    actorPlayerId: user.id,
+    actionType: 'submit_ko_score',
+    targetType: 'match',
+    targetId: matchId,
+    metadata: { home_score: homeScore, away_score: awayScore, decided_by: decidedBy },
+  });
+
   await advanceWinner(matchId, winnerParticipantId!);
 
   if (match.round === 5) {

@@ -1,6 +1,7 @@
 // PASS-2-ACTIONS-FIXTURES
 'use server';
 
+import { logAdminAction } from '@/lib/admin-log';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -176,6 +177,16 @@ export async function submitScore(formData: FormData) {
       })
       .eq('id', matchId);
 
+    await logAdminAction({
+      tournamentId: match.tournament_id,
+      actorPlayerId: user.id,
+      actionType: 'override_score',
+      targetType: 'match',
+      targetId: matchId,
+      metadata: { home_score: homeScore, away_score: awayScore, fast_path: true },
+    });
+
+    await tryAutoGenerateBracket(match.tournament_id);
     await tryAutoGenerateBracket(match.tournament_id);
 
     revalidatePath(`/play/${slug}`);
@@ -283,6 +294,17 @@ export async function overrideMatchScore(formData: FormData) {
     })
     .eq('id', matchId);
 
+  await logAdminAction({
+    tournamentId: match.tournament_id,
+    actorPlayerId: user.id,
+    actionType: 'override_score',
+    targetType: 'match',
+    targetId: matchId,
+    metadata: { home_score: homeScore, away_score: awayScore },
+  });
+
+  await tryAutoGenerateBracket(match.tournament_id);
+
   await tryAutoGenerateBracket(match.tournament_id);
 
   revalidatePath(`/admin/tournaments/${slug}/queue`);
@@ -365,7 +387,20 @@ export async function recordWalkover(formData: FormData) {
     // Group match — try to auto-generate bracket if group stage now done
     await tryAutoGenerateBracket(match.tournament_id);
   }
+} else {
+    await tryAutoGenerateBracket(match.tournament_id);
+  }
 
+  await logAdminAction({
+    tournamentId: match.tournament_id,
+    actorPlayerId: user.id,
+    actionType: 'record_walkover',
+    targetType: 'match',
+    targetId: matchId,
+    metadata: { winner_side: winnerSide, is_knockout: isKnockout },
+  });
+
+  revalidatePath(`/tournaments/${slug}`);
   revalidatePath(`/tournaments/${slug}`);
   revalidatePath(`/tournaments/${slug}/bracket`);
   redirect(`/tournaments/${slug}?walkover=${matchId}`);

@@ -67,7 +67,7 @@ export async function manualTiebreakAdvance(formData: FormData) {
 }
 
 export async function submitKnockoutScore(formData: FormData) {
-  const { supabase } = await requireMod();
+  const { supabase, user } = await requireMod();
   const matchId = formData.get('match_id') as string;
   const slug = formData.get('slug') as string;
   if (!matchId || !slug) redirect('/');
@@ -171,7 +171,7 @@ async function advanceWinner(fromMatchId: string, winnerParticipantId: string): 
 }
 
 export async function resetKnockoutBracket(formData: FormData) {
-  const { supabase } = await requireAdmin();
+  const { supabase, user } = await requireAdmin();
   const slug = formData.get('slug') as string;
   if (!slug) redirect('/');
 

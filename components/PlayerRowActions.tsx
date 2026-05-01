@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { removePlayerFromTournament, withdrawPlayer, changePlayerRole } from '../app/actions/tournaments';
 
 type Props = {
@@ -118,8 +119,12 @@ export default function PlayerRowActions({
           cursor: pointer;
           letter-spacing: -0.005em;
         }
-        .pra-menu-item:hover {
+        .pra-menu-item:hover:not(:disabled) {
           background: hsl(var(--ink) / 0.04);
+        }
+        .pra-menu-item:disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
         }
         .pra-menu-item.danger {
           color: hsl(var(--live));
@@ -171,17 +176,17 @@ export default function PlayerRowActions({
                 <form action={withdrawPlayer} className="pra-form">
                   <input type="hidden" name="slug" value={slug} />
                   <input type="hidden" name="participant_id" value={participantId} />
-                  <button type="submit" className="pra-menu-item" onClick={handleWithdraw}>
+                  <MenuItemSubmit className="pra-menu-item" onClick={handleWithdraw}>
                     Withdraw player
-                  </button>
+                  </MenuItemSubmit>
                 </form>
 
                 <form action={removePlayerFromTournament} className="pra-form">
                   <input type="hidden" name="slug" value={slug} />
                   <input type="hidden" name="participant_id" value={participantId} />
-                  <button type="submit" className="pra-menu-item danger" onClick={handleRemove}>
+                  <MenuItemSubmit className="pra-menu-item danger" onClick={handleRemove}>
                     Remove from tournament
-                  </button>
+                  </MenuItemSubmit>
                 </form>
               </div>
             )}
@@ -196,14 +201,13 @@ export default function PlayerRowActions({
                       <input type="hidden" name="slug" value={slug} />
                       <input type="hidden" name="player_id" value={playerId} />
                       <input type="hidden" name="role" value={role} />
-                      <button
-                        type="submit"
+                      <MenuItemSubmit
                         className={`pra-menu-item ${isCurrent ? 'current' : ''}`}
                         onClick={(e) => !isCurrent && handleRoleChange(e, role)}
                         disabled={isCurrent}
                       >
                         Set as {role}
-                      </button>
+                      </MenuItemSubmit>
                     </form>
                   );
                 })}
@@ -221,5 +225,30 @@ export default function PlayerRowActions({
         </>
       )}
     </>
+  );
+}
+
+function MenuItemSubmit({
+  className,
+  onClick,
+  disabled,
+  children,
+}: {
+  className: string;
+  onClick?: (e: React.MouseEvent) => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      className={className}
+      onClick={onClick}
+      disabled={pending || disabled}
+      aria-busy={pending}
+    >
+      {pending ? 'Working…' : children}
+    </button>
   );
 }

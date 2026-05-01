@@ -8,6 +8,7 @@ import { updateTournament, cancelTournament } from '../../../../actions/tourname
 import { resetKnockoutBracket } from '../../../../actions/knockout';
 import AddPlayersSheet from '../../../../../components/AddPlayersSheet';
 import PlayerRowActions from '../../../../../components/PlayerRowActions';
+import { getActivityForTournament, describeActivity, formatTimestamp } from '@/lib/activity';
 
 
 export default async function ManageTournamentPage({
@@ -79,6 +80,11 @@ export default async function ManageTournamentPage({
       displayName: p.display_name,
       avatarUrl: p.avatar_url,
     }));
+  }
+  // Activity tab data
+  let activityEntries: any[] = [];
+  if (tab === 'activity') {
+    activityEntries = await getActivityForTournament(tournament.id, 50);
   }
   return (
     <>
@@ -179,7 +185,7 @@ export default async function ManageTournamentPage({
             currentUserId={player.id}
           />
         )}
-        {tab === 'activity' && <ActivityTabStub />}
+        {tab === 'activity' && <ActivityTab entries={activityEntries} />}
       </main>
     </>
   );
@@ -524,12 +530,54 @@ function PlayerRow({
   );
 }
 
-function ActivityTabStub() {
+ffunction ActivityTab({ entries }: { entries: any[] }) {
+  if (entries.length === 0) {
+    return (
+      <div className="mg-empty">
+        <div className="mg-empty-title">No admin actions logged yet.</div>
+        <p className="mg-empty-body">
+          Actions like score overrides, walkovers, settings changes, and player edits will appear here as they happen.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="mg-stub">
-      <div className="mg-stub-title">Activity log — Phase 3</div>
-      <p className="mg-stub-body">Coming next. Will show a timeline of all admin actions on this tournament.</p>
-    </div>
+    <>
+      <div className="mg-activity-head">
+        <span>SHOWING {entries.length} MOST RECENT</span>
+      </div>
+      <div className="mg-activity-list">
+        {entries.map((entry: any) => {
+          const description = describeActivity(entry);
+          const timestamp = formatTimestamp(entry.createdAt);
+          const initial = (entry.actorDisplayName ?? entry.actorUsername).charAt(0).toUpperCase();
+          return (
+            <div key={entry.id} className="mg-activity-row">
+              <div
+                className="mg-activity-avatar"
+                style={entry.actorAvatarUrl ? {
+                  backgroundImage: `url(${entry.actorAvatarUrl})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                } : undefined}
+              >
+                {!entry.actorAvatarUrl && <span>{initial}</span>}
+              </div>
+              <div className="mg-activity-body">
+                <div className="mg-activity-desc">{description}</div>
+                <div className="mg-activity-meta">
+                  <span className={`mg-activity-tag tag-${entry.actionType}`}>
+                    {entry.actionType.replace(/_/g, ' ').toUpperCase()}
+                  </span>
+                  <span className="mg-activity-time">{timestamp}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
 
@@ -936,6 +984,96 @@ function Styles() {
         font-family: var(--font-sans), system-ui, sans-serif;
         font-size: 13px;
         color: hsl(var(--ink) / 0.62);
+      }
+      .mg-activity-head {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 9px; font-weight: 700;
+        letter-spacing: 0.18em; text-transform: uppercase;
+        color: hsl(var(--ink) / 0.42);
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid hsl(var(--ink));
+      }
+
+      .mg-activity-list {
+        display: flex; flex-direction: column; gap: 1px;
+        background: hsl(var(--ink) / 0.10);
+        border: 1px solid hsl(var(--ink) / 0.20);
+      }
+
+      .mg-activity-row {
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        gap: 12px;
+        align-items: flex-start;
+        background: hsl(var(--surface));
+        padding: 12px 14px;
+      }
+
+      .mg-activity-avatar {
+        width: 32px; height: 32px;
+        background: hsl(var(--ink));
+        color: hsl(var(--bg));
+        display: flex; align-items: center; justify-content: center;
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 800; font-size: 12px;
+        flex-shrink: 0;
+      }
+
+      .mg-activity-body { min-width: 0; }
+      .mg-activity-desc {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 500; font-size: 14px;
+        line-height: 1.4;
+        color: hsl(var(--ink));
+        margin-bottom: 4px;
+        word-wrap: break-word;
+      }
+
+      .mg-activity-meta {
+        display: flex; align-items: center; gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .mg-activity-tag {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 8px; font-weight: 700;
+        letter-spacing: 0.14em;
+        padding: 2px 6px;
+        line-height: 1.4;
+        background: hsl(var(--ink) / 0.06);
+        color: hsl(var(--ink) / 0.62);
+      }
+      .mg-activity-tag.tag-override_score,
+      .mg-activity-tag.tag-submit_ko_score {
+        background: hsl(var(--warn) / 0.10);
+        color: hsl(var(--warn));
+      }
+      .mg-activity-tag.tag-record_walkover {
+        background: hsl(var(--warn) / 0.10);
+        color: hsl(var(--warn));
+      }
+      .mg-activity-tag.tag-cancel_tournament,
+      .mg-activity-tag.tag-reset_bracket,
+      .mg-activity-tag.tag-remove_player {
+        background: hsl(var(--live) / 0.10);
+        color: hsl(var(--live));
+      }
+      .mg-activity-tag.tag-add_players,
+      .mg-activity-tag.tag-update_tournament {
+        background: hsl(var(--accent) / 0.10);
+        color: hsl(var(--accent));
+      }
+      .mg-activity-tag.tag-change_role {
+        background: hsl(var(--ink));
+        color: hsl(var(--bg));
+      }
+
+      .mg-activity-time {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 10px; font-weight: 500;
+        letter-spacing: 0.06em;
+        color: hsl(var(--ink) / 0.42);
       }
     `}</style>
   );

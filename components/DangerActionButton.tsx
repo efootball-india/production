@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { useFormStatus } from 'react-dom';
 
 type Props = {
   formAction: (formData: FormData) => void;
@@ -32,17 +32,39 @@ export default function DangerActionButton({
   return (
     <form action={formAction}>
       <input type="hidden" name="slug" value={slug} />
-      <button
-        type="submit"
+      <DangerSubmitInner
         className={className}
-        onClick={(e) => {
-          if (!confirm(confirmMessage)) {
-            e.preventDefault();
-          }
-        }}
-      >
-        {label}
-      </button>
+        confirmMessage={confirmMessage}
+        label={label}
+      />
     </form>
+  );
+}
+
+function DangerSubmitInner({
+  className,
+  confirmMessage,
+  label,
+}: {
+  className: string;
+  confirmMessage: string;
+  label: string;
+}) {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      className={className}
+      disabled={pending}
+      aria-busy={pending}
+      onClick={(e) => {
+        if (!confirm(confirmMessage)) {
+          e.preventDefault();
+        }
+      }}
+    >
+      {pending ? 'Working…' : label}
+    </button>
   );
 }

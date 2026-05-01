@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import DangerActionButton from '../../../../../components/DangerActionButton';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentPlayer } from '@/lib/player';
 import { FORMAT_LABELS } from '@/lib/tournaments';

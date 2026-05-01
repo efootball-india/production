@@ -1,4 +1,4 @@
-// PASS-36-PAGE-TOURNAMENTS (editorial)
+// PASS-37-PAGE-TOURNAMENTS (with banner images)
 import Link from 'next/link';
 import { listTournaments, FORMAT_LABELS, STATUS_LABELS, type TournamentStatus } from '@/lib/tournaments';
 import { getCurrentPlayer } from '@/lib/player';
@@ -190,25 +190,43 @@ function TournamentRow({
     ? new Date(t.starts_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
     : null;
 
+  const bannerUrl = t.banner_image_url ?? null;
+
   if (variant === 'past') {
     return (
       <Link
         href={`/tournaments/${t.slug}`}
-        className="block bg-card border border-hairline px-5 py-4 hover:border-hairline-strong transition-colors group"
+        className="block bg-card border border-hairline hover:border-hairline-strong transition-colors group overflow-hidden"
       >
-        <div className="flex items-baseline justify-between gap-3 mb-1">
-          <h3 className="font-sans font-black text-lg text-muted leading-tight">
-            {t.name}
-          </h3>
-          <span className="label whitespace-nowrap">{pillLabel}</span>
-        </div>
-        <div className="flex flex-wrap gap-x-4 gap-y-1 label">
-          <span>{formatLabel}</span>
-          <span>
-            {t.participant_count}
-            {t.max_participants ? ` / ${t.max_participants}` : ''} players
-          </span>
-          {startsLabel && <span>{startsLabel}</span>}
+        {bannerUrl ? (
+          <div
+            className="w-full"
+            style={{
+              aspectRatio: '16 / 6',
+              backgroundImage: `url(${bannerUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              opacity: 0.55,
+              filter: 'grayscale(0.4)',
+            }}
+            aria-hidden="true"
+          />
+        ) : null}
+        <div className="px-5 py-4">
+          <div className="flex items-baseline justify-between gap-3 mb-1">
+            <h3 className="font-sans font-black text-lg text-muted leading-tight">
+              {t.name}
+            </h3>
+            <span className="label whitespace-nowrap">{pillLabel}</span>
+          </div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 label">
+            <span>{formatLabel}</span>
+            <span>
+              {t.participant_count}
+              {t.max_participants ? ` / ${t.max_participants}` : ''} players
+            </span>
+            {startsLabel && <span>{startsLabel}</span>}
+          </div>
         </div>
       </Link>
     );
@@ -217,29 +235,65 @@ function TournamentRow({
   return (
     <Link
       href={`/tournaments/${t.slug}`}
-      className="block bg-card border border-hairline px-5 py-5 hover:border-ink-strong transition-colors group"
+      className="block bg-card border border-hairline hover:border-ink-strong transition-colors group overflow-hidden"
     >
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="min-w-0 flex-1">
-          <h3 className="font-sans font-black text-2xl tracking-tight leading-[1.1] mb-1">
-            {t.name}
-          </h3>
-          {t.description && (
-            <p className="text-muted text-sm leading-relaxed line-clamp-2">
-              {t.description}
-            </p>
-          )}
+      {bannerUrl ? (
+        <div
+          className="w-full"
+          style={{
+            aspectRatio: '16 / 7',
+            backgroundImage: `url(${bannerUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+          aria-hidden="true"
+        />
+      ) : (
+        <div
+          className="w-full relative overflow-hidden"
+          style={{
+            aspectRatio: '16 / 7',
+            background: 'linear-gradient(135deg, hsl(var(--ink)) 0%, hsl(var(--ink) / 0.85) 100%)',
+          }}
+          aria-hidden="true"
+        >
+          <svg
+            viewBox="0 0 800 350"
+            preserveAspectRatio="xMidYMid slice"
+            className="absolute inset-0 w-full h-full"
+            style={{ opacity: 0.18 }}
+          >
+            <rect x="50" y="40" width="700" height="270" fill="none" stroke="hsl(var(--accent))" strokeWidth="2" />
+            <line x1="400" y1="40" x2="400" y2="310" stroke="hsl(var(--accent))" strokeWidth="2" />
+            <circle cx="400" cy="175" r="55" fill="none" stroke="hsl(var(--accent))" strokeWidth="2" />
+            <rect x="50" y="115" width="100" height="120" fill="none" stroke="hsl(var(--accent))" strokeWidth="2" />
+            <rect x="650" y="115" width="100" height="120" fill="none" stroke="hsl(var(--accent))" strokeWidth="2" />
+          </svg>
         </div>
-        <span className={`${pillClass} flex-shrink-0`}>{pillLabel}</span>
-      </div>
+      )}
+      <div className="px-5 py-5">
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-sans font-black text-2xl tracking-tight leading-[1.1] mb-1">
+              {t.name}
+            </h3>
+            {t.description && (
+              <p className="text-muted text-sm leading-relaxed line-clamp-2">
+                {t.description}
+              </p>
+            )}
+          </div>
+          <span className={`${pillClass} flex-shrink-0`}>{pillLabel}</span>
+        </div>
 
-      <div className="flex flex-wrap gap-x-5 gap-y-1 label pt-3 hairline-t">
-        <span>{formatLabel}</span>
-        <span className="tabular-nums">
-          {t.participant_count}
-          {t.max_participants ? ` / ${t.max_participants}` : ''} players
-        </span>
-        {startsLabel && <span>Starts {startsLabel}</span>}
+        <div className="flex flex-wrap gap-x-5 gap-y-1 label pt-3 hairline-t">
+          <span>{formatLabel}</span>
+          <span className="tabular-nums">
+            {t.participant_count}
+            {t.max_participants ? ` / ${t.max_participants}` : ''} players
+          </span>
+          {startsLabel && <span>Starts {startsLabel}</span>}
+        </div>
       </div>
     </Link>
   );

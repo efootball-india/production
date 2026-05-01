@@ -1,6 +1,7 @@
 // PASS-3-ACTIONS-KNOCKOUT
 'use server';
 
+import { logAdminAction } from '@/lib/admin-log';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -197,6 +198,13 @@ export async function resetKnockoutBracket(formData: FormData) {
   await supabase.from('knockout_seeds').delete().eq('tournament_id', tournament.id);
   await supabase.from('stages').delete().eq('id', stage.id);
 
+  await logAdminAction({
+    tournamentId: tournament.id,
+    actorPlayerId: user.id,
+    actionType: 'reset_bracket',
+    targetType: 'tournament',
+    targetId: tournament.id,
+  });
   await supabase.from('tournaments').update({
     champion_participant_id: null,
     champion_declared_at: null,

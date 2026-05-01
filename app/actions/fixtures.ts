@@ -375,7 +375,7 @@ export async function recordWalkover(formData: FormData) {
       }
     }
 
-    // If this was the final, declare champion
+  // If this was the final, declare champion
     if (match.round === 5) {
       await supabase.from('tournaments').update({
         champion_participant_id: winnerId,
@@ -384,10 +384,6 @@ export async function recordWalkover(formData: FormData) {
       }).eq('id', match.tournament_id);
     }
   } else {
-    // Group match — try to auto-generate bracket if group stage now done
-    await tryAutoGenerateBracket(match.tournament_id);
-  }
-} else {
     await tryAutoGenerateBracket(match.tournament_id);
   }
 
@@ -400,7 +396,6 @@ export async function recordWalkover(formData: FormData) {
     metadata: { winner_side: winnerSide, is_knockout: isKnockout },
   });
 
-  revalidatePath(`/tournaments/${slug}`);
   revalidatePath(`/tournaments/${slug}`);
   revalidatePath(`/tournaments/${slug}/bracket`);
   redirect(`/tournaments/${slug}?walkover=${matchId}`);

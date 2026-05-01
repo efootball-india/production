@@ -329,8 +329,7 @@ function CancelTournamentRow({ slug }: { slug: string }) {
   return (
     <form action={cancelTournament} className="mg-danger-row">
       <input type="hidden" name="slug" value={slug} />
-      <div class
-="mg-danger-info">
+      <div className="mg-danger-info">
         <div className="mg-danger-name">Cancel tournament</div>
         <div className="mg-danger-desc">
           Mark this tournament as cancelled. Data is preserved but the tournament becomes read-only.

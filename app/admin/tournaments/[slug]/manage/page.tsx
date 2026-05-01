@@ -3,8 +3,8 @@ import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentPlayer } from '@/lib/player';
 import { FORMAT_LABELS } from '@/lib/tournaments';
-import { updateTournament, cancelTournament } from '@/app/actions/tournaments';
-import { resetKnockoutBracket } from '@/app/actions/knockout';
+import { updateTournament, cancelTournament } from '../../../../actions/tournaments';
+import { resetKnockoutBracket } from '../../../../actions/knockout';
 
 export default async function ManageTournamentPage({
   params,

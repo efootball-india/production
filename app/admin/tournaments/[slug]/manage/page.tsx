@@ -26,15 +26,23 @@ export default async function ManageTournamentPage({
     .maybeSingle();
   if (!tournament) notFound();
 
-  // For "reset bracket" disabled state — count played KO matches
-  const { count: koPlayed } = await supabase
-    .from('matches')
-    .select('id, stage:stages!inner(stage_type, tournament_id)', { count: 'exact', head: true })
-    .eq('stage.tournament_id', tournament.id)
-    .eq('stage.stage_type', 'single_elimination')
-    .not('home_score', 'is', null);
+  const { data: koStage } = await supabase
+    .from('stages')
+    .select('id')
+    .eq('tournament_id', tournament.id)
+    .eq('stage_type', 'single_elimination')
+    .maybeSingle();
 
-  // Currently registered count
+  let koPlayed = 0;
+  if (koStage) {
+    const { count } = await supabase
+      .from('matches')
+      .select('*', { count: 'exact', head: true })
+      .eq('stage_id', koStage.id)
+      .not('home_score', 'is', null);
+    koPlayed = count ?? 0;
+  }
+
   const { count: registeredCount } = await supabase
     .from('tournament_participants')
     .select('*', { count: 'exact', head: true })
@@ -102,17 +110,10 @@ export default async function ManageTournamentPage({
         )}
 
         {tab === 'settings' && (
-          <SettingsTab
-            tournament={tournament}
-            koPlayed={koPlayed ?? 0}
-          />
+          <SettingsTab tournament={tournament} koPlayed={koPlayed} />
         )}
-        {tab === 'players' && (
-          <PlayersTabStub />
-        )}
-        {tab === 'activity' && (
-          <ActivityTabStub />
-        )}
+        {tab === 'players' && <PlayersTabStub />}
+        {tab === 'activity' && <ActivityTabStub />}
       </main>
     </>
   );
@@ -121,7 +122,6 @@ export default async function ManageTournamentPage({
 function SettingsTab({ tournament, koPlayed }: { tournament: any; koPlayed: number }) {
   const formatLabel = FORMAT_LABELS[tournament.format as keyof typeof FORMAT_LABELS] ?? tournament.format;
 
-  // Format dates for datetime-local input (YYYY-MM-DDTHH:MM)
   const fmtDateTimeLocal = (iso: string | null) => {
     if (!iso) return '';
     const d = new Date(iso);
@@ -263,21 +263,44 @@ function SettingsTab({ tournament, koPlayed }: { tournament: any; koPlayed: numb
         </div>
       </form>
 
-      {/* Danger zone */}
       <div className="mg-danger">
         <div className="mg-danger-head">
           <span className="dot" />
           <span>DANGER ZONE</span>
         </div>
 
-        <ResetBracketRow
-          slug={tournament.slug}
-          canReset={canResetBracket}
-          koPlayed={koPlayed}
-        />
+        <div className="mg-danger-row">
+          <div className="mg-danger-info">
+            <div className="mg-danger-name">Reset bracket</div>
+            <div className="mg-danger-desc">
+              Delete all knockout matches and start fresh. Only allowed if no KO match has been played.
+            </div>
+          </div>
+          <DangerActionButton
+            formAction={resetKnockoutBracket}
+            slug={tournament.slug}
+            disabled={!canResetBracket}
+            disabledLabel={`Locked · ${koPlayed} played`}
+            label="Reset bracket"
+            confirmMessage="Reset bracket? This deletes all current KO matches and seeds. Cannot be undone."
+          />
+        </div>
 
         {!isCancelled && (
-          <CancelTournamentRow slug={tournament.slug} />
+          <div className="mg-danger-row">
+            <div className="mg-danger-info">
+              <div className="mg-danger-name">Cancel tournament</div>
+              <div className="mg-danger-desc">
+                Mark this tournament as cancelled. Data is preserved but the tournament becomes read-only.
+              </div>
+            </div>
+            <DangerActionButton
+              formAction={cancelTournament}
+              slug={tournament.slug}
+              label="Cancel tournament"
+              confirmMessage="Cancel this tournament? Players will see it as cancelled. To undo, you must edit the database directly."
+            />
+          </div>
         )}
 
         {isCancelled && (
@@ -292,62 +315,6 @@ function SettingsTab({ tournament, koPlayed }: { tournament: any; koPlayed: numb
         )}
       </div>
     </>
-  );
-}
-
-function ResetBracketRow({ slug, canReset, koPlayed }: { slug: string; canReset: boolean; koPlayed: number }) {
-  return (
-    <form action={resetKnockoutBracket} className="mg-danger-row">
-      <input type="hidden" name="slug" value={slug} />
-      <div className="mg-danger-info">
-        <div className="mg-danger-name">Reset bracket</div>
-        <div className="mg-danger-desc">
-          Delete all knockout matches and start fresh. Only allowed if no KO match has been played.
-        </div>
-      </div>
-      {canReset ? (
-        <button
-          type="submit"
-          className="mg-danger-btn"
-          onClick={(e) => {
-            if (!confirm('Reset bracket? This deletes all current KO matches and seeds. Cannot be undone.')) {
-              e.preventDefault();
-            }
-          }}
-        >
-          Reset bracket
-        </button>
-      ) : (
-        <button type="button" className="mg-danger-btn mg-danger-btn-disabled" disabled>
-          Locked · {koPlayed} played
-        </button>
-      )}
-    </form>
-  );
-}
-
-function CancelTournamentRow({ slug }: { slug: string }) {
-  return (
-    <form action={cancelTournament} className="mg-danger-row">
-      <input type="hidden" name="slug" value={slug} />
-      <div className="mg-danger-info">
-        <div className="mg-danger-name">Cancel tournament</div>
-        <div className="mg-danger-desc">
-          Mark this tournament as cancelled. Data is preserved but the tournament becomes read-only.
-        </div>
-      </div>
-      <button
-        type="submit"
-        className="mg-danger-btn"
-        onClick={(e) => {
-          if (!confirm('Cancel this tournament? Players will see it as cancelled. To undo, you must edit the database directly.')) {
-            e.preventDefault();
-          }
-        }}
-      >
-        Cancel tournament
-      </button>
-    </form>
   );
 }
 

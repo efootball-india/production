@@ -107,6 +107,11 @@ export default function AddPlayersSheet({ slug, allPlayers, alreadyRegisteredIds
           }
         }
 
+        .aps-form {
+          display: flex; flex-direction: column;
+          flex: 1; min-height: 0;
+        }
+
         .aps-handle { padding: 10px 0 4px; display: flex; justify-content: center; }
         .aps-handle .grip {
           width: 36px; height: 3px;
@@ -223,6 +228,7 @@ export default function AddPlayersSheet({ slug, allPlayers, alreadyRegisteredIds
           display: grid;
           grid-template-columns: auto 1fr;
           gap: 8px;
+          flex-shrink: 0;
         }
         .aps-cancel {
           font-family: var(--font-mono), ui-monospace, monospace;
@@ -270,97 +276,80 @@ export default function AddPlayersSheet({ slug, allPlayers, alreadyRegisteredIds
               <button type="button" className="close" onClick={() => setOpen(false)}>✕</button>
             </div>
 
-            <div className="aps-search-row">
-              <input
-                type="text"
-                className="aps-search-input"
-                placeholder="Search by username or name…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-
-            <form action={addPlayersToTournament} className="aps-list" id="aps-form">
+            <form action={addPlayersToTournament} className="aps-form">
               <input type="hidden" name="slug" value={slug} />
               {Array.from(selected).map((id) => (
                 <input key={id} type="hidden" name="player_ids" value={id} />
               ))}
 
-              {filtered.length === 0 ? (
-                <div className="aps-empty">
-                  {available.length === 0
-                    ? 'All platform players are already in this tournament.'
-                    : 'No players match your search.'}
-                </div>
-              ) : (
-                filtered.map((p) => {
-                  const isSel = selected.has(p.id);
-                  const initial = (p.displayName ?? p.username).charAt(0).toUpperCase();
-                  return (
-                    <div
-                      key={p.id}
-                      className={`aps-row ${isSel ? 'selected' : ''}`}
-                      onClick={() => toggle(p.id)}
-                    >
-                      <div className="aps-checkbox" />
-                      <div
-                        className="aps-avatar"
-                        style={p.avatarUrl ? {
-                          backgroundImage: `url(${p.avatarUrl})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                        } : undefined}
-                      >
-                        {!p.avatarUrl && <span>{initial}</span>}
-                      </div>
-                      <div className="aps-info">
-                        <div className="aps-display">{p.displayName ?? p.username}</div>
-                        <div className="aps-handle-text">@{p.username}</div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </form>
+              <div className="aps-search-row">
+                <input
+                  type="text"
+                  className="aps-search-input"
+                  placeholder="Search by username or name…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
 
-            <div className="aps-foot">
-              <button
-                type="button"
-                className="aps-cancel"
-                onClick={() => setOpen(false)}
-              >
-                Cancel
-              </button>
-              <AddPlayersSubmit selectedCount={selected.size} />
-            </div>
+              <div className="aps-list">
+                {filtered.length === 0 ? (
+                  <div className="aps-empty">
+                    {available.length === 0
+                      ? 'All platform players are already in this tournament.'
+                      : 'No players match your search.'}
+                  </div>
+                ) : (
+                  filtered.map((p) => {
+                    const isSel = selected.has(p.id);
+                    const initial = (p.displayName ?? p.username).charAt(0).toUpperCase();
+                    return (
+                      <div
+                        key={p.id}
+                        className={`aps-row ${isSel ? 'selected' : ''}`}
+                        onClick={() => toggle(p.id)}
+                      >
+                        <div className="aps-checkbox" />
+                        <div
+                          className="aps-avatar"
+                          style={p.avatarUrl ? {
+                            backgroundImage: `url(${p.avatarUrl})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                          } : undefined}
+                        >
+                          {!p.avatarUrl && <span>{initial}</span>}
+                        </div>
+                        <div className="aps-info">
+                          <div className="aps-display">{p.displayName ?? p.username}</div>
+                          <div className="aps-handle-text">@{p.username}</div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              <div className="aps-foot">
+                <button
+                  type="button"
+                  className="aps-cancel"
+                  onClick={() => setOpen(false)}
+                >
+                  Cancel
+                </button>
+                <SubmitButton
+                  className="aps-add"
+                  disabled={selected.size === 0}
+                  loadingChildren="Adding…"
+                >
+                  Add {selected.size > 0 ? selected.size : ''} player{selected.size === 1 ? '' : 's'} →
+                </SubmitButton>
+              </div>
+            </form>
           </div>
         </>
       )}
     </>
-  );
-}
-
-function AddPlayersSubmit({ selectedCount }: { selectedCount: number }) {
-  // SubmitButton must be inside <form> for useFormStatus to work, but our
-  // button is in the foot OUTSIDE the form (uses form="aps-form"). To make
-  // useFormStatus see the form, we wrap in a tiny one-button form that
-  // submits the parent form via JS. Simpler: just use a local form here
-  // with form-attribute on the button.
-  return (
-    <form
-      action={(fd) => {
-        // Forward submit to the actual form
-        const realForm = document.getElementById('aps-form') as HTMLFormElement | null;
-        if (realForm) realForm.requestSubmit();
-      }}
-    >
-      <SubmitButton
-        className="aps-add"
-        disabled={selectedCount === 0}
-        loadingChildren="Adding…"
-      >
-        Add {selectedCount > 0 ? selectedCount : ''} player{selectedCount === 1 ? '' : 's'} →
-      </SubmitButton>
-    </form>
   );
 }

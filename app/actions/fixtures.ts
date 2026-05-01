@@ -1,4 +1,4 @@
-// PASS-2-ACTIONS-FIXTURES
+// PASS-3-ACTIONS-FIXTURES (with admin logging)
 'use server';
 
 import { logAdminAction } from '@/lib/admin-log';
@@ -30,17 +30,10 @@ async function requireMod() {
   return { supabase, user };
 }
 
-/**
- * After a group match completes, check if the group stage is fully done with no
- * unresolved ties. If yes, auto-generate the knockout bracket.
- * Idempotent: skips if bracket already exists.
- */
 async function tryAutoGenerateBracket(tournamentId: string): Promise<void> {
   if (await bracketExists(tournamentId)) return;
   const groupCheck = await groupStageComplete(tournamentId);
   if (!groupCheck.complete) return;
-  // Generate. If a tie is unresolved, lib returns ok:false with reason.
-  // Admin can fix via match overrides, which retriggers this on the next score.
   await libGenerateBracket(tournamentId);
 }
 
@@ -122,7 +115,6 @@ export async function submitScore(formData: FormData) {
     redirect(`/play/${slug}?error=${encodeURIComponent('Invalid score')}`);
   }
 
-  // Check submitter's role
   const { data: me } = await supabase
     .from('players')
     .select('role')
@@ -130,7 +122,6 @@ export async function submitScore(formData: FormData) {
     .maybeSingle();
   const isPrivileged = me && ['moderator', 'admin', 'super_admin'].includes(me.role);
 
-  // Verify user is a participant in this match
   const { data: match } = await supabase
     .from('matches')
     .select(`
@@ -149,7 +140,6 @@ export async function submitScore(formData: FormData) {
     redirect(`/play/${slug}?error=${encodeURIComponent('Not your match')}`);
   }
 
-  // ===== ADMIN/MOD FAST PATH =====
   if (isPrivileged) {
     const winnerId = homeScore > awayScore
       ? match.home_participant_id
@@ -187,13 +177,11 @@ export async function submitScore(formData: FormData) {
     });
 
     await tryAutoGenerateBracket(match.tournament_id);
-    await tryAutoGenerateBracket(match.tournament_id);
 
     revalidatePath(`/play/${slug}`);
     redirect(`/play/${slug}?completed=${matchId}`);
   }
 
-  // ===== REGULAR PLAYER PATH =====
   await supabase.from('score_submissions').upsert({
     match_id: matchId,
     submitted_by: user.id,
@@ -256,8 +244,8 @@ export async function submitScore(formData: FormData) {
   redirect(`/play/${slug}?submitted=${matchId}`);
 }
 
-export async function recordWalkover(formData: FormData) {
-  const { supabase, user } = await requireMod();   // ← fixed
+export async function overrideMatchScore(formData: FormData) {
+  const { supabase, user } = await requireMod();
   const matchId = formData.get('match_id') as string;
   const slug = formData.get('slug') as string;
   const homeScoreRaw = (formData.get('home_score') as string ?? '').trim();
@@ -305,17 +293,15 @@ export async function recordWalkover(formData: FormData) {
 
   await tryAutoGenerateBracket(match.tournament_id);
 
-  await tryAutoGenerateBracket(match.tournament_id);
-
   revalidatePath(`/admin/tournaments/${slug}/queue`);
   redirect(`/admin/tournaments/${slug}/queue?overridden=${matchId}`);
 }
 
 export async function recordWalkover(formData: FormData) {
-  const { supabase } = await requireMod();
+  const { supabase, user } = await requireMod();
   const matchId = formData.get('match_id') as string;
   const slug = formData.get('slug') as string;
-  const winnerSide = formData.get('winner_side') as string; // 'home' | 'away'
+  const winnerSide = formData.get('winner_side') as string;
   const isKnockout = (formData.get('is_knockout') as string ?? '') === '1';
 
   if (!matchId || !slug || !['home', 'away'].includes(winnerSide)) {
@@ -350,7 +336,6 @@ export async function recordWalkover(formData: FormData) {
     })
     .eq('id', matchId);
 
-  // For KO matches, advance the winner to the next round
   if (isKnockout && match.round) {
     const { data: feeder } = await supabase
       .from('match_feeders')
@@ -375,7 +360,6 @@ export async function recordWalkover(formData: FormData) {
       }
     }
 
-  // If this was the final, declare champion
     if (match.round === 5) {
       await supabase.from('tournaments').update({
         champion_participant_id: winnerId,

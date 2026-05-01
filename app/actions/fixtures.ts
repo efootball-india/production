@@ -257,7 +257,7 @@ export async function submitScore(formData: FormData) {
 }
 
 export async function overrideMatchScore(formData: FormData) {
-  const { supabase } = await requireMod();
+const { supabase, user } = await requireMod();
   const matchId = formData.get('match_id') as string;
   const slug = formData.get('slug') as string;
   const homeScoreRaw = (formData.get('home_score') as string ?? '').trim();

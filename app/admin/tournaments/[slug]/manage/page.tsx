@@ -6,13 +6,42 @@ import { getCurrentPlayer } from '@/lib/player';
 import { FORMAT_LABELS } from '@/lib/tournaments';
 import { updateTournament, cancelTournament } from '../../../../actions/tournaments';
 import { resetKnockoutBracket } from '../../../../actions/knockout';
+import AddPlayersSheet from '../../../../../components/AddPlayersSheet';
+import PlayerRowActions from '../../../../../components/PlayerRowActions';
+// Players tab data
+  let participants: any[] = [];
+  let allPlayers: any[] = [];
+  if (tab === 'players') {
+    const [pResult, allResult] = await Promise.all([
+      supabase
+        .from('tournament_participants')
+        .select(`
+          id, status, player_id, country_id,
+          player:players(username, display_name, avatar_url, role, platform),
+          country:countries(name, group_label)
+        `)
+        .eq('tournament_id', tournament.id)
+        .order('id'),
+      supabase
+        .from('players')
+        .select('id, username, display_name, avatar_url')
+        .order('username'),
+    ]);
+    participants = pResult.data ?? [];
+    allPlayers = (allResult.data ?? []).map((p: any) => ({
+      id: p.id,
+      username: p.username,
+      displayName: p.display_name,
+      avatarUrl: p.avatar_url,
+    }));
+  }
 
 export default async function ManageTournamentPage({
   params,
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { tab?: string; error?: string; saved?: string; cancelled?: string };
+  searchParams: { tab?: string; error?: string; saved?: string; cancelled?: string; added?: string; removed?: string; withdrew?: string; country_changed?: string; role_changed?: string };
 }) {
   const player = await getCurrentPlayer();
   if (!player) redirect('/signin');
@@ -102,6 +131,36 @@ export default async function ManageTournamentPage({
             <span>TOURNAMENT CANCELLED.</span>
           </div>
         )}
+        {searchParams.added && (
+          <div className="mg-banner mg-banner-ok">
+            <span className="dot" />
+            <span>ADDED {searchParams.added} PLAYER{searchParams.added === '1' ? '' : 'S'}.</span>
+          </div>
+        )}
+        {searchParams.removed && (
+          <div className="mg-banner mg-banner-ok">
+            <span className="dot" />
+            <span>PLAYER REMOVED.</span>
+          </div>
+        )}
+        {searchParams.withdrew && (
+          <div className="mg-banner mg-banner-ok">
+            <span className="dot" />
+            <span>PLAYER WITHDRAWN. PENDING MATCHES SET TO WALKOVER.</span>
+          </div>
+        )}
+        {searchParams.country_changed && (
+          <div className="mg-banner mg-banner-ok">
+            <span className="dot" />
+            <span>COUNTRY UPDATED.</span>
+          </div>
+        )}
+        {searchParams.role_changed && (
+          <div className="mg-banner mg-banner-ok">
+            <span className="dot" />
+            <span>ROLE UPDATED.</span>
+          </div>
+        )}
         {searchParams.error && (
           <div className="mg-banner mg-banner-warn">
             <span className="dot" />
@@ -112,7 +171,14 @@ export default async function ManageTournamentPage({
         {tab === 'settings' && (
           <SettingsTab tournament={tournament} koPlayed={koPlayed} />
         )}
-        {tab === 'players' && <PlayersTabStub />}
+        {tab === 'players' && (
+          <PlayersTab
+            slug={tournament.slug}
+            participants={participants}
+            allPlayers={allPlayers}
+            currentUserId={player.id}
+          />
+        )}
         {tab === 'activity' && <ActivityTabStub />}
       </main>
     </>
@@ -318,11 +384,142 @@ function SettingsTab({ tournament, koPlayed }: { tournament: any; koPlayed: numb
   );
 }
 
-function PlayersTabStub() {
+function PlayersTab({
+  slug,
+  participants,
+  allPlayers,
+  currentUserId,
+}: {
+  slug: string;
+  participants: any[];
+  allPlayers: any[];
+  currentUserId: string;
+}) {
+  const registered = participants.filter((p) => p.status === 'registered');
+  const withdrawn = participants.filter((p) => p.status === 'withdrawn');
+
+  const alreadyRegisteredIds = participants
+    .filter((p) => p.player_id)
+    .map((p) => p.player_id);
+
   return (
-    <div className="mg-stub">
-      <div className="mg-stub-title">Players tab — Phase 2</div>
-      <p className="mg-stub-body">Coming next. Will support adding, removing, withdrawing, and editing players.</p>
+    <>
+      <div className="mg-players-head">
+        <div>
+          <div className="mg-players-stat">
+            <span className="big">{registered.length}</span>
+            <span className="lbl">REGISTERED</span>
+          </div>
+          {withdrawn.length > 0 && (
+            <div className="mg-players-stat dim">
+              <span className="big">{withdrawn.length}</span>
+              <span className="lbl">WITHDRAWN</span>
+            </div>
+          )}
+        </div>
+        <AddPlayersSheet
+          slug={slug}
+          allPlayers={allPlayers}
+          alreadyRegisteredIds={alreadyRegisteredIds}
+        />
+      </div>
+
+      {registered.length === 0 ? (
+        <div className="mg-empty">
+          <div className="mg-empty-title">No players registered yet.</div>
+          <p className="mg-empty-body">Use the "Add players" button to manually add players from your platform.</p>
+        </div>
+      ) : (
+        <div className="mg-player-list">
+          {registered.map((p) => (
+            <PlayerRow
+              key={p.id}
+              participant={p}
+              slug={slug}
+              currentUserId={currentUserId}
+            />
+          ))}
+        </div>
+      )}
+
+      {withdrawn.length > 0 && (
+        <>
+          <div className="mg-players-section-head">WITHDRAWN · {withdrawn.length}</div>
+          <div className="mg-player-list mg-player-list-dim">
+            {withdrawn.map((p) => (
+              <PlayerRow
+                key={p.id}
+                participant={p}
+                slug={slug}
+                currentUserId={currentUserId}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </>
+  );
+}
+
+function PlayerRow({
+  participant,
+  slug,
+  currentUserId,
+}: {
+  participant: any;
+  slug: string;
+  currentUserId: string;
+}) {
+  const p = participant;
+  const username = p.player?.username ?? '?';
+  const displayName = p.player?.display_name ?? username;
+  const initial = displayName.charAt(0).toUpperCase();
+  const avatarUrl = p.player?.avatar_url;
+  const role = p.player?.role ?? 'player';
+  const country = p.country?.name;
+  const groupLabel = p.country?.group_label;
+  const isMe = p.player_id === currentUserId;
+  const isWithdrawn = p.status === 'withdrawn';
+
+  return (
+    <div className={`mg-player-row ${isWithdrawn ? 'withdrawn' : ''}`}>
+      <div
+        className="mg-player-avatar"
+        style={avatarUrl ? {
+          backgroundImage: `url(${avatarUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        } : undefined}
+      >
+        {!avatarUrl && <span>{initial}</span>}
+      </div>
+      <div className="mg-player-info">
+        <div className="mg-player-name-row">
+          <span className="name">{displayName}</span>
+          {role !== 'player' && (
+            <span className={`role-pill role-${role}`}>{role.toUpperCase()}</span>
+          )}
+          {groupLabel && (
+            <span className="group-pill">GROUP {groupLabel}</span>
+          )}
+          {isWithdrawn && (
+            <span className="status-pill">WITHDRAWN</span>
+          )}
+        </div>
+        <div className="mg-player-meta">
+          @{username}
+          {country && <span> · {country}</span>}
+        </div>
+      </div>
+      <PlayerRowActions
+        slug={slug}
+        participantId={p.id}
+        playerId={p.player_id}
+        username={username}
+        currentRole={role}
+        isCurrentUser={isMe}
+        status={p.status}
+      />
     </div>
   );
 }
@@ -612,6 +809,133 @@ function Styles() {
         font-size: 13px;
         color: hsl(var(--ink) / 0.62);
         line-height: 1.5;
+      }
+      .mg-players-head {
+        display: flex; justify-content: space-between; align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid hsl(var(--ink));
+        flex-wrap: wrap;
+      }
+      .mg-players-head > div:first-child {
+        display: flex; gap: 22px; align-items: baseline;
+      }
+      .mg-players-stat {
+        display: flex; flex-direction: column; gap: 2px;
+      }
+      .mg-players-stat.dim { opacity: 0.6; }
+      .mg-players-stat .big {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 900; font-size: 28px;
+        line-height: 1; letter-spacing: -0.025em;
+        color: hsl(var(--ink));
+        font-variant-numeric: tabular-nums;
+      }
+      .mg-players-stat .lbl {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 9px; font-weight: 700;
+        letter-spacing: 0.16em; text-transform: uppercase;
+        color: hsl(var(--ink) / 0.42);
+      }
+
+      .mg-players-section-head {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 9px; font-weight: 700;
+        letter-spacing: 0.18em; text-transform: uppercase;
+        color: hsl(var(--ink) / 0.42);
+        margin: 24px 0 10px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid hsl(var(--ink) / 0.20);
+      }
+
+      .mg-player-list {
+        display: flex; flex-direction: column;
+        gap: 6px;
+      }
+      .mg-player-list-dim { opacity: 0.65; }
+      .mg-player-row {
+        display: grid;
+        grid-template-columns: 36px 1fr auto;
+        gap: 12px; align-items: center;
+        background: hsl(var(--surface));
+        border: 1px solid hsl(var(--ink) / 0.20);
+        padding: 10px 14px;
+      }
+      .mg-player-row.withdrawn { opacity: 0.7; }
+      .mg-player-avatar {
+        width: 36px; height: 36px;
+        background: hsl(var(--ink));
+        color: hsl(var(--bg));
+        display: flex; align-items: center; justify-content: center;
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 800; font-size: 14px;
+        flex-shrink: 0;
+      }
+      .mg-player-info { min-width: 0; }
+      .mg-player-name-row {
+        display: flex; align-items: center;
+        gap: 6px; margin-bottom: 3px;
+        flex-wrap: wrap;
+      }
+      .mg-player-name-row .name {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 800; font-size: 14px;
+        letter-spacing: -0.005em;
+        color: hsl(var(--ink));
+        line-height: 1.2;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .role-pill, .group-pill, .status-pill {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 8px; font-weight: 700;
+        letter-spacing: 0.14em;
+        padding: 2px 6px;
+        line-height: 1.4;
+      }
+      .role-pill.role-admin {
+        background: hsl(var(--ink));
+        color: hsl(var(--bg));
+      }
+      .role-pill.role-moderator {
+        background: hsl(var(--warn));
+        color: #fff;
+      }
+      .role-pill.role-super_admin {
+        background: hsl(var(--accent));
+        color: #fff;
+      }
+      .group-pill {
+        background: hsl(var(--accent) / 0.10);
+        color: hsl(var(--accent));
+      }
+      .status-pill {
+        background: hsl(var(--ink) / 0.10);
+        color: hsl(var(--ink) / 0.62);
+      }
+      .mg-player-meta {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 9px; font-weight: 500;
+        letter-spacing: 0.10em;
+        color: hsl(var(--ink) / 0.62);
+        text-transform: uppercase;
+      }
+
+      .mg-empty {
+        text-align: center;
+        padding: 36px 20px;
+        border: 1px dashed hsl(var(--ink) / 0.20);
+        background: hsl(var(--surface));
+      }
+      .mg-empty-title {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-weight: 900; font-size: 18px;
+        margin-bottom: 8px;
+      }
+      .mg-empty-body {
+        font-family: var(--font-sans), system-ui, sans-serif;
+        font-size: 13px;
+        color: hsl(var(--ink) / 0.62);
       }
     `}</style>
   );

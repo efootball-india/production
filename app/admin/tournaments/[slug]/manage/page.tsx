@@ -530,7 +530,7 @@ function PlayerRow({
   );
 }
 
-ffunction ActivityTab({ entries }: { entries: any[] }) {
+function ActivityTab({ entries }: { entries: any[] }) {
   if (entries.length === 0) {
     return (
       <div className="mg-empty">

@@ -1,4 +1,4 @@
-// PASS-42-TOURNAMENT-LAYOUT (editorial + banner + Option 2 header)
+// PASS-43-TOURNAMENT-LAYOUT (with Rules tab)
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTournamentBySlug, isCurrentUserRegistered, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments';
@@ -62,6 +62,8 @@ export default async function TournamentLayout({
 
   // Read defensively in case the type hasn't been updated yet
   const bannerUrl: string | null = (tournament as any).banner_image_url ?? null;
+  const rulesText: string | null = (tournament as any).rules ?? null;
+  const hasRules = !!(rulesText && rulesText.trim().length > 0);
 
   const eyebrowToneClass =
     eyebrow.tone === 'live'   ? 'text-status-live'
@@ -81,20 +83,20 @@ export default async function TournamentLayout({
       </Link>
 
       {/* Banner */}
-<div className="border border-ink-strong overflow-hidden mb-7 md:mb-8">
-  <div className="relative w-full h-[120px] md:h-[220px] bg-card-2">
-    {bannerUrl ? (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={bannerUrl}
-        alt={tournament.name}
-        className="w-full h-full object-cover block"
-      />
-    ) : (
-      <BannerFallback />
-    )}
-  </div>
-</div>
+      <div className="border border-ink-strong overflow-hidden mb-7 md:mb-8">
+        <div className="relative w-full h-[120px] md:h-[220px] bg-card-2">
+          {bannerUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={bannerUrl}
+              alt={tournament.name}
+              className="w-full h-full object-cover block"
+            />
+          ) : (
+            <BannerFallback />
+          )}
+        </div>
+      </div>
 
       {/* Header — Option 2: eyebrow + title + 3-col stat strip */}
       <header className="mb-7 md:mb-8">
@@ -192,7 +194,7 @@ export default async function TournamentLayout({
             <input type="hidden" name="tournament_id" value={tournament.id} />
             <div className="flex items-center gap-3 flex-wrap">
               <span className="label-strong text-status-ok">✓ You're in</span>
-            <button
+              <button
                 type="submit"
                 className="border border-hairline-strong hover:border-ink-strong text-default hover:bg-ink hover:text-bg transition-colors px-3 py-2 font-mono text-[10px] font-bold tracking-[0.14em] uppercase cursor-pointer"
               >
@@ -208,7 +210,6 @@ export default async function TournamentLayout({
       </div>
 
       {/* Admin shortcuts */}
-{/* Admin shortcuts */}
       {isAdmin && (
         <div className="mb-3">
           <div className="font-mono text-[9px] font-bold tracking-[0.18em] uppercase text-status-ok mb-2">
@@ -269,7 +270,7 @@ export default async function TournamentLayout({
       )}
 
       {/* Tabs (sticky) */}
-      <TournamentTabs slug={tournament.slug} />
+      <TournamentTabs slug={tournament.slug} hasRules={hasRules} />
 
       {/* Tab content */}
       <div className="pt-6">

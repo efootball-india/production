@@ -70,7 +70,7 @@ export default async function HomePage() {
 
       {/* Featured cup */}
       {featured && (
-        <section className="max-w-[920px] mx-auto px-6 md:px-10 pb-16 md:pb-24">
+  <section className="max-w-[920px] mx-auto px-6 md:px-10 pt-12 md:pt-20 pb-16 md:pb-24">
           <h2 className="section-head">Featured cup.</h2>
           <FeaturedCupCard
             tournament={featured}
@@ -82,8 +82,9 @@ export default async function HomePage() {
 
       {/* Active /NN */}
       {active.length > 0 && (
-        <section className="max-w-[920px] mx-auto px-6 md:px-10 pb-24">
+     <section className="max-w-[920px] mx-auto px-6 md:px-10 pt-4 md:pt-8 pb-24">
           <h2 className="section-head">
+            Active
             Active
             <span className="font-mono text-ink/40 ml-2 text-base align-middle">
               /{String(active.length).padStart(2, '0')}

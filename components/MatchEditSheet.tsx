@@ -27,6 +27,7 @@ type Props = {
   initialHomePens: number | null;
   initialAwayPens: number | null;
   initialDecidedBy: string | null;
+  returnTo?: string;
 };
 
 export default function MatchEditSheet({
@@ -43,6 +44,7 @@ export default function MatchEditSheet({
   initialHomePens,
   initialAwayPens,
   initialDecidedBy,
+  returnTo,
 }: Props) {
   const [homeScore, setHomeScore] = useState<string>(initialHomeScore?.toString() ?? '');
   const [awayScore, setAwayScore] = useState<string>(initialAwayScore?.toString() ?? '');
@@ -410,9 +412,10 @@ export default function MatchEditSheet({
           </button>
         </div>
 
-        <form action={formAction} className="mes-form">
+<form action={formAction} className="mes-form">
           <input type="hidden" name="match_id" value={matchId} />
           <input type="hidden" name="slug" value={slug} />
+          {returnTo && <input type="hidden" name="return_to" value={returnTo} />}
           {walkover && <input type="hidden" name="winner_side" value={walkoverWinner ?? ''} />}
           {walkover && <input type="hidden" name="is_knockout" value={isKnockout ? '1' : '0'} />}
 

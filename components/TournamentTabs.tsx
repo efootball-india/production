@@ -1,22 +1,32 @@
-// PASS-40-TOURNAMENT-TABS (editorial)
+// PASS-41-TOURNAMENT-TABS (with Rules)
 'use client';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-type Props = { slug: string };
+type Props = {
+  slug: string;
+  hasRules?: boolean;
+};
 
-export default function TournamentTabs({ slug }: Props) {
+export default function TournamentTabs({ slug, hasRules = false }: Props) {
   const pathname = usePathname() ?? '';
   const base = `/tournaments/${slug}`;
 
-  const tabs = [
-    { href: base, label: 'Fixtures', match: (p: string) => p === base },
-    { href: `${base}/standings`, label: 'Standings', match: (p: string) => p.startsWith(`${base}/standings`) },
-    { href: `${base}/bracket`, label: 'Bracket', match: (p: string) => p.startsWith(`${base}/bracket`) },
-    { href: `${base}/stats`, label: 'Stats', match: (p: string) => p.startsWith(`${base}/stats`) },
-    { href: `${base}/players`, label: 'Players', match: (p: string) => p.startsWith(`${base}/players`) },
+  const tabs: { href: string; label: string; match: (p: string) => boolean }[] = [
+    { href: base, label: 'Fixtures', match: (p) => p === base },
+    { href: `${base}/standings`, label: 'Standings', match: (p) => p.startsWith(`${base}/standings`) },
+    { href: `${base}/bracket`, label: 'Bracket', match: (p) => p.startsWith(`${base}/bracket`) },
+    { href: `${base}/stats`, label: 'Stats', match: (p) => p.startsWith(`${base}/stats`) },
+    { href: `${base}/players`, label: 'Players', match: (p) => p.startsWith(`${base}/players`) },
   ];
+
+  if (hasRules) {
+    tabs.push({
+      href: `${base}/rules`,
+      label: 'Rules',
+      match: (p) => p.startsWith(`${base}/rules`),
+    });
+  }
 
   return (
     <>
@@ -40,7 +50,6 @@ export default function TournamentTabs({ slug }: Props) {
         }
         .tt-wrap::-webkit-scrollbar { display: none; }
         .tt-wrap { scrollbar-width: none; }
-
         .tt-inner {
           display: flex;
           gap: 24px;
@@ -50,14 +59,13 @@ export default function TournamentTabs({ slug }: Props) {
         @media (min-width: 768px) {
           .tt-inner { padding: 0 32px; }
         }
-
         .tt-tab {
           font-family: var(--font-mono), ui-monospace, monospace;
           font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.14em;
           text-transform: uppercase;
-          color: var(--ink-3-rgba);
+          color: hsl(var(--ink) / 0.42);
           text-decoration: none;
           padding: 16px 0;
           border-bottom: 2px solid transparent;
@@ -71,7 +79,6 @@ export default function TournamentTabs({ slug }: Props) {
           border-bottom-color: hsl(var(--ink));
         }
       `}</style>
-
       <nav className="tt-wrap" aria-label="Tournament sections">
         <div className="tt-inner">
           {tabs.map((t) => (

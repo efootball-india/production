@@ -8,10 +8,12 @@ export default function SignedOutHero({ liveCount }: Props) {
   return (
     <>
       <style>{`
-        .so-hero {
+     .so-hero {
           position: relative;
           width: 100%;
           aspect-ratio: 16 / 9;
+          max-height: 68vh;
+          min-height: 480px;
           overflow: hidden;
           background: #0a0a0a;
           border-bottom: 1px solid hsl(var(--ink));
@@ -19,6 +21,8 @@ export default function SignedOutHero({ liveCount }: Props) {
         @media (max-width: 720px) {
           .so-hero {
             aspect-ratio: 4 / 4.6;
+            max-height: none;
+            min-height: 0;
           }
         }
 

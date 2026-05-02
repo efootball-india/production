@@ -9,6 +9,7 @@ import { resetKnockoutBracket } from '../../../../actions/knockout';
 import AddPlayersSheet from '../../../../../components/AddPlayersSheet';
 import PlayerRowActions from '../../../../../components/PlayerRowActions';
 import { getActivityForTournament, describeActivity, formatTimestamp } from '@/lib/activity';
+import SubmitButton from '../../../../../components/SubmitButton';
 
 
 export default async function ManageTournamentPage({
@@ -322,16 +323,19 @@ function SettingsTab({ tournament, koPlayed }: { tournament: any; koPlayed: numb
           </div>
         </section>
 
-        <div className="mg-actions">
+       <div className="mg-actions">
           <Link
             href={`/tournaments/${tournament.slug}`}
             className="mg-btn mg-btn-secondary"
           >
             Cancel
           </Link>
-          <button type="submit" className="mg-btn mg-btn-primary">
+          <SubmitButton
+            className="mg-btn mg-btn-primary"
+            loadingChildren="Saving…"
+          >
             Save changes →
-          </button>
+          </SubmitButton>
         </div>
       </form>
 

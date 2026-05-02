@@ -1,4 +1,4 @@
-// PASS-3-ACTIONS-KNOCKOUT
+// PASS-4-ACTIONS-KNOCKOUT (returnTo support)
 'use server';
 
 import { logAdminAction } from '@/lib/admin-log';
@@ -83,23 +83,6 @@ export async function submitKnockoutScore(formData: FormData) {
   const fallback = `/tournaments/${slug}/bracket`;
   const target = returnTo ?? fallback;
 
-export async function submitKnockoutScore(formData: FormData) {
-  const { supabase, user } = await requireMod();
-  const matchId = formData.get('match_id') as string;
-  const slug = formData.get('slug') as string;
-  const returnTo = (formData.get('return_to') as string ?? '').trim() || null;
-  if (!matchId || !slug) redirect('/');
-
-  const homeScore = parseInt((formData.get('home_score') as string ?? '').trim(), 10);
-  const awayScore = parseInt((formData.get('away_score') as string ?? '').trim(), 10);
-  const homePensRaw = (formData.get('home_pens') as string ?? '').trim();
-  const awayPensRaw = (formData.get('away_pens') as string ?? '').trim();
-  const wentToPens = (formData.get('went_to_pens') as string ?? '') === 'on';
-  const wentToET = (formData.get('went_to_et') as string ?? '') === 'on';
-
-  const fallback = `/tournaments/${slug}/bracket`;
-  const target = returnTo ?? fallback;
-
   if (isNaN(homeScore) || isNaN(awayScore) || homeScore < 0 || awayScore < 0) {
     redirect(`${target}?error=${encodeURIComponent('Invalid score')}`);
   }
@@ -130,70 +113,6 @@ export async function submitKnockoutScore(formData: FormData) {
     winnerParticipantId = hp > ap ? match.home_participant_id : match.away_participant_id;
     decidedBy = 'penalties';
   } else {
-    redirect(`${target}?error=${encodeURIComponent('Tied score must go to penalties')}`);
-  }
-
-  await supabase.from('matches').update({
-    home_score: homeScore,
-    away_score: awayScore,
-    home_pens: homePens,
-    away_pens: awayPens,
-    decided_by: decidedBy,
-    status: 'completed',
-    winner_participant_id: winnerParticipantId,
-    confirmed_at: new Date().toISOString(),
-  }).eq('id', matchId);
-
-  await logAdminAction({
-    tournamentId: match.tournament_id,
-    actorPlayerId: user.id,
-    actionType: 'submit_ko_score',
-    targetType: 'match',
-    targetId: matchId,
-    metadata: { home_score: homeScore, away_score: awayScore, decided_by: decidedBy },
-  });
-
-  await advanceWinner(matchId, winnerParticipantId!);
-
-  if (match.round === 5) {
-    await supabase.from('tournaments').update({
-      champion_participant_id: winnerParticipantId,
-      champion_declared_at: new Date().toISOString(),
-      status: 'completed',
-    }).eq('id', match.tournament_id);
-  }
-
-  revalidatePath(`/tournaments/${slug}/bracket`);
-  if (returnTo) {
-    redirect(`${returnTo}?ok=score_updated`);
-  }
-  redirect(`/tournaments/${slug}/bracket?completed=${matchId}`);
-}
-
-  let winnerParticipantId: string | null = null;
-  let homePens: number | null = null;
-  let awayPens: number | null = null;
-  let decidedBy: string | null = null;
-
-  const { data: match } = await supabase
-    .from('matches')
-    .select('home_participant_id, away_participant_id, round, match_number_in_round, stage_id, tournament_id')
-    .eq('id', matchId)
-    .maybeSingle();
-  if (!match) redirect(`/tournaments/${slug}/bracket?error=match_not_found`);
-
-  if (homeScore !== awayScore) {
-    winnerParticipantId = homeScore > awayScore ? match.home_participant_id : match.away_participant_id;
-    decidedBy = wentToET ? 'extra_time' : 'regulation';
-  } else if (wentToPens) {
-    homePens = parseInt(homePensRaw, 10);
-    awayPens = parseInt(awayPensRaw, 10);
-    if (isNaN(homePens) || isNaN(awayPens) || homePens === awayPens) {
-      redirect(`/tournaments/${slug}/bracket?error=${encodeURIComponent('Invalid penalty shootout')}`);
-    }
-    winnerParticipantId = homePens > awayPens ? match.home_participant_id : match.away_participant_id;
-    decidedBy = 'penalties';
-} else {
     redirect(`${target}?error=${encodeURIComponent('Tied score must go to penalties')}`);
   }
 

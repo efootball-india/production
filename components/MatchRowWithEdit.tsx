@@ -159,7 +159,7 @@ export default function MatchRowWithEdit({ match, slug, isMod, isKnockout }: Pro
         </article>
       )}
 
-      {canEdit && sheetOpen && (
+    {canEdit && sheetOpen && (
         <MatchEditSheet
           open={sheetOpen}
           onClose={() => setSheetOpen(false)}
@@ -182,6 +182,7 @@ export default function MatchRowWithEdit({ match, slug, isMod, isKnockout }: Pro
           initialHomePens={match.home_pens}
           initialAwayPens={match.away_pens}
           initialDecidedBy={match.decided_by}
+          returnTo={`/tournaments/${slug}${isKnockout ? '/bracket' : ''}`}
         />
       )}
     </>

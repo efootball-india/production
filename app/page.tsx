@@ -5,6 +5,9 @@ import { listTournaments, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments
 import { getPlayerStats } from '@/lib/stats';
 import ProfileHero from '../components/ProfileHero';
 import { getPlayerConsistency, seasonWindow } from '@/lib/consistency';
+import { getFixtureTickerData } from '@/lib/homepage-fixtures';
+import SignedOutHero from '../components/SignedOutHero';
+import FixtureTicker from '../components/FixtureTicker';
 
 export default async function HomePage() {
   const player = await getCurrentPlayer();
@@ -14,6 +17,8 @@ export default async function HomePage() {
   const tournaments = await listTournaments();
   const stats = player ? await getPlayerStats(player.id) : null;
   const consistency = player ? await getPlayerConsistency(player.id) : null;
+  const fixtures = !player ? await getFixtureTickerData(8) : [];
+  const liveCount = fixtures.filter((f) => f.status === 'live').length;
   const { label: seasonLabel } = seasonWindow();
   
 
@@ -56,31 +61,12 @@ export default async function HomePage() {
           seasonLabel={seasonLabel}
         />
       ) : (
-        <section className="max-w-[920px] mx-auto px-6 md:px-10 pt-16 md:pt-24 pb-16">
-          <h1 className="display-h1 max-w-5xl">
-            eFootball tournaments,{' '}
-            <span className="display-italic-accent">played for real.</span>
-          </h1>
-          <p className="mt-8 max-w-2xl text-lg text-ink/70 leading-relaxed">
-            Compete in structured cups and ladders with verified results, live brackets,
-            and a community that takes the game seriously.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/signup"
-              className="bg-accent text-bg font-sans font-bold uppercase tracking-wider text-sm px-6 py-3 border border-accent hover:bg-ink hover:border-ink transition-colors"
-            >
-              Create account
-            </Link>
-            <Link
-              href="/signin"
-              className="bg-transparent text-ink font-sans font-bold uppercase tracking-wider text-sm px-6 py-3 border border-ink hover:bg-ink hover:text-bg transition-colors"
-            >
-              Sign in
-            </Link>
-          </div>
-        </section>
+        <>
+          <SignedOutHero liveCount={liveCount} />
+          <FixtureTicker fixtures={fixtures} liveCount={liveCount} />
+        </>
       )}
+       
 
       {/* Featured cup */}
       {featured && (

@@ -25,34 +25,62 @@ import {
 } from '../../../../../components/DrawActionButtons';
 
 const NAME_TO_CODE: Record<string, string> = {
-  'Argentina': 'AR', 'Australia': 'AU', 'Belgium': 'BE', 'Brazil': 'BR',
-  'Cameroon': 'CM', 'Canada': 'CA', 'Chile': 'CL', 'Colombia': 'CO',
-  'Costa Rica': 'CR', 'Croatia': 'HR', 'Czech Republic': 'CZ',
+  'Algeria': 'DZ', 'Argentina': 'AR', 'Australia': 'AU', 'Austria': 'AT',
+  'Belgium': 'BE', 'Bosnia-Herzegovina': 'BA', 'Brazil': 'BR',
+  'Cabo Verde': 'CV', 'Cameroon': 'CM', 'Canada': 'CA', 'Chile': 'CL',
+  'Colombia': 'CO', 'Congo DR': 'CD', 'Costa Rica': 'CR',
+  "Côte d'Ivoire": 'CI', 'Croatia': 'HR', 'Curaçao': 'CW',
+  'Czech Republic': 'CZ',
   'Denmark': 'DK', 'Ecuador': 'EC', 'Egypt': 'EG', 'England': 'GB',
-  'France': 'FR', 'Germany': 'DE', 'Ghana': 'GH', 'Iran': 'IR',
-  'Ireland': 'IE', 'Italy': 'IT', 'Japan': 'JP', 'Mexico': 'MX',
-  'Morocco': 'MA', 'Netherlands': 'NL', 'Nigeria': 'NG', 'Norway': 'NO',
-  'Peru': 'PE', 'Poland': 'PL', 'Portugal': 'PT', 'Qatar': 'QA',
-  'Russia': 'RU', 'Saudi Arabia': 'SA', 'Scotland': 'GB', 'Senegal': 'SN',
+  'France': 'FR', 'Germany': 'DE', 'Ghana': 'GH', 'Haiti': 'HT',
+  'Iran': 'IR', 'IR Iran': 'IR', 'Iraq': 'IQ', 'Ireland': 'IE',
+  'Italy': 'IT', 'Japan': 'JP', 'Jordan': 'JO',
+  'Korea Republic': 'KR', 'Mexico': 'MX', 'Morocco': 'MA',
+  'Netherlands': 'NL', 'New Zealand': 'NZ', 'Nigeria': 'NG', 'Norway': 'NO',
+  'Panama': 'PA', 'Paraguay': 'PY', 'Peru': 'PE', 'Poland': 'PL',
+  'Portugal': 'PT', 'Qatar': 'QA', 'Russia': 'RU',
+  'Saudi Arabia': 'SA', 'Scotland': 'GB', 'Senegal': 'SN',
   'Serbia': 'RS', 'South Africa': 'ZA', 'South Korea': 'KR',
-  'Korea Republic': 'KR', 'Spain': 'ES', 'Sweden': 'SE', 'Switzerland': 'CH',
-  'Tunisia': 'TN', 'Turkey': 'TR', 'Ukraine': 'UA', 'United States': 'US',
-  'USA': 'US', 'Uruguay': 'UY', 'Wales': 'GB',
+  'Spain': 'ES', 'Sweden': 'SE', 'Switzerland': 'CH',
+  'Tunisia': 'TN', 'Turkey': 'TR', 'Türkiye': 'TR',
+  'Ukraine': 'UA', 'United States': 'US', 'USA': 'US',
+  'Uruguay': 'UY', 'Uzbekistan': 'UZ', 'Wales': 'GB',
+};
+
+// 3-letter to 2-letter for FIFA-style codes if your DB uses them
+const CODE3_TO_CODE2: Record<string, string> = {
+  ALG: 'DZ', ARG: 'AR', AUS: 'AU', AUT: 'AT', BEL: 'BE', BIH: 'BA',
+  BRA: 'BR', CAN: 'CA', CIV: 'CI', CMR: 'CM', COD: 'CD', COL: 'CO',
+  CPV: 'CV', CRC: 'CR', CRO: 'HR', CUW: 'CW', CZE: 'CZ', DEN: 'DK',
+  DEU: 'DE', DNK: 'DK', ECU: 'EC', EGY: 'EG', ENG: 'GB', ESP: 'ES',
+  FRA: 'FR', GER: 'DE', GHA: 'GH', HTI: 'HT', IRL: 'IE', IRN: 'IR',
+  IRQ: 'IQ', ITA: 'IT', JOR: 'JO', JPN: 'JP', KOR: 'KR', MAR: 'MA',
+  MEX: 'MX', NED: 'NL', NGA: 'NG', NLD: 'NL', NOR: 'NO', NZL: 'NZ',
+  PAN: 'PA', PER: 'PE', POL: 'PL', POR: 'PT', PRY: 'PY', PRT: 'PT',
+  PRY2: 'PY', QAT: 'QA', SAU: 'SA', SCO: 'GB', SEN: 'SN', SRB: 'RS',
+  SUI: 'CH', SWE: 'SE', TUN: 'TN', TUR: 'TR', UKR: 'UA', URU: 'UY',
+  USA: 'US', UZB: 'UZ', WAL: 'GB',
 };
 
 function codeToFlag(code: string): string {
-  if (!code || code.length !== 2) return '🏴';
-  const upper = code.toUpperCase();
-  const a = upper.charCodeAt(0);
-  const b = upper.charCodeAt(1);
-  if (a < 65 || a > 90 || b < 65 || b > 90) return '🏴';
+  if (!code) return '';
+  let c = code.toUpperCase();
+  if (c.length === 3 && CODE3_TO_CODE2[c]) c = CODE3_TO_CODE2[c];
+  if (c.length !== 2) return '';
+  const a = c.charCodeAt(0);
+  const b = c.charCodeAt(1);
+  if (a < 65 || a > 90 || b < 65 || b > 90) return '';
   return String.fromCodePoint(0x1F1E6 + a - 65, 0x1F1E6 + b - 65);
 }
 
 function flagForCountry(country: { code?: string | null; name: string }): string {
-  if (country.code) return codeToFlag(country.code);
+  if (country.code) {
+    const fromCode = codeToFlag(country.code);
+    if (fromCode) return fromCode;
+  }
   const fromMap = NAME_TO_CODE[country.name];
-  return fromMap ? codeToFlag(fromMap) : '🏴';
+  if (fromMap) return codeToFlag(fromMap);
+  return '';
 }
 
 export default async function DrawPage({
@@ -644,16 +672,22 @@ function Styles() {
       }
       .dr-start-btn:disabled { opacity: 0.5; cursor: wait; }
 
-      .dr-broadcast {
+     .dr-broadcast {
         display: grid;
         grid-template-columns: 240px 1fr 280px;
+        height: min(72vh, 720px);
+        min-height: 520px;
         border-top: 1px solid hsl(var(--ink));
         border-bottom: 1px solid hsl(var(--ink));
         background: hsl(var(--bg));
+        overflow: hidden;
       }
       @media (max-width: 1024px) {
         .dr-broadcast {
           grid-template-columns: 1fr;
+          height: auto;
+          min-height: 0;
+          overflow: visible;
         }
       }
 
@@ -661,7 +695,10 @@ function Styles() {
         border-right: 1px solid hsl(var(--ink) / 0.10);
         display: flex;
         flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
       }
+      .dr-pool-head { flex-shrink: 0; }
       @media (max-width: 1024px) {
         .dr-pool {
           border-right: none;
@@ -758,10 +795,14 @@ function Styles() {
         text-overflow: ellipsis;
       }
 
-      .dr-groups {
+    .dr-groups {
         display: flex;
         flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
       }
+      .dr-groups-head { flex-shrink: 0; }
+      .dr-groups-list { flex: 1; overflow-y: auto; min-height: 0; }
       @media (max-width: 1024px) {
         .dr-groups { order: 3; }
       }
@@ -973,6 +1014,7 @@ function Styles() {
         padding-top: 14px;
         border-top: 1px solid hsl(var(--warn) / 0.20);
       }
+      
       .dr-danger-name {
         font-family: var(--font-sans), system-ui, sans-serif;
         font-weight: 800;

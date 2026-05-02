@@ -1,4 +1,4 @@
-// PASS-1-LIB-DRAW
+// PASS-2-LIB-DRAW (clean autolinks)
 import { createClient } from '@/lib/supabase/server';
 
 export interface Country {
@@ -30,11 +30,11 @@ export interface ParticipantWithDraw {
     id: string;
     username: string;
     display_name: string;
+    avatar_url?: string | null;
   } | null;
 }
 
 const MAX_REROLLS_FOR_QUIZ_WINNER = 2;
-
 export function maxRerollsForWinner() { return MAX_REROLLS_FOR_QUIZ_WINNER; }
 
 export async function listCountries(): Promise<Country[]> {
@@ -70,7 +70,7 @@ export async function listParticipantsForDraw(tournamentId: string): Promise<Par
     .select(`
       id, player_id, status, is_quiz_winner, rerolls_used, drawn_at, registered_at, country_id,
       country:countries(id, code, name, group_label, position),
-      player:players(id, username, display_name)
+      player:players(id, username, display_name, avatar_url)
     `)
     .eq('tournament_id', tournamentId)
     .order('registered_at', { ascending: true });
@@ -84,19 +84,21 @@ export async function listAvailableCountries(tournamentId: string): Promise<Coun
     .select('country_id')
     .eq('tournament_id', tournamentId)
     .not('country_id', 'is', null);
-  const taken = new Set((assigned ?? []).map(a => a.country_id));
+  const taken = new Set((assigned ?? []).map((a) => a.country_id));
   const all = await listCountries();
-  return all.filter(c => !taken.has(c.id));
+  return all.filter((c) => !taken.has(c.id));
 }
 
 export interface GroupSlot {
   country: Country;
   participant: ParticipantWithDraw | null;
 }
+
 export interface GroupView {
   label: string;
   slots: GroupSlot[];
 }
+
 export async function buildGroupView(tournamentId: string): Promise<GroupView[]> {
   const countries = await listCountries();
   const participants = await listParticipantsForDraw(tournamentId);

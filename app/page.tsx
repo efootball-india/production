@@ -17,7 +17,7 @@ export default async function HomePage() {
   const tournaments = await listTournaments();
   const stats = player ? await getPlayerStats(player.id) : null;
   const consistency = player ? await getPlayerConsistency(player.id) : null;
-  const fixtures = !player ? await getFixtureTickerData(8) : [];
+  const fixtures = await getFixtureTickerData(8, player?.id ?? null);
   const liveCount = fixtures.filter((f) => f.status === 'live').length;
   const { label: seasonLabel } = seasonWindow();
   
@@ -60,11 +60,14 @@ export default async function HomePage() {
           points={consistency?.points ?? null}
           seasonLabel={seasonLabel}
         />
-      ) : (
+     ) : (
         <>
           <SignedOutHero liveCount={liveCount} />
-          <FixtureTicker fixtures={fixtures} liveCount={liveCount} />
+          <FixtureTicker fixtures={fixtures} liveCount={liveCount} currentUsername={null} />
         </>
+      )}
+      {player && (
+        <FixtureTicker fixtures={fixtures} liveCount={liveCount} currentUsername={player.username} />
       )}
        
 

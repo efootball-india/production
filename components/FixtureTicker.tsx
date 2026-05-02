@@ -12,7 +12,73 @@ type Props = {
 export default function FixtureTicker({ fixtures, liveCount }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
 
-  if (fixtures.length === 0) return null;
+  if (fixtures.length === 0) {
+    return (
+      <>
+        <style>{`
+          .ft-empty-band {
+            background: hsl(var(--bg));
+            border-bottom: 1px solid hsl(var(--ink));
+          }
+          .ft-empty-eye {
+            padding: 16px 20px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid hsl(var(--ink) / 0.10);
+          }
+          .ft-empty-eye .label {
+            font-family: var(--font-mono), ui-monospace, monospace;
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 0.18em; text-transform: uppercase;
+            color: hsl(var(--ink) / 0.62);
+          }
+          .ft-empty-eye .label .strong { color: hsl(var(--ink)); font-weight: 900; }
+          .ft-empty-body {
+            padding: 28px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            text-align: center;
+          }
+          .ft-empty-body .msg {
+            font-family: var(--font-sans), system-ui, sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            color: hsl(var(--ink));
+            letter-spacing: -0.01em;
+          }
+          .ft-empty-body .link {
+            font-family: var(--font-mono), ui-monospace, monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: hsl(var(--accent));
+            text-decoration: none;
+            border-bottom: 1px solid hsl(var(--accent) / 0.30);
+            padding-bottom: 2px;
+          }
+          .ft-empty-body .link:hover {
+            color: hsl(var(--ink));
+            border-color: hsl(var(--ink));
+          }
+        `}</style>
+        <div className="ft-empty-band">
+          <div className="ft-empty-eye">
+            <span className="label">
+              <span className="strong">LIVE & UPCOMING</span>
+            </span>
+          </div>
+          <div className="ft-empty-body">
+            <span className="msg">No matches in progress.</span>
+            <Link href="/tournaments" className="link">See open tournaments →</Link>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   // Duplicate for seamless loop on desktop only
   const displayFixtures = fixtures.length >= 4 ? [...fixtures, ...fixtures] : fixtures;

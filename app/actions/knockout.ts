@@ -83,7 +83,7 @@ export async function submitKnockoutScore(formData: FormData) {
   const fallback = `/tournaments/${slug}/bracket`;
   const target = returnTo ?? fallback;
 
- if (isNaN(homePens) || isNaN(awayPens) || homePens === awayPens) {
+ if (isNaN(homePens as number) || isNaN(awayPens as number) || homePens === awayPens) {
       redirect(`${target}?error=${encodeURIComponent('Invalid penalty shootout')}`);
     }
 

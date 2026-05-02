@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { overrideMatchScore } from '../app/actions/fixtures';
 import { submitKnockoutScore } from '../app/actions/knockout';
 import { recordWalkover } from '../app/actions/fixtures';
+import SubmitButton from './SubmitButton';
 
 type Side = {
   id: string;
@@ -150,6 +151,11 @@ export default function MatchEditSheet({
           padding: 4px 8px;
         }
         .mes-head .close:hover { color: hsl(var(--ink)); }
+
+        .mes-form {
+          display: flex; flex-direction: column;
+          flex: 1; min-height: 0;
+        }
 
         .mes-body {
           padding: 18px;
@@ -389,10 +395,6 @@ export default function MatchEditSheet({
           background: hsl(var(--ink));
           border-color: hsl(var(--ink));
         }
-        .mes-save:disabled {
-          opacity: 0.4;
-          cursor: not-allowed;
-        }
       `}</style>
 
       <div className="mes-backdrop" onClick={onClose} />
@@ -408,170 +410,171 @@ export default function MatchEditSheet({
           </button>
         </div>
 
-        <form action={formAction} className="mes-body" id="match-edit-form">
+        <form action={formAction} className="mes-form">
           <input type="hidden" name="match_id" value={matchId} />
           <input type="hidden" name="slug" value={slug} />
           {walkover && <input type="hidden" name="winner_side" value={walkoverWinner ?? ''} />}
           {walkover && <input type="hidden" name="is_knockout" value={isKnockout ? '1' : '0'} />}
 
-          {!walkover && (
-            <>
-              <h2 className="mes-title">Edit result.</h2>
+          <div className="mes-body">
+            {!walkover && (
+              <>
+                <h2 className="mes-title">Edit result.</h2>
 
-              <div className="mes-score-row">
-                <div className="mes-side">
-                  <span className="country">{home.country}</span>
-                  <span className="handle">{home.seedLabel ? `${home.seedLabel} · ` : ''}{home.handle}</span>
-                  <input
-                    type="number"
-                    name="home_score"
-                    min={0}
-                    max={50}
-                    required
-                    value={homeScore}
-                    onChange={(e) => setHomeScore(e.target.value)}
-                  />
+                <div className="mes-score-row">
+                  <div className="mes-side">
+                    <span className="country">{home.country}</span>
+                    <span className="handle">{home.seedLabel ? `${home.seedLabel} · ` : ''}{home.handle}</span>
+                    <input
+                      type="number"
+                      name="home_score"
+                      min={0}
+                      max={50}
+                      required
+                      value={homeScore}
+                      onChange={(e) => setHomeScore(e.target.value)}
+                    />
+                  </div>
+                  <div className="mes-dash">—</div>
+                  <div className="mes-side">
+                    <span className="country">{away.country}</span>
+                    <span className="handle">{away.seedLabel ? `${away.seedLabel} · ` : ''}{away.handle}</span>
+                    <input
+                      type="number"
+                      name="away_score"
+                      min={0}
+                      max={50}
+                      required
+                      value={awayScore}
+                      onChange={(e) => setAwayScore(e.target.value)}
+                    />
+                  </div>
                 </div>
-                <div className="mes-dash">—</div>
-                <div className="mes-side">
-                  <span className="country">{away.country}</span>
-                  <span className="handle">{away.seedLabel ? `${away.seedLabel} · ` : ''}{away.handle}</span>
-                  <input
-                    type="number"
-                    name="away_score"
-                    min={0}
-                    max={50}
-                    required
-                    value={awayScore}
-                    onChange={(e) => setAwayScore(e.target.value)}
-                  />
-                </div>
-              </div>
 
-              {isKnockout && (
-                <>
-                  <button
-                    type="button"
-                    className={`mes-toggle-row ${wentToET ? 'on' : ''}`}
-                    onClick={() => setWentToET(!wentToET)}
-                  >
-                    <input type="hidden" name="went_to_et" value={wentToET ? 'on' : ''} />
-                    <div className="check" />
-                    <div className="label">Match went to extra time</div>
-                  </button>
+                {isKnockout && (
+                  <>
+                    <button
+                      type="button"
+                      className={`mes-toggle-row ${wentToET ? 'on' : ''}`}
+                      onClick={() => setWentToET(!wentToET)}
+                    >
+                      <input type="hidden" name="went_to_et" value={wentToET ? 'on' : ''} />
+                      <div className="check" />
+                      <div className="label">Match went to extra time</div>
+                    </button>
 
-                  <button
-                    type="button"
-                    className={`mes-toggle-row ${wentToPens ? 'on' : ''}`}
-                    onClick={() => {
-                      const next = !wentToPens;
-                      setWentToPens(next);
-                      if (next) setWentToET(true);
-                    }}
-                  >
-                    <input type="hidden" name="went_to_pens" value={wentToPens ? 'on' : ''} />
-                    <div className="check" />
-                    <div className="label">Decided by penalties</div>
-                  </button>
+                    <button
+                      type="button"
+                      className={`mes-toggle-row ${wentToPens ? 'on' : ''}`}
+                      onClick={() => {
+                        const next = !wentToPens;
+                        setWentToPens(next);
+                        if (next) setWentToET(true);
+                      }}
+                    >
+                      <input type="hidden" name="went_to_pens" value={wentToPens ? 'on' : ''} />
+                      <div className="check" />
+                      <div className="label">Decided by penalties</div>
+                    </button>
 
-                  {wentToPens && (
-                    <div className="mes-pens">
-                      <div className="head">PENALTY SHOOTOUT</div>
-                      <div className="row">
-                        <input
-                          type="number"
-                          name="home_pens"
-                          min={0}
-                          max={20}
-                          value={homePens}
-                          onChange={(e) => setHomePens(e.target.value)}
-                          required
-                        />
-                        <span className="dash">—</span>
-                        <input
-                          type="number"
-                          name="away_pens"
-                          min={0}
-                          max={20}
-                          value={awayPens}
-                          onChange={(e) => setAwayPens(e.target.value)}
-                          required
-                        />
+                    {wentToPens && (
+                      <div className="mes-pens">
+                        <div className="head">PENALTY SHOOTOUT</div>
+                        <div className="row">
+                          <input
+                            type="number"
+                            name="home_pens"
+                            min={0}
+                            max={20}
+                            value={homePens}
+                            onChange={(e) => setHomePens(e.target.value)}
+                            required
+                          />
+                          <span className="dash">—</span>
+                          <input
+                            type="number"
+                            name="away_pens"
+                            min={0}
+                            max={20}
+                            value={awayPens}
+                            onChange={(e) => setAwayPens(e.target.value)}
+                            required
+                          />
+                        </div>
                       </div>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+
+            {walkover && (
+              <>
+                <h2 className="mes-title">Record <span className="accent">walkover.</span></h2>
+
+                <div className="mes-walkover">
+                  <div className="head">⚠ WHO ADVANCES?</div>
+                  <div className="opts">
+                    <button
+                      type="button"
+                      className={`opt ${walkoverWinner === 'home' ? 'selected' : ''}`}
+                      onClick={() => setWalkoverWinner('home')}
+                    >
+                      <span className="country">{home.country}</span>
+                      <span className="label">{home.handle}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`opt ${walkoverWinner === 'away' ? 'selected' : ''}`}
+                      onClick={() => setWalkoverWinner('away')}
+                    >
+                      <span className="country">{away.country}</span>
+                      <span className="label">{away.handle}</span>
+                    </button>
+                  </div>
+                  {walkoverWinner && (
+                    <div className="scoreline">
+                      FINAL: <span className="score">3 — 0</span> TO {winnerCountry.toUpperCase()}
                     </div>
                   )}
-                </>
-              )}
-            </>
-          )}
-
-          {walkover && (
-            <>
-              <h2 className="mes-title">Record <span className="accent">walkover.</span></h2>
-
-              <div className="mes-walkover">
-                <div className="head">⚠ WHO ADVANCES?</div>
-                <div className="opts">
-                  <button
-                    type="button"
-                    className={`opt ${walkoverWinner === 'home' ? 'selected' : ''}`}
-                    onClick={() => setWalkoverWinner('home')}
-                  >
-                    <span className="country">{home.country}</span>
-                    <span className="label">{home.handle}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`opt ${walkoverWinner === 'away' ? 'selected' : ''}`}
-                    onClick={() => setWalkoverWinner('away')}
-                  >
-                    <span className="country">{away.country}</span>
-                    <span className="label">{away.handle}</span>
-                  </button>
                 </div>
-                {walkoverWinner && (
-                  <div className="scoreline">
-                    FINAL: <span className="score">3 — 0</span> TO {winnerCountry.toUpperCase()}
-                  </div>
-                )}
+              </>
+            )}
+
+            <button
+              type="button"
+              className={`mes-toggle-row ${walkover ? 'on warn' : ''}`}
+              onClick={() => {
+                setWalkover(!walkover);
+                if (walkover) setWalkoverWinner(null);
+              }}
+              style={{ marginTop: walkover ? 8 : 0 }}
+            >
+              <div className="check" />
+              <div className="label">
+                Mark as walkover
+                <span className="sub">
+                  {walkover
+                    ? 'Match did not happen · winner advances 3-0'
+                    : 'Auto-records 3-0 to the winner'}
+                </span>
               </div>
-            </>
-          )}
+            </button>
+          </div>
 
-          <button
-            type="button"
-            className={`mes-toggle-row ${walkover ? 'on warn' : ''}`}
-            onClick={() => {
-              setWalkover(!walkover);
-              if (walkover) setWalkoverWinner(null);
-            }}
-            style={{ marginTop: walkover ? 8 : 0 }}
-          >
-            <div className="check" />
-            <div className="label">
-              Mark as walkover
-              <span className="sub">
-                {walkover
-                  ? 'Match did not happen · winner advances 3-0'
-                  : 'Auto-records 3-0 to the winner'}
-              </span>
-            </div>
-          </button>
+          <div className="mes-foot">
+            <button type="button" className="mes-cancel" onClick={onClose}>
+              Cancel
+            </button>
+            <SubmitButton
+              className={`mes-save ${walkover ? 'warn' : ''}`}
+              disabled={walkover && !walkoverWinner}
+              loadingChildren={walkover ? 'Confirming…' : 'Saving…'}
+            >
+              {walkover ? 'Confirm walkover →' : 'Save result →'}
+            </SubmitButton>
+          </div>
         </form>
-
-        <div className="mes-foot">
-          <button type="button" className="mes-cancel" onClick={onClose}>
-            Cancel
-          </button>
-          <button
-            type="submit"
-            form="match-edit-form"
-            className={`mes-save ${walkover ? 'warn' : ''}`}
-            disabled={walkover && !walkoverWinner}
-          >
-            {walkover ? 'Confirm walkover →' : 'Save result →'}
-          </button>
-        </div>
       </div>
     </>
   );

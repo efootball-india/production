@@ -7,9 +7,10 @@ import type { FixtureEntry } from '@/lib/homepage-fixtures';
 type Props = {
   fixtures: FixtureEntry[];
   liveCount: number;
+  currentUsername?: string | null;
 };
 
-export default function FixtureTicker({ fixtures, liveCount }: Props) {
+export default function FixtureTicker({ fixtures, liveCount, currentUsername }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
 
   if (fixtures.length === 0) {
@@ -80,8 +81,8 @@ export default function FixtureTicker({ fixtures, liveCount }: Props) {
     );
   }
 
-  // Duplicate for seamless loop on desktop only
   const displayFixtures = fixtures.length >= 4 ? [...fixtures, ...fixtures] : fixtures;
+  const me = currentUsername ? currentUsername.toLowerCase() : null;
 
   const handleNav = (direction: 'left' | 'right') => {
     const track = trackRef.current;
@@ -209,6 +210,40 @@ export default function FixtureTicker({ fixtures, liveCount }: Props) {
           }
         }
 
+        /* MINE — user's own match */
+        .ft-fixture.mine {
+          background: hsl(var(--accent) / 0.04);
+          border-left: 3px solid hsl(var(--accent));
+          padding-left: 15px;
+          padding-top: 24px;
+        }
+        @media (max-width: 720px) {
+          .ft-fixture.mine {
+            padding-left: 11px;
+            padding-top: 22px;
+          }
+        }
+        .ft-fixture.mine:hover {
+          background: hsl(var(--accent) / 0.08);
+        }
+        .ft-fixture .mine-tag {
+          position: absolute;
+          top: 6px;
+          left: 15px;
+          font-family: var(--font-mono), ui-monospace, monospace;
+          font-size: 8px;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: hsl(var(--accent));
+        }
+        @media (max-width: 720px) {
+          .ft-fixture .mine-tag {
+            left: 11px;
+            font-size: 7px;
+          }
+        }
+
         .ft-status {
           position: absolute;
           top: 14px; right: 18px;
@@ -218,6 +253,10 @@ export default function FixtureTicker({ fixtures, liveCount }: Props) {
           letter-spacing: 0.14em;
           text-transform: uppercase;
           line-height: 1;
+        }
+        .ft-fixture.mine .ft-status {
+          top: 6px;
+          right: 18px;
         }
         @media (max-width: 720px) {
           .ft-status { top: 12px; right: 14px; font-size: 8px; }
@@ -288,6 +327,10 @@ export default function FixtureTicker({ fixtures, liveCount }: Props) {
           overflow: hidden;
           text-overflow: ellipsis;
           text-transform: uppercase;
+        }
+        .ft-handle.is-me {
+          color: hsl(var(--accent));
+          font-weight: 800;
         }
         .ft-score {
           font-family: var(--font-sans), system-ui, sans-serif;
@@ -366,12 +409,17 @@ export default function FixtureTicker({ fixtures, liveCount }: Props) {
               const homeScoreText = f.home.score == null ? '—' : String(f.home.score);
               const awayScoreText = f.away.score == null ? '—' : String(f.away.score);
 
+              const homeUserMatch = me && f.home.username.toLowerCase() === me;
+              const awayUserMatch = me && f.away.username.toLowerCase() === me;
+              const isMine = !!(homeUserMatch || awayUserMatch);
+
               return (
                 <Link
                   key={`${f.id}-${i}`}
                   href={`/tournaments/${f.tournamentSlug}`}
-                  className="ft-fixture"
+                  className={`ft-fixture ${isMine ? 'mine' : ''}`}
                 >
+                  {isMine && <span className="mine-tag">★ YOUR MATCH</span>}
                   <span className={`ft-status ${f.status}`}>
                     {f.status === 'live' && <span className="dot" />}
                     {f.statusLabel}
@@ -382,7 +430,7 @@ export default function FixtureTicker({ fixtures, liveCount }: Props) {
                       <span className="ft-flag">{f.home.countryFlag}</span>
                       <div className="ft-info">
                         <span className="ft-country">{f.home.country.toUpperCase()}</span>
-                        <span className="ft-handle">@{f.home.username}</span>
+                        <span className={`ft-handle ${homeUserMatch ? 'is-me' : ''}`}>@{f.home.username}</span>
                       </div>
                     </div>
                     <span className={`ft-score ${homeScoreClass}`}>{homeScoreText}</span>
@@ -393,7 +441,7 @@ export default function FixtureTicker({ fixtures, liveCount }: Props) {
                       <span className="ft-flag">{f.away.countryFlag}</span>
                       <div className="ft-info">
                         <span className="ft-country">{f.away.country.toUpperCase()}</span>
-                        <span className="ft-handle">@{f.away.username}</span>
+                        <span className={`ft-handle ${awayUserMatch ? 'is-me' : ''}`}>@{f.away.username}</span>
                       </div>
                     </div>
                     <span className={`ft-score ${awayScoreClass}`}>{awayScoreText}</span>

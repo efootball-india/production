@@ -70,6 +70,7 @@ export async function submitKnockoutScore(formData: FormData) {
   const { supabase, user } = await requireMod();
   const matchId = formData.get('match_id') as string;
   const slug = formData.get('slug') as string;
+  const returnTo = (formData.get('return_to') as string ?? '').trim() || null;
   if (!matchId || !slug) redirect('/');
 
   const homeScore = parseInt((formData.get('home_score') as string ?? '').trim(), 10);
@@ -79,9 +80,12 @@ export async function submitKnockoutScore(formData: FormData) {
   const wentToPens = (formData.get('went_to_pens') as string ?? '') === 'on';
   const wentToET = (formData.get('went_to_et') as string ?? '') === 'on';
 
-  if (isNaN(homeScore) || isNaN(awayScore) || homeScore < 0 || awayScore < 0) {
-    redirect(`/tournaments/${slug}/bracket?error=${encodeURIComponent('Invalid score')}`);
-  }
+  const fallback = `/tournaments/${slug}/bracket`;
+  const target = returnTo ?? fallback;
+
+ if (isNaN(homePens) || isNaN(awayPens) || homePens === awayPens) {
+      redirect(`${target}?error=${encodeURIComponent('Invalid penalty shootout')}`);
+    }
 
   let winnerParticipantId: string | null = null;
   let homePens: number | null = null;
@@ -106,8 +110,8 @@ export async function submitKnockoutScore(formData: FormData) {
     }
     winnerParticipantId = homePens > awayPens ? match.home_participant_id : match.away_participant_id;
     decidedBy = 'penalties';
-  } else {
-    redirect(`/tournaments/${slug}/bracket?error=${encodeURIComponent('Tied score must go to penalties')}`);
+} else {
+    redirect(`${target}?error=${encodeURIComponent('Tied score must go to penalties')}`);
   }
 
   await supabase.from('matches').update({
@@ -141,6 +145,9 @@ export async function submitKnockoutScore(formData: FormData) {
   }
 
   revalidatePath(`/tournaments/${slug}/bracket`);
+  if (returnTo) {
+    redirect(`${returnTo}?ok=score_updated`);
+  }
   redirect(`/tournaments/${slug}/bracket?completed=${matchId}`);
 }
 

@@ -86,39 +86,32 @@ const LIVE_STATUSES = new Set(['live', 'in_progress', 'in-progress', 'ongoing'])
 const UPCOMING_STATUSES = new Set(['scheduled', 'pending', 'upcoming', 'awaiting_result', 'awaiting_confirmation', 'submitted', 'not_started', 'open']);
 const PLAYED_STATUSES = new Set(['completed', 'walkover', 'finished', 'final', 'confirmed']);
 
-export async function getFixtureTickerData(limit: number = 10): Promise<FixtureEntry[]> {
+export async function getFixtureTickerData(
+  limit: number = 10,
+  currentPlayerId?: string | null
+): Promise<FixtureEntry[]> {
   const supabase = createClient();
 
-  // Step 1: get matches without nested joins (to avoid FK-name mismatches)
   const { data: matches, error: matchError } = await supabase
     .from('matches')
     .select('id, status, decided_by, home_score, away_score, home_pens, away_pens, matchday, round, confirmed_at, home_participant_id, away_participant_id, winner_participant_id, tournament_id, created_at')
     .order('confirmed_at', { ascending: false, nullsFirst: false })
     .order('created_at', { ascending: false })
-    .limit(80);
+    .limit(120);
 
   if (matchError) {
     console.error('[ticker] matches query error:', matchError);
     return [];
   }
   if (!matches || matches.length === 0) {
-    console.log('[ticker] no matches found');
     return [];
   }
 
-  console.log('[ticker] fetched', matches.length, 'matches');
-  console.log('[ticker] status distribution:', matches.reduce((acc: Record<string, number>, m: any) => {
-    acc[m.status ?? 'null'] = (acc[m.status ?? 'null'] ?? 0) + 1;
-    return acc;
-  }, {}));
-
-  // Step 2: collect all unique IDs we need to look up
   const tournamentIds = Array.from(new Set(matches.map((m: any) => m.tournament_id).filter(Boolean)));
   const participantIds = Array.from(new Set(
     matches.flatMap((m: any) => [m.home_participant_id, m.away_participant_id]).filter(Boolean)
   ));
 
-  // Step 3: fetch tournaments
   const { data: tournaments } = await supabase
     .from('tournaments')
     .select('id, name, slug, status')
@@ -126,19 +119,14 @@ export async function getFixtureTickerData(limit: number = 10): Promise<FixtureE
   const tournamentById = new Map<string, any>();
   for (const t of (tournaments ?? [])) tournamentById.set(t.id, t);
 
-  // Step 4: fetch participants with country + player
   const { data: participants } = await supabase
     .from('tournament_participants')
-    .select('id, country:countries(name, code, group_label), player:players(username)')
+    .select('id, player_id, country:countries(name, code, group_label), player:players(username)')
     .in('id', participantIds);
   const participantById = new Map<string, any>();
   for (const p of (participants ?? [])) participantById.set(p.id, p);
 
-  console.log('[ticker] tournaments:', tournamentById.size, 'participants:', participantById.size);
-
-  const live: FixtureEntry[] = [];
-  const upcoming: FixtureEntry[] = [];
-  const played: FixtureEntry[] = [];
+  const all: { entry: FixtureEntry; isMine: boolean }[] = [];
 
   for (const m of matches as any[]) {
     const tournament = tournamentById.get(m.tournament_id);
@@ -159,7 +147,6 @@ export async function getFixtureTickerData(limit: number = 10): Promise<FixtureE
     let statusLabel: string;
 
     if (PLAYED_STATUSES.has(rawStatus) || m.home_score != null) {
-      // Treat anything with a score as played, regardless of status field
       status = 'played';
       statusLabel = ageLabel(m.confirmed_at ?? m.created_at);
     } else if (LIVE_STATUSES.has(rawStatus)) {
@@ -169,7 +156,6 @@ export async function getFixtureTickerData(limit: number = 10): Promise<FixtureE
       status = 'upcoming';
       statusLabel = 'UPCOMING';
     } else {
-      // Unknown status — bucket as upcoming so it shows
       status = 'upcoming';
       statusLabel = 'UPCOMING';
     }
@@ -187,49 +173,4 @@ export async function getFixtureTickerData(limit: number = 10): Promise<FixtureE
     const winnerId = m.winner_participant_id;
     const isWinnerHome = winnerId
       ? winnerId === home.id
-        ? true
-        : winnerId === away.id
-        ? false
-        : null
-      : null;
-
-    const entry: FixtureEntry = {
-      id: m.id,
-      status,
-      statusLabel,
-      home: {
-        country: homeCountry,
-        countryFlag: getFlagEmoji(homeCountry),
-        username: homeUsername,
-        score: m.home_score,
-        pens: m.home_pens,
-      },
-      away: {
-        country: awayCountry,
-        countryFlag: getFlagEmoji(awayCountry),
-        username: awayUsername,
-        score: m.away_score,
-        pens: m.away_pens,
-      },
-      tournamentName: tournament.name,
-      tournamentSlug: tournament.slug,
-      stageLabel,
-      groupLabel,
-      isWinnerHome,
-    };
-
-    if (status === 'live') live.push(entry);
-    else if (status === 'upcoming') upcoming.push(entry);
-    else played.push(entry);
-  }
-
-  console.log('[ticker] bucketed: live=', live.length, 'upcoming=', upcoming.length, 'played=', played.length);
-
-  const result: FixtureEntry[] = [
-    ...live.slice(0, 3),
-    ...upcoming.slice(0, 4),
-    ...played.slice(0, Math.max(0, limit - live.slice(0, 3).length - upcoming.slice(0, 4).length)),
-  ];
-
-  return result.slice(0, limit);
-}
+        ? tr

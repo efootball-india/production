@@ -20,7 +20,7 @@ export default async function FixturesTab({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { registered?: string; withdrawn?: string; error?: string; walkover?: string };
+  searchParams: { registered?: string; withdrawn?: string; error?: string; walkover?: string; ok?: string };
 }) {
   const supabase = createClient();
 
@@ -81,6 +81,12 @@ export default async function FixturesTab({
         <Banner tone="muted">Withdrawn from this tournament.</Banner>
       )}
       {searchParams.walkover && (
+        <Banner tone="ok">Walkover recorded.</Banner>
+      )}
+      {searchParams.ok === 'score_updated' && (
+        <Banner tone="ok">Match score saved.</Banner>
+      )}
+      {searchParams.ok === 'walkover_recorded' && (
         <Banner tone="ok">Walkover recorded.</Banner>
       )}
       {searchParams.error && (

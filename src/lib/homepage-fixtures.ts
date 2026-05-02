@@ -32,38 +32,42 @@ const ROUND_LABELS: Record<number, string> = {
   6: 'F',
 };
 
-// Country name → ISO 2-letter code map for emoji flag derivation.
-// Covers the 32 World Cup 2026 + 2022 nations and common eFTBL choices.
 const NAME_TO_CODE: Record<string, string> = {
-  'Argentina': 'AR', 'Australia': 'AU', 'Belgium': 'BE', 'Brazil': 'BR',
-  'Cameroon': 'CM', 'Canada': 'CA', 'Chile': 'CL', 'Colombia': 'CO',
-  'Costa Rica': 'CR', 'Croatia': 'HR', 'Czech Republic': 'CZ',
+  'Algeria': 'DZ', 'Argentina': 'AR', 'Australia': 'AU', 'Austria': 'AT',
+  'Belgium': 'BE', 'Bosnia-Herzegovina': 'BA', 'Brazil': 'BR',
+  'Cabo Verde': 'CV', 'Cameroon': 'CM', 'Canada': 'CA', 'Chile': 'CL',
+  'Colombia': 'CO', 'Congo DR': 'CD', 'Costa Rica': 'CR',
+  "Côte d'Ivoire": 'CI', 'Croatia': 'HR', 'Curaçao': 'CW',
+  'Czech Republic': 'CZ',
   'Denmark': 'DK', 'Ecuador': 'EC', 'Egypt': 'EG', 'England': 'GB',
-  'France': 'FR', 'Germany': 'DE', 'Ghana': 'GH', 'Iran': 'IR',
-  'Ireland': 'IE', 'Italy': 'IT', 'Japan': 'JP', 'Mexico': 'MX',
-  'Morocco': 'MA', 'Netherlands': 'NL', 'Nigeria': 'NG', 'Norway': 'NO',
-  'Peru': 'PE', 'Poland': 'PL', 'Portugal': 'PT', 'Qatar': 'QA',
-  'Russia': 'RU', 'Saudi Arabia': 'SA', 'Scotland': 'GB', 'Senegal': 'SN',
+  'France': 'FR', 'Germany': 'DE', 'Ghana': 'GH', 'Haiti': 'HT',
+  'Iran': 'IR', 'IR Iran': 'IR', 'Iraq': 'IQ', 'Ireland': 'IE',
+  'Italy': 'IT', 'Japan': 'JP', 'Jordan': 'JO',
+  'Korea Republic': 'KR', 'Mexico': 'MX', 'Morocco': 'MA',
+  'Netherlands': 'NL', 'New Zealand': 'NZ', 'Nigeria': 'NG', 'Norway': 'NO',
+  'Panama': 'PA', 'Paraguay': 'PY', 'Peru': 'PE', 'Poland': 'PL',
+  'Portugal': 'PT', 'Qatar': 'QA', 'Russia': 'RU',
+  'Saudi Arabia': 'SA', 'Scotland': 'GB', 'Senegal': 'SN',
   'Serbia': 'RS', 'South Africa': 'ZA', 'South Korea': 'KR',
-  'Korea Republic': 'KR', 'Spain': 'ES', 'Sweden': 'SE', 'Switzerland': 'CH',
-  'Tunisia': 'TN', 'Turkey': 'TR', 'Ukraine': 'UA', 'United States': 'US',
-  'USA': 'US', 'Uruguay': 'UY', 'Wales': 'GB',
+  'Spain': 'ES', 'Sweden': 'SE', 'Switzerland': 'CH',
+  'Tunisia': 'TN', 'Turkey': 'TR', 'Türkiye': 'TR',
+  'Ukraine': 'UA', 'United States': 'US', 'USA': 'US',
+  'Uruguay': 'UY', 'Uzbekistan': 'UZ', 'Wales': 'GB',
 };
 
 function codeToEmoji(code: string | null | undefined): string {
-  if (!code || code.length !== 2) return '🏴';
+  if (!code || code.length !== 2) return '';
   const upper = code.toUpperCase();
   const a = upper.charCodeAt(0);
   const b = upper.charCodeAt(1);
-  if (a < 65 || a > 90 || b < 65 || b > 90) return '🏴';
+  if (a < 65 || a > 90 || b < 65 || b > 90) return '';
   return String.fromCodePoint(0x1F1E6 + a - 65, 0x1F1E6 + b - 65);
 }
 
-function getFlagEmoji(country: string | null | undefined, code: string | null | undefined): string {
-  if (code) return codeToEmoji(code);
-  if (!country) return '🏴';
+function getFlagEmoji(country: string | null | undefined): string {
+  if (!country) return '';
   const fromMap = NAME_TO_CODE[country];
-  return fromMap ? codeToEmoji(fromMap) : '🏴';
+  return fromMap ? codeToEmoji(fromMap) : '';
 }
 
 function ageLabel(confirmedAt: string | null): string {
@@ -78,44 +82,70 @@ function ageLabel(confirmedAt: string | null): string {
   return `FT · ${ageDay}D AGO`;
 }
 
+const LIVE_STATUSES = new Set(['live', 'in_progress', 'in-progress', 'ongoing']);
+const UPCOMING_STATUSES = new Set(['scheduled', 'pending', 'upcoming', 'awaiting_result', 'awaiting_confirmation', 'submitted', 'not_started', 'open']);
+const PLAYED_STATUSES = new Set(['completed', 'walkover', 'finished', 'final', 'confirmed']);
+
 export async function getFixtureTickerData(limit: number = 10): Promise<FixtureEntry[]> {
   const supabase = createClient();
 
-  const { data: matches } = await supabase
+  // Step 1: get matches without nested joins (to avoid FK-name mismatches)
+  const { data: matches, error: matchError } = await supabase
     .from('matches')
-    .select(`
-      id, status, decided_by,
-      home_score, away_score, home_pens, away_pens,
-      matchday, round, confirmed_at,
-      home_participant_id, away_participant_id, winner_participant_id, tournament_id,
-      tournament:tournaments(id, name, slug, status),
-      home:tournament_participants!matches_home_participant_id_fkey(
-        id,
-        country:countries(name, group_label),
-        player:players(username)
-      ),
-      away:tournament_participants!matches_away_participant_id_fkey(
-        id,
-        country:countries(name, group_label),
-        player:players(username)
-      )
-    `)
-    .in('status', ['live', 'in_progress', 'awaiting_result', 'awaiting_confirmation', 'completed', 'walkover'])
+    .select('id, status, decided_by, home_score, away_score, home_pens, away_pens, matchday, round, confirmed_at, home_participant_id, away_participant_id, winner_participant_id, tournament_id, created_at')
     .order('confirmed_at', { ascending: false, nullsFirst: false })
-    .limit(60);
+    .order('created_at', { ascending: false })
+    .limit(80);
 
-  if (!matches || matches.length === 0) return [];
+  if (matchError) {
+    console.error('[ticker] matches query error:', matchError);
+    return [];
+  }
+  if (!matches || matches.length === 0) {
+    console.log('[ticker] no matches found');
+    return [];
+  }
+
+  console.log('[ticker] fetched', matches.length, 'matches');
+  console.log('[ticker] status distribution:', matches.reduce((acc: Record<string, number>, m: any) => {
+    acc[m.status ?? 'null'] = (acc[m.status ?? 'null'] ?? 0) + 1;
+    return acc;
+  }, {}));
+
+  // Step 2: collect all unique IDs we need to look up
+  const tournamentIds = Array.from(new Set(matches.map((m: any) => m.tournament_id).filter(Boolean)));
+  const participantIds = Array.from(new Set(
+    matches.flatMap((m: any) => [m.home_participant_id, m.away_participant_id]).filter(Boolean)
+  ));
+
+  // Step 3: fetch tournaments
+  const { data: tournaments } = await supabase
+    .from('tournaments')
+    .select('id, name, slug, status')
+    .in('id', tournamentIds);
+  const tournamentById = new Map<string, any>();
+  for (const t of (tournaments ?? [])) tournamentById.set(t.id, t);
+
+  // Step 4: fetch participants with country + player
+  const { data: participants } = await supabase
+    .from('tournament_participants')
+    .select('id, country:countries(name, code, group_label), player:players(username)')
+    .in('id', participantIds);
+  const participantById = new Map<string, any>();
+  for (const p of (participants ?? [])) participantById.set(p.id, p);
+
+  console.log('[ticker] tournaments:', tournamentById.size, 'participants:', participantById.size);
 
   const live: FixtureEntry[] = [];
   const upcoming: FixtureEntry[] = [];
   const played: FixtureEntry[] = [];
 
-  for (const m of matches) {
-    const tournament: any = m.tournament;
+  for (const m of matches as any[]) {
+    const tournament = tournamentById.get(m.tournament_id);
     if (!tournament || tournament.status === 'cancelled') continue;
 
-    const home: any = m.home;
-    const away: any = m.away;
+    const home = participantById.get(m.home_participant_id);
+    const away = participantById.get(m.away_participant_id);
     if (!home || !away) continue;
 
     const homeUsername = home.player?.username ?? null;
@@ -124,16 +154,22 @@ export async function getFixtureTickerData(limit: number = 10): Promise<FixtureE
     const awayCountry = away.country?.name ?? null;
     if (!homeUsername || !awayUsername || !homeCountry || !awayCountry) continue;
 
+    const rawStatus = String(m.status ?? '').toLowerCase();
     let status: FixtureStatus;
     let statusLabel: string;
 
-    if (m.status === 'completed' || m.status === 'walkover') {
+    if (PLAYED_STATUSES.has(rawStatus) || m.home_score != null) {
+      // Treat anything with a score as played, regardless of status field
       status = 'played';
-      statusLabel = ageLabel(m.confirmed_at);
-    } else if (m.status === 'live' || m.status === 'in_progress') {
+      statusLabel = ageLabel(m.confirmed_at ?? m.created_at);
+    } else if (LIVE_STATUSES.has(rawStatus)) {
       status = 'live';
       statusLabel = 'LIVE';
+    } else if (UPCOMING_STATUSES.has(rawStatus)) {
+      status = 'upcoming';
+      statusLabel = 'UPCOMING';
     } else {
+      // Unknown status — bucket as upcoming so it shows
       status = 'upcoming';
       statusLabel = 'UPCOMING';
     }
@@ -163,14 +199,14 @@ export async function getFixtureTickerData(limit: number = 10): Promise<FixtureE
       statusLabel,
       home: {
         country: homeCountry,
-        countryFlag: getFlagEmoji(homeCountry, null),
+        countryFlag: getFlagEmoji(homeCountry),
         username: homeUsername,
         score: m.home_score,
         pens: m.home_pens,
       },
       away: {
         country: awayCountry,
-        countryFlag: getFlagEmoji(awayCountry, null),
+        countryFlag: getFlagEmoji(awayCountry),
         username: awayUsername,
         score: m.away_score,
         pens: m.away_pens,
@@ -187,7 +223,8 @@ export async function getFixtureTickerData(limit: number = 10): Promise<FixtureE
     else played.push(entry);
   }
 
-  // Take up to 3 live, up to 4 upcoming, fill rest with played
+  console.log('[ticker] bucketed: live=', live.length, 'upcoming=', upcoming.length, 'played=', played.length);
+
   const result: FixtureEntry[] = [
     ...live.slice(0, 3),
     ...upcoming.slice(0, 4),

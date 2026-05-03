@@ -200,13 +200,13 @@ export default function SignedOutHero({ liveCount }: Props) {
               <span className="arrow">→</span>
             </Link>
           )}
-          <h1 className="so-title">
-            eFootball<br />
-            tournaments,<br />
-            <span className="accent">played for real.</span>
+         <h1 className="so-title">
+            Where every<br />
+            match<br />
+            <span className="accent">counts.</span>
           </h1>
           <p className="so-sub">
-            Verified results. Live brackets. A community that takes the game as seriously as you do.
+            You take this seriously. So do we. Real tournaments, verified scores, a season-long ranking that remembers every match you play.
           </p>
           <div className="so-ctas">
             <Link href="/signup" className="so-cta">Create account →</Link>

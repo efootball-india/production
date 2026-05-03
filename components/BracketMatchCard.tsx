@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
 import MatchEditSheet from './MatchEditSheet';
 
 type Props = {
@@ -21,6 +22,13 @@ export default function BracketMatchCard({
   roundLabel,
 }: Props) {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Close the sheet whenever the URL changes (e.g. after server redirect on save)
+  useEffect(() => {
+    setSheetOpen(false);
+  }, [pathname, searchParams]);
 
   const m = match;
   const winnerId = m.winner_participant_id ?? null;
@@ -143,6 +151,7 @@ export default function BracketMatchCard({
           initialHomePens={m.home_pens}
           initialAwayPens={m.away_pens}
           initialDecidedBy={m.decided_by}
+          returnTo={`/tournaments/${slug}/bracket`}
         />
       )}
     </>

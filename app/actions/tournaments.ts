@@ -180,9 +180,10 @@ export async function updateTournament(formData: FormData) {
     .maybeSingle();
   if (!existing) redirect('/admin/tournaments');
 
-  const name = (formData.get('name') as string ?? '').trim();
+const name = (formData.get('name') as string ?? '').trim();
   const description = (formData.get('description') as string ?? '').trim() || null;
   const banner_image_url = (formData.get('banner_image_url') as string ?? '').trim() || null;
+  const prize_pool = (formData.get('prize_pool') as string ?? '').trim() || null;
   const max_raw = (formData.get('max_participants') as string ?? '').trim();
   const reg_close = (formData.get('registration_closes_at') as string ?? '').trim();
   const starts_at = (formData.get('starts_at') as string ?? '').trim();
@@ -212,12 +213,13 @@ export async function updateTournament(formData: FormData) {
   const regCloseIso = reg_close ? new Date(reg_close).toISOString() : null;
   const startsAtIso = starts_at ? new Date(starts_at).toISOString() : null;
 
-  const { error } = await supabase
+const { error } = await supabase
     .from('tournaments')
     .update({
       name,
       description,
       banner_image_url,
+      prize_pool,
       max_participants,
       registration_closes_at: regCloseIso,
       starts_at: startsAtIso,

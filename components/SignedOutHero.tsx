@@ -26,14 +26,14 @@ export default function SignedOutHero({ liveCount }: Props) {
           }
         }
 
-        .so-bg {
+  .so-bg {
           position: absolute;
           inset: 0;
           z-index: 1;
-          /* Replace with: background-image: url('/hero-bg.jpg'); background-size: cover; background-position: center; */
           background:
-            linear-gradient(135deg, rgba(10,10,10,0.55) 0%, rgba(10,10,10,0.10) 50%, rgba(10,10,10,0.30) 100%),
-            linear-gradient(135deg, #1f1f1f 0%, #0a0a0a 60%, #1a2520 100%);
+            linear-gradient(135deg, rgba(10,10,10,0.65) 0%, rgba(10,10,10,0.15) 55%, rgba(10,10,10,0.40) 100%),
+            url('/hero-bg.jpg') center/cover no-repeat,
+            #0a0a0a;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -41,53 +41,13 @@ export default function SignedOutHero({ liveCount }: Props) {
         @media (max-width: 720px) {
           .so-bg {
             background:
-              linear-gradient(180deg, rgba(10,10,10,0.30) 0%, rgba(10,10,10,0.60) 60%, rgba(10,10,10,0.85) 100%),
-              linear-gradient(135deg, #1f1f1f 0%, #0a0a0a 60%, #1a2520 100%);
+              linear-gradient(180deg, rgba(10,10,10,0.20) 0%, rgba(10,10,10,0.40) 45%, rgba(10,10,10,0.85) 100%),
+              url('/hero-bg-mobile.jpg') center/cover no-repeat,
+              #0a0a0a;
           }
         }
 
-        .so-bg-placeholder {
-          border: 1.5px dashed rgba(255,255,255,0.22);
-          padding: 22px 32px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-          background: rgba(0,0,0,0.18);
-          margin-left: 38%;
-        }
-        @media (max-width: 720px) {
-          .so-bg-placeholder {
-            margin-left: 0;
-            margin-top: -180px;
-            padding: 14px 18px;
-          }
-        }
-        .so-bg-placeholder .icon {
-          width: 36px; height: 36px;
-          border: 1.5px solid rgba(255,255,255,0.30);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .so-bg-placeholder .icon::before {
-          content: '';
-          width: 16px; height: 12px;
-          border: 1.5px solid rgba(255,255,255,0.30);
-          border-radius: 4px;
-        }
-        .so-bg-placeholder .label {
-          font-family: var(--font-mono), ui-monospace, monospace;
-          font-size: 11px; font-weight: 700;
-          letter-spacing: 0.20em;
-          color: rgba(255,255,255,0.5);
-        }
-        .so-bg-placeholder .sub {
-          font-family: var(--font-mono), ui-monospace, monospace;
-          font-size: 9px;
-          letter-spacing: 0.14em;
-          color: rgba(255,255,255,0.32);
-        }
+
 
         .so-content {
           position: relative;
@@ -230,14 +190,8 @@ export default function SignedOutHero({ liveCount }: Props) {
         }
       `}</style>
 
-      <div className="so-hero">
-        <div className="so-bg">
-          <div className="so-bg-placeholder">
-            <div className="icon" />
-            <span className="label">YOUR HERO IMAGE</span>
-            <span className="sub">controller close-up · 1920×1080 jpg</span>
-          </div>
-        </div>
+   <div className="so-hero">
+        <div className="so-bg" />
         <div className="so-content">
           {liveCount > 0 && (
             <Link href="/tournaments" className="so-live-badge">

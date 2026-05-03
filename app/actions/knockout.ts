@@ -146,9 +146,9 @@ export async function submitKnockoutScore(formData: FormData) {
     }).eq('id', match.tournament_id);
   }
 
-  revalidatePath(`/tournaments/${slug}/bracket`);
+ revalidatePath(`/tournaments/${slug}/bracket`);
   if (returnTo) {
-    redirect(`${returnTo}?ok=score_updated`);
+    redirect(`${returnTo}?ok=score_updated&t=${Date.now()}`);
   }
   redirect(`/tournaments/${slug}/bracket?completed=${matchId}`);
 }

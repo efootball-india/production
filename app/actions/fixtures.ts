@@ -298,11 +298,10 @@ export async function overrideMatchScore(formData: FormData) {
   await tryAutoGenerateBracket(match.tournament_id);
 
   revalidatePath(target);
-  if (returnTo) {
-    redirect(`${returnTo}?ok=score_updated`);
+if (returnTo) {
+    redirect(`${returnTo}?ok=score_updated&t=${Date.now()}`);
   }
   redirect(`/admin/tournaments/${slug}/queue?overridden=${matchId}`);
-}
 
 export async function recordWalkover(formData: FormData) {
   const { supabase, user } = await requireMod();
@@ -389,10 +388,10 @@ export async function recordWalkover(formData: FormData) {
     metadata: { winner_side: winnerSide, is_knockout: isKnockout },
   });
 
-  revalidatePath(`/tournaments/${slug}`);
+ revalidatePath(`/tournaments/${slug}`);
   revalidatePath(`/tournaments/${slug}/bracket`);
   if (returnTo) {
-    redirect(`${returnTo}?ok=walkover_recorded`);
+    redirect(`${returnTo}?ok=walkover_recorded&t=${Date.now()}`);
   }
   redirect(`/tournaments/${slug}?walkover=${matchId}`);
 }

@@ -1,4 +1,4 @@
-// PASS-9-LAYOUT (editorial theme + restored chrome)
+// PASS-10-LAYOUT (editorial theme + OG metadata + favicon)
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Archivo, JetBrains_Mono } from 'next/font/google';
@@ -21,8 +21,53 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'eFTBL · eFootball Tournament Platform',
-  description: 'A community tournament platform for eFootball 1v1 players. Group stages, knockouts, rankings.',
+  metadataBase: new URL('https://eftbl.in'),
+  title: {
+    default: 'eFTBL · Where every match counts',
+    template: '%s · eFTBL',
+  },
+  description: 'You take this seriously. So do we. Real tournaments, verified scores, a season-long ranking that remembers every match you play.',
+  keywords: ['eFootball', 'tournaments', 'esports', '1v1', 'gaming community', 'eFTBL', 'India eFootball', 'eFootball league'],
+  authors: [{ name: 'eFTBL' }],
+  creator: 'eFTBL',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://eftbl.in',
+    siteName: 'eFTBL',
+    title: 'eFTBL · Where every match counts',
+    description: 'You take this seriously. So do we. Real tournaments, verified scores, a season-long ranking that remembers every match you play.',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'eFTBL — eFootball tournament platform. Where every match counts.',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'eFTBL · Where every match counts',
+    description: 'Real tournaments, verified scores, a season-long ranking. eFootball played seriously.',
+    images: ['/og-image.jpg'],
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+  manifest: '/site.webmanifest',
+  themeColor: '#0a0a0a',
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

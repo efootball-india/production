@@ -26,12 +26,12 @@ export default function SignedOutHero({ liveCount }: Props) {
           }
         }
 
-  .so-bg {
+ .so-bg {
           position: absolute;
           inset: 0;
           z-index: 1;
           background:
-            linear-gradient(135deg, rgba(10,10,10,0.65) 0%, rgba(10,10,10,0.15) 55%, rgba(10,10,10,0.40) 100%),
+            linear-gradient(90deg, rgba(10,10,10,0.55) 0%, rgba(10,10,10,0) 50%),
             url('/hero-bg.jpg') center/cover no-repeat,
             #0a0a0a;
           display: flex;

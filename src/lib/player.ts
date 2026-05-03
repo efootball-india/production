@@ -21,6 +21,7 @@ export interface Player {
   timezone: string | null;
   game_id: string | null;
   discord_handle: string | null;
+  whatsapp_contact: string | null;
   role: PlayerRole;
   is_active: boolean;
   security_question: string | null;
@@ -64,7 +65,12 @@ export async function requireCompleteProfile(): Promise<Player> {
 }
 
 export function isProfileComplete(player: Player): boolean {
-  return Boolean(player.username && player.display_name && player.platform);
+  return Boolean(
+    player.username &&
+    player.display_name &&
+    player.platform &&
+    player.whatsapp_contact
+  );
 }
 
 export const PLATFORM_LABELS: Record<Platform, string> = {

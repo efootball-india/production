@@ -151,62 +151,92 @@ export default async function TournamentLayout({
           </p>
         )}
       </header>
-
-      {/* Action row — register / withdraw / sign in / complete profile */}
+{/* Action row — register / withdraw / sign in / complete profile / offline notice */}
       <div className="mb-6 md:mb-8">
-        {!player && (
-          <Link
-            href="/signin"
-            className="inline-block bg-accent text-white border border-accent hover:bg-ink hover:border-ink transition-colors px-5 py-3 font-mono text-[11px] font-bold tracking-[0.18em] uppercase"
-          >
-            Sign in to register
-          </Link>
-        )}
+        {(() => {
+          const isOfflineRegistration = tournament.slug === 'eftbl-world-cup';
 
-        {player && !profileOk && (
-          <Link
-            href="/profile/edit"
-            className="inline-block bg-accent text-white border border-accent hover:bg-ink hover:border-ink transition-colors px-5 py-3 font-mono text-[11px] font-bold tracking-[0.18em] uppercase"
-          >
-            Complete profile to register
-          </Link>
-        )}
+          // Offline-registration tournaments: show notice instead of register flow
+          if (isOfflineRegistration && tournament.status === 'registration_open') {
+            if (player && profileOk && isRegistered) {
+              return (
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="label-strong text-status-ok">✓ You're in</span>
+                  <span className="label">Registration managed by admin</span>
+                </div>
+              );
+            }
+            return (
+              <div className="border border-ink-strong bg-card-2 px-5 py-4 max-w-xl">
+                <div className="font-mono text-[10px] font-bold tracking-[0.18em] uppercase text-accent mb-2">
+                  ★ INVITE ONLY
+                </div>
+                <div className="text-sm text-ink/80 leading-relaxed">
+                  This tournament's registration is managed offline. Contact admin to register.
+                </div>
+              </div>
+            );
+          }
 
-        {player && profileOk && !isRegistered && regOpen && !capacityFull && (
-          <form action={registerForTournament}>
-            <input type="hidden" name="slug" value={tournament.slug} />
-            <button
-              type="submit"
-              className="bg-accent text-white border border-accent hover:bg-ink hover:border-ink transition-colors px-6 py-3 font-mono text-[11px] font-bold tracking-[0.18em] uppercase cursor-pointer"
-            >
-              Register →
-            </button>
-          </form>
-        )}
+          // Normal flow
+          return (
+            <>
+              {!player && (
+                <Link
+                  href="/signin"
+                  className="inline-block bg-accent text-white border border-accent hover:bg-ink hover:border-ink transition-colors px-5 py-3 font-mono text-[11px] font-bold tracking-[0.18em] uppercase"
+                >
+                  Sign in to register
+                </Link>
+              )}
 
-        {player && profileOk && !isRegistered && regOpen && capacityFull && (
-          <span className="label">Tournament is full</span>
-        )}
+              {player && !profileOk && (
+                <Link
+                  href="/profile/edit"
+                  className="inline-block bg-accent text-white border border-accent hover:bg-ink hover:border-ink transition-colors px-5 py-3 font-mono text-[11px] font-bold tracking-[0.18em] uppercase"
+                >
+                  Complete profile to register
+                </Link>
+              )}
 
-        {player && profileOk && isRegistered && tournament.status === 'registration_open' && (
-          <form action={withdrawFromTournament}>
-            <input type="hidden" name="slug" value={tournament.slug} />
-            <input type="hidden" name="tournament_id" value={tournament.id} />
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="label-strong text-status-ok">✓ You're in</span>
-              <button
-                type="submit"
-                className="border border-hairline-strong hover:border-ink-strong text-default hover:bg-ink hover:text-bg transition-colors px-3 py-2 font-mono text-[10px] font-bold tracking-[0.14em] uppercase cursor-pointer"
-              >
-                Withdraw
-              </button>
-            </div>
-          </form>
-        )}
+              {player && profileOk && !isRegistered && regOpen && !capacityFull && (
+                <form action={registerForTournament}>
+                  <input type="hidden" name="slug" value={tournament.slug} />
+                  <button
+                    type="submit"
+                    className="bg-accent text-white border border-accent hover:bg-ink hover:border-ink transition-colors px-6 py-3 font-mono text-[11px] font-bold tracking-[0.18em] uppercase cursor-pointer"
+                  >
+                    Register →
+                  </button>
+                </form>
+              )}
 
-        {player && profileOk && isRegistered && tournament.status !== 'registration_open' && (
-          <span className="label-strong text-status-ok">✓ You're in this tournament</span>
-        )}
+              {player && profileOk && !isRegistered && regOpen && capacityFull && (
+                <span className="label">Tournament is full</span>
+              )}
+
+              {player && profileOk && isRegistered && tournament.status === 'registration_open' && (
+                <form action={withdrawFromTournament}>
+                  <input type="hidden" name="slug" value={tournament.slug} />
+                  <input type="hidden" name="tournament_id" value={tournament.id} />
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="label-strong text-status-ok">✓ You're in</span>
+                    <button
+                      type="submit"
+                      className="border border-hairline-strong hover:border-ink-strong text-default hover:bg-ink hover:text-bg transition-colors px-3 py-2 font-mono text-[10px] font-bold tracking-[0.14em] uppercase cursor-pointer"
+                    >
+                      Withdraw
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {player && profileOk && isRegistered && tournament.status !== 'registration_open' && (
+                <span className="label-strong text-status-ok">✓ You're in this tournament</span>
+              )}
+            </>
+          );
+        })()}
       </div>
 
       {/* Admin shortcuts */}

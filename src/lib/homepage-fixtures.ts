@@ -75,11 +75,11 @@ function ageLabel(confirmedAt: string | null): string {
   const ageMs = Date.now() - new Date(confirmedAt).getTime();
   const ageMin = Math.floor(ageMs / 60000);
   if (ageMin < 1) return 'FT · JUST NOW';
-  if (ageMin < 60) return `FT · ${ageMin}M AGO`;
+  if (ageMin < 60) return 'FT · ' + ageMin + 'M AGO';
   const ageHr = Math.floor(ageMin / 60);
-  if (ageHr < 24) return `FT · ${ageHr}H AGO`;
+  if (ageHr < 24) return 'FT · ' + ageHr + 'H AGO';
   const ageDay = Math.floor(ageHr / 24);
-  return `FT · ${ageDay}D AGO`;
+  return 'FT · ' + ageDay + 'D AGO';
 }
 
 const LIVE_STATUSES = new Set(['live', 'in_progress', 'in-progress', 'ongoing']);
@@ -142,6 +142,11 @@ export async function getFixtureTickerData(
     const awayCountry = away.country?.name ?? null;
     if (!homeUsername || !awayUsername || !homeCountry || !awayCountry) continue;
 
+    const homeId: string = home.id;
+    const awayId: string = away.id;
+    const homePlayerId: string | null = home.player_id ?? null;
+    const awayPlayerId: string | null = away.player_id ?? null;
+
     const rawStatus = String(m.status ?? '').toLowerCase();
     let status: FixtureStatus;
     let statusLabel: string;
@@ -160,26 +165,33 @@ export async function getFixtureTickerData(
       statusLabel = 'UPCOMING';
     }
 
-    const stageLabel = m.matchday != null
-      ? `MD${m.matchday}`
-      : m.round != null
-      ? ROUND_LABELS[m.round] ?? `R${m.round}`
-      : '';
+    let stageLabel = '';
+    if (m.matchday != null) {
+      stageLabel = 'MD' + m.matchday;
+    } else if (m.round != null) {
+      stageLabel = ROUND_LABELS[m.round] ?? ('R' + m.round);
+    }
 
     const groupLabel = home.country?.group_label
-      ? `GROUP ${home.country.group_label}`
+      ? 'GROUP ' + home.country.group_label
       : null;
 
-    const winnerId = m.winner_participant_id;
-    const isWinnerHome = winnerId
-      ? winnerId === home.id
-        ? true
-        : winnerId === away.id
-        ? false
-        : null
-      : null;
+    const winnerId: string | null = m.winner_participant_id ?? null;
+    let isWinnerHome: boolean | null = null;
+    if (winnerId) {
+      if (winnerId === homeId) {
+        isWinnerHome = true;
+      } else if (winnerId === awayId) {
+        isWinnerHome = false;
+      }
+    }
 
-    const isMine = !!(currentPlayerId && (home.player_id === currentPlayerId || away.player_id === currentPlayerId));
+    let isMine = false;
+    if (currentPlayerId) {
+      if (homePlayerId === currentPlayerId || awayPlayerId === currentPlayerId) {
+        isMine = true;
+      }
+    }
 
     const entry: FixtureEntry = {
       id: m.id,
@@ -209,28 +221,42 @@ export async function getFixtureTickerData(
     all.push({ entry, isMine });
   }
 
-  // Bucket
-  const myLive = all.filter((x) => x.isMine && x.entry.status === 'live').map((x) => x.entry);
-  const myUpcoming = all.filter((x) => x.isMine && x.entry.status === 'upcoming').map((x) => x.entry);
-  const myPlayed = all.filter((x) => x.isMine && x.entry.status === 'played').map((x) => x.entry);
+  const myLive: FixtureEntry[] = [];
+  const myUpcoming: FixtureEntry[] = [];
+  const myPlayed: FixtureEntry[] = [];
+  const otherLive: FixtureEntry[] = [];
+  const otherUpcoming: FixtureEntry[] = [];
+  const otherPlayed: FixtureEntry[] = [];
 
-  const otherLive = all.filter((x) => !x.isMine && x.entry.status === 'live').map((x) => x.entry);
-  const otherUpcoming = all.filter((x) => !x.isMine && x.entry.status === 'upcoming').map((x) => x.entry);
-  const otherPlayed = all.filter((x) => !x.isMine && x.entry.status === 'played').map((x) => x.entry);
+  for (const x of all) {
+    if (x.isMine) {
+      if (x.entry.status === 'live') myLive.push(x.entry);
+      else if (x.entry.status === 'upcoming') myUpcoming.push(x.entry);
+      else myPlayed.push(x.entry);
+    } else {
+      if (x.entry.status === 'live') otherLive.push(x.entry);
+      else if (x.entry.status === 'upcoming') otherUpcoming.push(x.entry);
+      else otherPlayed.push(x.entry);
+    }
+  }
 
-  // Personal slice — capped at 2 cards (live > upcoming > played)
   const mineSlice: FixtureEntry[] = [];
-  for (const f of myLive) { if (mineSlice.length < 2) mineSlice.push(f); }
-  for (const f of myUpcoming) { if (mineSlice.length < 2) mineSlice.push(f); }
-  for (const f of myPlayed) { if (mineSlice.length < 2) mineSlice.push(f); }
+  for (const f of myLive) {
+    if (mineSlice.length < 2) mineSlice.push(f);
+  }
+  for (const f of myUpcoming) {
+    if (mineSlice.length < 2) mineSlice.push(f);
+  }
+  for (const f of myPlayed) {
+    if (mineSlice.length < 2) mineSlice.push(f);
+  }
 
-  // Other slice — fill the rest
   const remaining = Math.max(0, limit - mineSlice.length);
-  const otherSlice: FixtureEntry[] = [
-    ...otherLive.slice(0, 3),
-    ...otherUpcoming.slice(0, 4),
-    ...otherPlayed.slice(0, Math.max(0, remaining - otherLive.slice(0, 3).length - otherUpcoming.slice(0, 4).length)),
-  ].slice(0, remaining);
+  const otherTopLive = otherLive.slice(0, 3);
+  const otherTopUpcoming = otherUpcoming.slice(0, 4);
+  const playedSlots = Math.max(0, remaining - otherTopLive.length - otherTopUpcoming.length);
+  const otherTopPlayed = otherPlayed.slice(0, playedSlots);
+  const otherSlice = [...otherTopLive, ...otherTopUpcoming, ...otherTopPlayed].slice(0, remaining);
 
   return [...mineSlice, ...otherSlice].slice(0, limit);
 }

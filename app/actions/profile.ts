@@ -25,13 +25,14 @@ async function saveProfile(formData: FormData, requireSecurityQuestion: boolean)
   const security_question = (formData.get('security_question') as string ?? '').trim();
   const security_answer = (formData.get('security_answer') as string ?? '').trim();
 
-  if (!username) return { ok: false, error: 'Username is required' };
+if (!username) return { ok: false, error: 'Username is required' };
   if (username.length < 3 || username.length > 24) return { ok: false, error: 'Username must be 3-24 characters' };
   if (!/^[A-Za-z0-9_]+$/.test(username)) return { ok: false, error: 'Username: letters, numbers, underscore only' };
   if (platform && !VALID_PLATFORMS.includes(platform as Platform)) return { ok: false, error: 'Invalid platform' };
   if (region && !/^[A-Z]{2}$/.test(region)) return { ok: false, error: 'Country must be a 2-letter code' };
-  if (whatsapp_contact && (whatsapp_contact.length > 32 || !/^[0-9+\-() ]+$/.test(whatsapp_contact))) {
-    return { ok: false, error: 'WhatsApp must be digits, spaces, hyphens, parens, or +' };
+  if (!whatsapp_contact) return { ok: false, error: 'WhatsApp number is required' };
+  if (whatsapp_contact.length < 6 || whatsapp_contact.length > 32 || !/^[0-9+\-() ]+$/.test(whatsapp_contact)) {
+    return { ok: false, error: 'WhatsApp must be 6-32 chars · digits, spaces, hyphens, parens, or + only' };
   }
 
   if (requireSecurityQuestion) {

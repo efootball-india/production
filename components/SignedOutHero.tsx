@@ -39,10 +39,9 @@ export default function SignedOutHero({ liveCount }: Props) {
           align-items: center;
           justify-content: center;
         }
-        @media (max-width: 720px) {
+    @media (max-width: 720px) {
           .so-bg {
             background:
-              linear-gradient(180deg, rgba(10,10,10,0.20) 0%, rgba(10,10,10,0.40) 45%, rgba(10,10,10,0.85) 100%),
               url('/hero-bg-mobile.jpg') center/cover no-repeat,
               #0a0a0a;
           }

@@ -255,6 +255,22 @@ function SettingsTab({ tournament, koPlayed }: { tournament: any; koPlayed: numb
           </div>
 
           <div className="mg-field">
+            <label htmlFor="mg-prize" className="mg-label">Prize pool</label>
+            <input
+              id="mg-prize"
+              name="prize_pool"
+              type="text"
+              className="mg-input"
+              defaultValue={tournament.prize_pool ?? ''}
+              placeholder="₹10,000 prize pool · ₹5,000 to winner"
+              maxLength={120}
+            />
+            <div className="mg-hint">
+              Freeform text. Leave empty to hide the prize section. Examples: "$500 + trophy", "₹10,000 prize pool", "Bragging rights".
+            </div>
+          </div>
+
+          <div className="mg-field">
             <label className="mg-label">Format</label>
             <input
               type="text"

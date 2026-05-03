@@ -96,7 +96,7 @@ export async function groupStageComplete(tournamentId: string): Promise<{ comple
     .select('*', { count: 'exact', head: true })
     .eq('tournament_id', tournamentId)
     .not('matchday', 'is', null)
-    .neq('status', 'completed');
+   .not('status', 'in', '(completed,walkover)');
   return { complete: (pending ?? 0) === 0, pending: pending ?? 0 };
 }
 

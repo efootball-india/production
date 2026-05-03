@@ -200,10 +200,9 @@ export default function SignedOutHero({ liveCount }: Props) {
               <span className="arrow">→</span>
             </Link>
           )}
-         <h1 className="so-title">
+      <h1 className="so-title">
             Where every<br />
-            match<br />
-            <span className="accent">counts.</span>
+            match <span className="accent">counts.</span>
           </h1>
           <p className="so-sub">
             You take this seriously. So do we. Real tournaments, verified scores, a season-long ranking that remembers every match you play.

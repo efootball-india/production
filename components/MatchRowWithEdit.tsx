@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
 import MatchEditSheet from './MatchEditSheet';
 
 type WinnerSide = 'home' | 'away' | 'draw' | null;
@@ -38,6 +39,14 @@ function getWinner(match: any): WinnerSide {
 
 export default function MatchRowWithEdit({ match, slug, isMod, isKnockout }: Props) {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Close the sheet whenever the URL changes (e.g. after server redirect on save).
+  // Without this, hydration errors after redirect can leave the sheet stuck open.
+  useEffect(() => {
+    setSheetOpen(false);
+  }, [pathname, searchParams]);
 
   const home = match.home;
   const away = match.away;
@@ -159,7 +168,7 @@ export default function MatchRowWithEdit({ match, slug, isMod, isKnockout }: Pro
         </article>
       )}
 
-    {canEdit && sheetOpen && (
+      {canEdit && sheetOpen && (
         <MatchEditSheet
           open={sheetOpen}
           onClose={() => setSheetOpen(false)}

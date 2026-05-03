@@ -4,10 +4,11 @@ import { getCurrentPlayer } from '@/lib/player';
 import { listTournaments, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments';
 import { getPlayerStats } from '@/lib/stats';
 import ProfileHero from '../components/ProfileHero';
-import { getPlayerConsistency, seasonWindow } from '@/lib/consistency';
+import { getPlayerConsistency, getConsistencyRanking, seasonWindow } from '@/lib/consistency';
 import { getFixtureTickerData } from '@/lib/homepage-fixtures';
 import SignedOutHero from '../components/SignedOutHero';
 import FixtureTicker from '../components/FixtureTicker';
+import CommunityCard from '../components/CommunityCard';
 
 export default async function HomePage() {
   const player = await getCurrentPlayer();
@@ -20,7 +21,10 @@ export default async function HomePage() {
   const fixtures = await getFixtureTickerData(8, player?.id ?? null);
   const liveCount = fixtures.filter((f) => f.status === 'live').length;
   const { label: seasonLabel } = seasonWindow();
-  
+
+  const ranking = await getConsistencyRanking();
+  const topPlayers = ranking.slice(0, 5);
+  const totalPlayers = ranking.length;
 
   const supabase = createClient();
   const myParticipations: Map<string, { participantId: string; status: string; countryId: string | null }> = new Map();
@@ -47,7 +51,7 @@ export default async function HomePage() {
 
   return (
     <main className="bg-bg text-ink min-h-screen">
-     {player && stats ? (
+      {player && stats ? (
         <ProfileHero
           displayName={player.display_name ?? player.username}
           username={player.username}
@@ -60,7 +64,7 @@ export default async function HomePage() {
           points={consistency?.points ?? null}
           seasonLabel={seasonLabel}
         />
-     ) : (
+      ) : (
         <>
           <SignedOutHero liveCount={liveCount} />
           <FixtureTicker fixtures={fixtures} liveCount={liveCount} currentUsername={null} />
@@ -69,11 +73,19 @@ export default async function HomePage() {
       {player && (
         <FixtureTicker fixtures={fixtures} liveCount={liveCount} currentUsername={player.username} />
       )}
-       
+
+      {/* Community card — appears below FixtureTicker in both signed-in and signed-out states */}
+      <section className="max-w-[920px] mx-auto px-6 md:px-10 pt-8">
+        <CommunityCard
+          topPlayers={topPlayers}
+          totalPlayers={totalPlayers}
+          seasonLabel={seasonLabel}
+        />
+      </section>
 
       {/* Featured cup */}
       {featured && (
-  <section className="max-w-[920px] mx-auto px-6 md:px-10 pt-12 md:pt-20 pb-16 md:pb-24">
+        <section className="max-w-[920px] mx-auto px-6 md:px-10 pt-12 md:pt-20 pb-16 md:pb-24">
           <h2 className="section-head">Featured cup.</h2>
           <FeaturedCupCard
             tournament={featured}
@@ -85,9 +97,8 @@ export default async function HomePage() {
 
       {/* Active /NN */}
       {active.length > 0 && (
-     <section className="max-w-[920px] mx-auto px-6 md:px-10 pt-4 md:pt-8 pb-24">
+        <section className="max-w-[920px] mx-auto px-6 md:px-10 pt-4 md:pt-8 pb-24">
           <h2 className="section-head">
-            Active
             Active
             <span className="font-mono text-ink/40 ml-2 text-base align-middle">
               /{String(active.length).padStart(2, '0')}
@@ -214,7 +225,7 @@ function FeaturedCupCard({ tournament, player, myParticipation }: any) {
           <span className="label">Featured · {formatLabel}</span>
         </div>
 
-       <h3 className="font-sans font-black text-[40px] md:text-[56px] leading-[0.95] tracking-tight">
+        <h3 className="font-sans font-black text-[40px] md:text-[56px] leading-[0.95] tracking-tight">
           {t.name}
         </h3>
 
@@ -253,7 +264,7 @@ function FeaturedCupCard({ tournament, player, myParticipation }: any) {
           </div>
         </div>
 
-      {isOfflineRegistration && status === 'registration_open' && !isRegistered && (
+        {isOfflineRegistration && status === 'registration_open' && !isRegistered && (
           <div className="mt-8 px-4 py-3 border border-ink/20 bg-ink/5">
             <div className="label-strong mb-1">★ INVITE ONLY</div>
             <div className="text-sm text-ink/70">
@@ -380,7 +391,7 @@ function TournamentCard({ tournament, player, isAdmin, isMod, myParticipation }:
         </div>
       </div>
       <div className="p-6 flex flex-col flex-1">
-       <h3 className="font-sans font-black text-2xl leading-tight tracking-tight">{t.name}</h3>
+        <h3 className="font-sans font-black text-2xl leading-tight tracking-tight">{t.name}</h3>
         {t.prize_pool && (
           <div className="mt-2 font-mono text-[10px] font-bold tracking-[0.16em] uppercase text-accent">
             ★ {t.prize_pool}

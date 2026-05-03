@@ -155,9 +155,13 @@ function FeaturedCupCard({ tournament, player, myParticipation }: any) {
   const isRegistered = !!myParticipation && myParticipation.status === 'registered';
   const bannerUrl: string | null = t.banner_image_url ?? null;
 
+  const isOfflineRegistration = t.slug === 'eftbl-world-cup';
   let primary: { label: string; href: string };
   if (status === 'registration_open') {
-    if (!player) primary = { label: 'Sign in to register →', href: '/signin' };
+    if (isOfflineRegistration) {
+      if (isRegistered) primary = { label: "You're in · View →", href: `/tournaments/${t.slug}` };
+      else primary = { label: 'Invite only · View →', href: `/tournaments/${t.slug}` };
+    } else if (!player) primary = { label: 'Sign in to register →', href: '/signin' };
     else if (isRegistered) primary = { label: "You're in · View →", href: `/tournaments/${t.slug}` };
     else primary = { label: 'Register now →', href: `/tournaments/${t.slug}` };
   } else if (status === 'in_progress') {
@@ -242,6 +246,15 @@ function FeaturedCupCard({ tournament, player, myParticipation }: any) {
           </div>
         </div>
 
+      {isOfflineRegistration && status === 'registration_open' && !isRegistered && (
+          <div className="mt-8 px-4 py-3 border border-ink/20 bg-ink/5">
+            <div className="label-strong mb-1">★ INVITE ONLY</div>
+            <div className="text-sm text-ink/70">
+              This tournament's registration is managed offline. Contact admin to register.
+            </div>
+          </div>
+        )}
+
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href={primary.href}
@@ -271,8 +284,12 @@ function TournamentCard({ tournament, player, isAdmin, isMod, myParticipation }:
   let primary: { label: string; href: string };
   const secondary: { label: string; href: string }[] = [];
 
+  const isOfflineRegistration = t.slug === 'eftbl-world-cup';
   if (status === 'registration_open') {
-    if (!player) primary = { label: 'Sign in to register →', href: '/signin' };
+    if (isOfflineRegistration) {
+      if (isRegistered) primary = { label: "You're in · View →", href: `/tournaments/${t.slug}` };
+      else primary = { label: 'Invite only · View →', href: `/tournaments/${t.slug}` };
+    } else if (!player) primary = { label: 'Sign in to register →', href: '/signin' };
     else if (isRegistered) primary = { label: "You're in · View →", href: `/tournaments/${t.slug}` };
     else primary = { label: 'Register →', href: `/tournaments/${t.slug}` };
   } else if (status === 'registration_closed') {

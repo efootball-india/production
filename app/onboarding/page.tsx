@@ -66,7 +66,7 @@ export default async function OnboardingPage({
             </select>
           </div>
 
-          <div className="auth-field">
+      <div className="auth-field">
             <label htmlFor="game_id" className="auth-label">eFootball friend code (optional)</label>
             <input
               id="game_id" name="game_id" type="text" maxLength={32}
@@ -75,6 +75,21 @@ export default async function OnboardingPage({
             />
           </div>
 
+          <div className="auth-field">
+            <label htmlFor="whatsapp_contact" className="auth-label">WhatsApp number *</label>
+            <input
+              id="whatsapp_contact" name="whatsapp_contact" type="tel" required
+              minLength={6} maxLength={32}
+              pattern="[\d\s\+\-\(\)]+"
+              className="auth-input"
+              placeholder="+91 98765 43210"
+              inputMode="tel"
+              autoComplete="tel"
+            />
+            <small style={{ fontSize: 11, color: 'var(--text-3)' }}>
+              Required · used by admins for match coordination · visible only to tournament admins
+            </small>
+          </div>
           <div className="auth-field">
             <label htmlFor="region" className="auth-label">Country (optional)</label>
             <input

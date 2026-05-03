@@ -3,6 +3,7 @@ import { getConsistencyRanking, seasonWindow } from '@/lib/consistency';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentPlayer } from '@/lib/player';
+import CommunityCard from '../../components/CommunityCard';
 import {
   getMatchesForPlayer,
   roundLabel,
@@ -62,7 +63,7 @@ export default async function PlayIndexPage() {
     <>
       <Styles />
       <main className="efp-page">
-        <div className="efp-head">
+   <div className="efp-head">
           <h1 className="efp-title">
             Your <span className="accent">matches.</span>
           </h1>
@@ -71,6 +72,12 @@ export default async function PlayIndexPage() {
             {played.length} PLAYED
           </div>
         </div>
+
+        <CommunityCard
+          topPlayers={ranking.slice(0, 5)}
+          totalPlayers={ranking.length}
+          seasonLabel={seasonLabel}
+        />
 
         <div className="efp-create">
           <div className="body">
@@ -123,17 +130,7 @@ export default async function PlayIndexPage() {
           </>
         )}
 
-        <Link href="/players" className="efp-discover">
-          <div className="efp-discover-body">
-            <div className="efp-discover-eye">DISCOVER</div>
-            <div className="efp-discover-ttl">See all players</div>
-            <div className="efp-discover-meta">
-              {ranking.length} ranked · season {seasonLabel}
-            </div>
-          </div>
-          <span className="efp-discover-arrow">→</span>
-        </Link>
-      </main>
+    </main>
     </>
   );
 }

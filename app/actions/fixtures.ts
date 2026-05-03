@@ -1,4 +1,4 @@
-// PASS-3-ACTIONS-FIXTURES (with admin logging)
+// PASS-4-ACTIONS-FIXTURES (returnTo + cache-busting timestamps)
 'use server';
 
 import { logAdminAction } from '@/lib/admin-log';
@@ -298,10 +298,11 @@ export async function overrideMatchScore(formData: FormData) {
   await tryAutoGenerateBracket(match.tournament_id);
 
   revalidatePath(target);
-if (returnTo) {
+  if (returnTo) {
     redirect(`${returnTo}?ok=score_updated&t=${Date.now()}`);
   }
   redirect(`/admin/tournaments/${slug}/queue?overridden=${matchId}`);
+}
 
 export async function recordWalkover(formData: FormData) {
   const { supabase, user } = await requireMod();
@@ -312,8 +313,8 @@ export async function recordWalkover(formData: FormData) {
   const isKnockout = (formData.get('is_knockout') as string ?? '') === '1';
 
   if (!matchId || !slug || !['home', 'away'].includes(winnerSide)) {
-    const target = returnTo ?? `/tournaments/${slug}`;
-    redirect(`${target}?error=${encodeURIComponent('Invalid walkover data')}`);
+    const errTarget = returnTo ?? `/tournaments/${slug}`;
+    redirect(`${errTarget}?error=${encodeURIComponent('Invalid walkover data')}`);
   }
 
   const { data: match } = await supabase
@@ -358,12 +359,12 @@ export async function recordWalkover(formData: FormData) {
       else updates.away_participant_id = winnerId;
       await supabase.from('matches').update(updates).eq('id', feeder.target_match_id);
 
-      const { data: target } = await supabase
+      const { data: targetMatch } = await supabase
         .from('matches')
         .select('home_participant_id, away_participant_id')
         .eq('id', feeder.target_match_id)
         .maybeSingle();
-      if (target?.home_participant_id && target?.away_participant_id) {
+      if (targetMatch?.home_participant_id && targetMatch?.away_participant_id) {
         await supabase.from('matches').update({ status: 'awaiting_result' }).eq('id', feeder.target_match_id);
       }
     }
@@ -379,7 +380,7 @@ export async function recordWalkover(formData: FormData) {
     await tryAutoGenerateBracket(match.tournament_id);
   }
 
- await logAdminAction({
+  await logAdminAction({
     tournamentId: match.tournament_id,
     actorPlayerId: user.id,
     actionType: 'record_walkover',
@@ -388,7 +389,7 @@ export async function recordWalkover(formData: FormData) {
     metadata: { winner_side: winnerSide, is_knockout: isKnockout },
   });
 
- revalidatePath(`/tournaments/${slug}`);
+  revalidatePath(`/tournaments/${slug}`);
   revalidatePath(`/tournaments/${slug}/bracket`);
   if (returnTo) {
     redirect(`${returnTo}?ok=walkover_recorded&t=${Date.now()}`);

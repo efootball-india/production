@@ -276,7 +276,7 @@ export async function getGroupStandings(groupId: string): Promise<StandingRow[]>
     .from('matches')
     .select('home_participant_id, away_participant_id, home_score, away_score, status')
     .eq('group_id', groupId)
-    .eq('status', 'completed');
+    .in('status', ['completed', 'walkover']);
 
   const rows = new Map<string, StandingRow>();
   for (const m of (members ?? [])) {

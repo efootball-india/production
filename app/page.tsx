@@ -214,9 +214,16 @@ function FeaturedCupCard({ tournament, player, myParticipation }: any) {
           <span className="label">Featured · {formatLabel}</span>
         </div>
 
-        <h3 className="font-sans font-black text-[40px] md:text-[56px] leading-[0.95] tracking-tight">
+       <h3 className="font-sans font-black text-[40px] md:text-[56px] leading-[0.95] tracking-tight">
           {t.name}
         </h3>
+
+        {t.prize_pool && (
+          <div className="mt-4 inline-flex items-center gap-2 px-3 py-2 border border-accent bg-accent/10">
+            <span className="font-mono text-[10px] font-bold tracking-[0.18em] uppercase text-accent">★ PRIZE POOL</span>
+            <span className="font-sans font-black text-base text-ink">{t.prize_pool}</span>
+          </div>
+        )}
 
         {t.description && (
           <p className="mt-6 max-w-2xl text-lg text-ink/70 leading-relaxed">{t.description}</p>
@@ -373,7 +380,12 @@ function TournamentCard({ tournament, player, isAdmin, isMod, myParticipation }:
         </div>
       </div>
       <div className="p-6 flex flex-col flex-1">
-        <h3 className="font-sans font-black text-2xl leading-tight tracking-tight">{t.name}</h3>
+       <h3 className="font-sans font-black text-2xl leading-tight tracking-tight">{t.name}</h3>
+        {t.prize_pool && (
+          <div className="mt-2 font-mono text-[10px] font-bold tracking-[0.16em] uppercase text-accent">
+            ★ {t.prize_pool}
+          </div>
+        )}
         {t.description && (
           <p className="mt-2 text-sm text-ink/70 leading-relaxed line-clamp-3">{t.description}</p>
         )}

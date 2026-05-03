@@ -114,8 +114,7 @@ export default async function TournamentLayout({
         </div>
 
         <h1 className="display-h1 mb-5 md:mb-6">{tournament.name}.</h1>
-
-        <div className="hairline-strong-t pt-4 grid grid-cols-3 gap-3 md:gap-6 mb-5 md:mb-6">
+<div className="hairline-strong-t pt-4 grid grid-cols-3 gap-3 md:gap-6 mb-5 md:mb-6">
           <div className="min-w-0">
             <div className="label mb-1">Format</div>
             <div className="font-sans font-bold text-xs md:text-base text-default truncate">
@@ -144,6 +143,13 @@ export default async function TournamentLayout({
             </div>
           )}
         </div>
+
+        {(tournament as any).prize_pool && (
+          <div className="mb-5 md:mb-6 inline-flex items-center gap-2 px-3 py-2 border border-accent bg-accent/10">
+            <span className="font-mono text-[10px] font-bold tracking-[0.18em] uppercase text-accent">★ PRIZE POOL</span>
+            <span className="font-sans font-black text-base text-default">{(tournament as any).prize_pool}</span>
+          </div>
+        )}
 
         {tournament.description && (
           <p className="text-muted text-base md:text-lg leading-relaxed max-w-2xl">

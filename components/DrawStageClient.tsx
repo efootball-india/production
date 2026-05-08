@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useState, useRef, useTransition } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import {
   spinForParticipant,
   acceptDraw,
+  pickCandidate,
 } from '../app/actions/draw';
 
 type Country = {
+  id?: string;
   name: string;
   flag: string;
   groupLabel: string;
@@ -23,21 +25,15 @@ type Player = {
 
 type Props = {
   slug: string;
-  // Current state inputs
-  mode: 'ready' | 'revealed' | 'all_drawn';
-  // Player up next (ready) or just drawn (revealed)
+  mode: 'ready' | 'revealed' | 'all_drawn' | 'candidate_pick';
   currentPlayer: Player | null;
   participantId: string | null;
-  // Pool size shown in ready state
   poolSize: number;
-  // Pick number shown in eyebrow ("PICK 24")
   pickNumber: number;
-  // Just-drawn country (revealed only)
   justDrawnCountry: Country | null;
-  // Reroll info (revealed + quiz winner only)
   rerollsRemaining: number;
-  // Up-next preview names ("@user1, @user2")
   upNextNames: string[];
+  candidates: Country[] | null;
 };
 
 const SPIN_FLAGS = ['🇧🇷','🇪🇸','🇦🇷','🇩🇪','🇫🇷','🇬🇧','🇲🇦','🇸🇳','🇯🇵','🇰🇷','🇲🇽','🇺🇸','🇮🇹','🇵🇹','🇳🇱','🇧🇪','🇭🇷','🇨🇦'];
@@ -53,22 +49,20 @@ export default function DrawStageClient({
   justDrawnCountry,
   rerollsRemaining,
   upNextNames,
+  candidates,
 }: Props) {
-  // Spinning state — purely client-side animation that runs before form submits
   const [isSpinning, setIsSpinning] = useState(false);
   const [spinFlag, setSpinFlag] = useState(SPIN_FLAGS[0]);
   const [spinName, setSpinName] = useState(SPIN_NAMES[0]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const spinFormRef = useRef<HTMLFormElement | null>(null);
 
-  // Cleanup the spin interval on unmount
   useEffect(() => {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, []);
 
-  // Stop the spin animation when mode changes (i.e. server returned and revealed)
   useEffect(() => {
     if (mode !== 'ready' && intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -87,9 +81,7 @@ export default function DrawStageClient({
     }, 180);
   };
 
-  const handleSpinClick = (e: React.FormEvent<HTMLFormElement>) => {
-    // Don't preventDefault — let the form submit naturally to the server action
-    // We just kick off the visual animation to show "spinning…"
+  const handleSpinClick = (_e: React.FormEvent<HTMLFormElement>) => {
     startSpinAnimation();
   };
 
@@ -211,15 +203,9 @@ export default function DrawStageClient({
           z-index: 2;
         }
         @media (max-width: 720px) {
-          .ds-country-card {
-            min-width: 240px;
-            padding: 22px 28px;
-          }
+          .ds-country-card { min-width: 240px; padding: 22px 28px; }
         }
-        .ds-country-card .flag {
-          font-size: 56px;
-          line-height: 1;
-        }
+        .ds-country-card .flag { font-size: 56px; line-height: 1; }
         @media (max-width: 720px) {
           .ds-country-card .flag { font-size: 44px; }
         }
@@ -243,8 +229,6 @@ export default function DrawStageClient({
           text-transform: uppercase;
           color: hsl(var(--accent));
         }
-
-        /* Spinning animation */
         .ds-country-card.spinning {
           animation: ds-pulse-border 0.4s ease-in-out infinite alternate;
         }
@@ -259,8 +243,6 @@ export default function DrawStageClient({
           0% { opacity: 0.3; transform: translateY(2px); }
           100% { opacity: 1; transform: translateY(0); }
         }
-
-        /* Reveal bounce */
         .ds-country-card.revealed {
           animation: ds-bounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -270,7 +252,63 @@ export default function DrawStageClient({
           100% { transform: scale(1); opacity: 1; }
         }
 
-        /* Action buttons */
+        /* Quiz-winner candidate cards (3 picks) */
+        .ds-candidates {
+          display: flex;
+          gap: 14px;
+          flex-wrap: wrap;
+          justify-content: center;
+          margin-bottom: 16px;
+          position: relative;
+          z-index: 2;
+        }
+        .ds-candidate {
+          background: hsl(var(--bg));
+          border: 2px solid hsl(var(--ink));
+          padding: 22px 26px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          min-width: 180px;
+          cursor: pointer;
+          transition: border-color 0.15s, background 0.15s, transform 0.15s;
+          font: inherit;
+          color: inherit;
+          opacity: 0;
+          animation: ds-bounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        .ds-candidate:hover:not(:disabled) {
+          border-color: hsl(var(--accent));
+          background: hsl(var(--accent) / 0.04);
+          transform: translateY(-2px);
+        }
+        .ds-candidate:disabled {
+          cursor: wait;
+          opacity: 0.5;
+        }
+        .ds-candidate .flag { font-size: 40px; line-height: 1; }
+        .ds-candidate .name {
+          font-family: var(--font-sans), system-ui, sans-serif;
+          font-weight: 900;
+          font-size: 20px;
+          letter-spacing: -0.025em;
+          color: hsl(var(--ink));
+          text-align: center;
+        }
+        .ds-candidate .group {
+          font-family: var(--font-mono), ui-monospace, monospace;
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: hsl(var(--ink) / 0.55);
+        }
+        @media (max-width: 720px) {
+          .ds-candidates { flex-direction: column; width: 100%; }
+          .ds-candidate { min-width: 0; width: 100%; }
+        }
+
         .ds-actions {
           display: flex;
           gap: 10px;
@@ -302,10 +340,7 @@ export default function DrawStageClient({
           border-color: hsl(var(--ink));
           background: hsl(var(--ink) / 0.04);
         }
-        .ds-cta:disabled {
-          opacity: 0.5;
-          cursor: wait;
-        }
+        .ds-cta:disabled { opacity: 0.5; cursor: wait; }
 
         .ds-spin-cta {
           background: hsl(var(--ink));
@@ -321,15 +356,8 @@ export default function DrawStageClient({
           line-height: 1;
           transition: background 0.15s ease;
         }
-        .ds-spin-cta:hover {
-          background: hsl(var(--accent));
-          border-color: hsl(var(--accent));
-        }
-        .ds-spin-cta:disabled {
-          opacity: 0.5;
-          cursor: wait;
-          background: hsl(var(--ink));
-        }
+        .ds-spin-cta:hover { background: hsl(var(--accent)); border-color: hsl(var(--accent)); }
+        .ds-spin-cta:disabled { opacity: 0.5; cursor: wait; background: hsl(var(--ink)); }
 
         .ds-up-next {
           margin-top: 16px;
@@ -343,11 +371,7 @@ export default function DrawStageClient({
           position: relative;
           z-index: 2;
         }
-        .ds-up-next .name {
-          color: hsl(var(--ink));
-          font-weight: 900;
-        }
-
+        .ds-up-next .name { color: hsl(var(--ink)); font-weight: 900; }
         .ds-pool-hint {
           font-family: var(--font-mono), ui-monospace, monospace;
           font-size: 9px;
@@ -358,13 +382,13 @@ export default function DrawStageClient({
           margin-top: 8px;
           position: relative;
           z-index: 2;
+          text-align: center;
         }
       `}</style>
 
       <div className="ds-stage">
         <div className="ds-glow" />
 
-        {/* MODE: ready or spinning (animation overlay shows on top) */}
         {mode === 'ready' && currentPlayer && participantId && (
           <>
             <div className="ds-eyebrow live">
@@ -387,7 +411,7 @@ export default function DrawStageClient({
               <div className="ds-handle">
                 @{currentPlayer.username.toUpperCase()}
                 {currentPlayer.isQuizWinner && (
-                  <span className="winner">★ QUIZ WINNER</span>
+                  <span className="winner">★ QUIZ WINNER · 3 PICKS</span>
                 )}
               </div>
             </div>
@@ -396,7 +420,7 @@ export default function DrawStageClient({
               <div className="ds-country-card spinning">
                 <span className="flag">{spinFlag}</span>
                 <span className="name">{spinName}</span>
-                <span className="group">Revealing…</span>
+                <span className="group">{currentPlayer.isQuizWinner ? 'Drawing 3…' : 'Revealing…'}</span>
               </div>
             )}
 
@@ -409,7 +433,7 @@ export default function DrawStageClient({
                 >
                   <input type="hidden" name="slug" value={slug} />
                   <input type="hidden" name="participant_id" value={participantId} />
-                  <SpinButton />
+                  <SpinButton isQuizWinner={currentPlayer.isQuizWinner} />
                 </form>
                 <div className="ds-pool-hint">{poolSize} countries left in pool</div>
                 {upNextNames.length > 0 && (
@@ -428,7 +452,47 @@ export default function DrawStageClient({
           </>
         )}
 
-        {/* MODE: revealed */}
+        {mode === 'candidate_pick' && currentPlayer && participantId && candidates && (
+          <>
+            <div className="ds-eyebrow drawn">
+              ★ Quiz winner · Pick one of {candidates.length}
+            </div>
+
+            <div className="ds-player">
+              <div
+                className="ds-avatar"
+                style={
+                  currentPlayer.avatarUrl
+                    ? { backgroundImage: `url(${currentPlayer.avatarUrl})`, color: 'transparent' }
+                    : undefined
+                }
+              >
+                {!currentPlayer.avatarUrl && currentPlayer.initial}
+              </div>
+              <div className="ds-name">{currentPlayer.displayName}</div>
+              <div className="ds-handle">@{currentPlayer.username.toUpperCase()}</div>
+            </div>
+
+            <div className="ds-candidates">
+              {candidates.map((c, i) => (
+                <form action={pickCandidate} key={c.id ?? i}>
+                  <input type="hidden" name="slug" value={slug} />
+                  <input type="hidden" name="participant_id" value={participantId} />
+                  <input type="hidden" name="country_id" value={c.id ?? ''} />
+                  <CandidateButton index={i}>
+                    <span className="flag">{c.flag}</span>
+                    <span className="name">{c.name}</span>
+                    <span className="group">Group {c.groupLabel}</span>
+                  </CandidateButton>
+                </form>
+              ))}
+            </div>
+            <div className="ds-pool-hint">
+              Click a country to claim it · the other {candidates.length - 1} go back to the pool
+            </div>
+          </>
+        )}
+
         {mode === 'revealed' && currentPlayer && participantId && justDrawnCountry && (
           <>
             <div className="ds-eyebrow drawn">
@@ -473,7 +537,6 @@ export default function DrawStageClient({
           </>
         )}
 
-        {/* MODE: all drawn */}
         {mode === 'all_drawn' && (
           <>
             <div className="ds-eyebrow drawn">★ All players drawn</div>
@@ -490,11 +553,11 @@ export default function DrawStageClient({
   );
 }
 
-function SpinButton() {
+function SpinButton({ isQuizWinner }: { isQuizWinner: boolean }) {
   const { pending } = useFormStatus();
   return (
     <button type="submit" className="ds-spin-cta" disabled={pending}>
-      {pending ? 'Spinning…' : '↻ Spin the wheel'}
+      {pending ? 'Spinning…' : isQuizWinner ? '↻ Draw 3 countries' : '↻ Spin the wheel'}
     </button>
   );
 }
@@ -513,6 +576,20 @@ function RerollButton({ remaining }: { remaining: number }) {
   return (
     <button type="submit" className="ds-cta ds-cta-ghost" disabled={pending}>
       {pending ? 'Spinning…' : `↻ Reroll (${remaining} left)`}
+    </button>
+  );
+}
+
+function CandidateButton({ children, index }: { children: React.ReactNode; index: number }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      className="ds-candidate"
+      style={{ animationDelay: `${index * 500}ms` }}
+      disabled={pending}
+    >
+      {children}
     </button>
   );
 }

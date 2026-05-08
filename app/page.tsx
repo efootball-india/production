@@ -119,7 +119,11 @@ export default async function HomePage() {
           </div>
         </section>
       )}
-
+{/* All-time XI playground */}
+      <section className="max-w-[920px] mx-auto px-6 md:px-10 pt-4 md:pt-8 pb-16 md:pb-24">
+        <h2 className="section-head">Playground.</h2>
+        <AllTimeXICard />
+      </section>
       {!featured && active.length === 0 && (
         <section className="max-w-[920px] mx-auto px-6 md:px-10 pb-24">
           <div className="card-brutalist-sm p-10 text-center">
@@ -468,5 +472,89 @@ function BannerFallback() {
       </g>
       <circle cx="700" cy="220" r="4" fill="rgba(255,255,255,0.3)" />
     </svg>
+  );
+}
+
+function AllTimeXICard() {
+  return (
+    <div className="card-brutalist mt-10 overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr,220px] gap-0">
+        <div className="p-8 md:p-10">
+          <div className="flex items-center gap-3 mb-4">
+            <span
+              className="font-mono text-[10px] font-bold tracking-[0.20em] uppercase"
+              style={{ color: '#D4A82A' }}
+            >
+              ★ Playground · New
+            </span>
+            <span className="font-mono text-[10px] font-bold tracking-[0.18em] uppercase text-ink/40">
+              No login needed
+            </span>
+          </div>
+          <h3 className="font-sans font-black text-3xl md:text-4xl leading-[0.95] tracking-tight">
+            Build your all-time XI
+            <span className="italic" style={{ color: '#D4A82A' }}>.</span>
+          </h3>
+          <p className="mt-4 max-w-lg text-ink/70 leading-relaxed">
+            Pick the squad that wins everything. Eleven slots. One formation. The greatest of all time, decided by you.
+          </p>
+          <div className="mt-6">
+            <Link
+              href="/all-time-xi"
+              className="bg-ink text-bg font-sans font-bold uppercase tracking-wider text-sm px-6 py-3 border border-ink hover:bg-accent hover:border-accent transition-colors inline-block"
+            >
+              Start building →
+            </Link>
+          </div>
+        </div>
+        <div className="hidden md:flex items-center justify-center border-l border-ink p-6" style={{ background: '#1B4A2D' }}>
+          <svg viewBox="0 0 100 145" className="w-full max-w-[180px] h-auto" preserveAspectRatio="xMidYMid meet">
+            <rect x="0" y="0" width="100" height="145" fill="#1B4A2D" />
+            <rect x="3" y="3" width="94" height="139" fill="none" stroke="rgba(244,239,231,0.5)" strokeWidth="0.4" />
+            <line x1="3" y1="72.5" x2="97" y2="72.5" stroke="rgba(244,239,231,0.5)" strokeWidth="0.4" />
+            <circle cx="50" cy="72.5" r="9" fill="none" stroke="rgba(244,239,231,0.5)" strokeWidth="0.4" />
+            {/* tiny kits — 4-3-3 silhouette, a few filled */}
+            {[
+              { x: 50, y: 132, filled: true,  num: '1' },
+              { x: 14, y: 108, filled: false },
+              { x: 36, y: 112, filled: false },
+              { x: 64, y: 112, filled: true,  num: '5' },
+              { x: 86, y: 108, filled: false },
+              { x: 24, y: 76,  filled: false },
+              { x: 50, y: 82,  filled: true,  num: '14' },
+              { x: 76, y: 76,  filled: false },
+              { x: 16, y: 36,  filled: true,  num: '10' },
+              { x: 50, y: 26,  filled: true,  num: '10' },
+              { x: 84, y: 36,  filled: false },
+            ].map((p, i) =>
+              p.filled ? (
+                <g key={i} transform={`translate(${p.x},${p.y}) scale(0.18)`}>
+                  <g transform="translate(-50,-52)">
+                    <path d="M 25 15 L 5 30 L 12 42 L 25 32 Z" fill="#0E0E0C" />
+                    <path d="M 75 15 L 95 30 L 88 42 L 75 32 Z" fill="#0E0E0C" />
+                    <path d="M 25 15 L 75 15 L 75 90 L 25 90 Z" fill="#0E0E0C" />
+                    <path d="M 40 15 L 50 28 L 60 15" stroke="#D4A82A" strokeWidth="2.4" fill="none" />
+                    <text x="50" y="68" textAnchor="middle" fontWeight="900" fontSize="32" fill="#D4A82A" fontFamily="system-ui">
+                      {p.num}
+                    </text>
+                  </g>
+                </g>
+              ) : (
+                <circle
+                  key={i}
+                  cx={p.x}
+                  cy={p.y}
+                  r="6.5"
+                  fill="rgba(244,239,231,0.06)"
+                  stroke="rgba(244,239,231,0.55)"
+                  strokeWidth="0.6"
+                  strokeDasharray="1.5 1.5"
+                />
+              )
+            )}
+          </svg>
+        </div>
+      </div>
+    </div>
   );
 }

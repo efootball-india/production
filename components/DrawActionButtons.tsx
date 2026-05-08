@@ -11,6 +11,54 @@ export function ToggleWinnerButton({ isWinner }: { isWinner: boolean }) {
   );
 }
 
+export function MoveUpButton({ disabled }: { disabled?: boolean }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      className="dr-setup-arrow"
+      disabled={pending || disabled}
+      aria-label="Move up"
+      title="Move up"
+    >
+      {pending ? '…' : '▲'}
+    </button>
+  );
+}
+
+export function MoveDownButton({ disabled }: { disabled?: boolean }) {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      className="dr-setup-arrow"
+      disabled={pending || disabled}
+      aria-label="Move down"
+      title="Move down"
+    >
+      {pending ? '…' : '▼'}
+    </button>
+  );
+}
+
+export function ShuffleOrderButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" className="dr-setup-shuffle" disabled={pending}>
+      {pending ? 'Shuffling…' : '🎲 Shuffle order'}
+    </button>
+  );
+}
+
+export function ResetOrderButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" className="dr-setup-reset-order" disabled={pending}>
+      {pending ? '…' : 'Reset to registration order'}
+    </button>
+  );
+}
+
 export function StartDrawButton() {
   const { pending } = useFormStatus();
   return (

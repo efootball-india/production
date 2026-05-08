@@ -1,4 +1,4 @@
-// PASS-2-LIB-DRAW (clean autolinks)
+// PASS-3-LIB-DRAW (draw_order + 3-candidate picks for quiz winners)
 import { createClient } from '@/lib/supabase/server';
 
 export interface Country {
@@ -25,6 +25,7 @@ export interface ParticipantWithDraw {
   drawn_at: string | null;
   registered_at: string;
   country_id: string | null;
+  draw_order: number | null;
   country: Country | null;
   player: {
     id: string;
@@ -36,6 +37,9 @@ export interface ParticipantWithDraw {
 
 const MAX_REROLLS_FOR_QUIZ_WINNER = 2;
 export function maxRerollsForWinner() { return MAX_REROLLS_FOR_QUIZ_WINNER; }
+
+// Quiz winners get this many country choices on their spin
+export const QUIZ_WINNER_CHOICES = 3;
 
 export async function listCountries(): Promise<Country[]> {
   const supabase = createClient();
@@ -68,13 +72,25 @@ export async function listParticipantsForDraw(tournamentId: string): Promise<Par
   const { data } = await supabase
     .from('tournament_participants')
     .select(`
-      id, player_id, status, is_quiz_winner, rerolls_used, drawn_at, registered_at, country_id,
+      id, player_id, status, is_quiz_winner, rerolls_used, drawn_at, registered_at, country_id, draw_order,
       country:countries(id, code, name, group_label, position),
       player:players(id, username, display_name, avatar_url)
     `)
-    .eq('tournament_id', tournamentId)
-    .order('registered_at', { ascending: true });
-  return ((data ?? []) as unknown) as ParticipantWithDraw[];
+    .eq('tournament_id', tournamentId);
+
+  const list = ((data ?? []) as unknown) as ParticipantWithDraw[];
+
+  // Sort: draw_order asc (nulls last), then registered_at asc
+  list.sort((a, b) => {
+    const aHas = a.draw_order != null;
+    const bHas = b.draw_order != null;
+    if (aHas && bHas) return (a.draw_order as number) - (b.draw_order as number);
+    if (aHas) return -1;
+    if (bHas) return 1;
+    return new Date(a.registered_at).getTime() - new Date(b.registered_at).getTime();
+  });
+
+  return list;
 }
 
 export async function listAvailableCountries(tournamentId: string): Promise<Country[]> {
@@ -87,6 +103,20 @@ export async function listAvailableCountries(tournamentId: string): Promise<Coun
   const taken = new Set((assigned ?? []).map((a) => a.country_id));
   const all = await listCountries();
   return all.filter((c) => !taken.has(c.id));
+}
+
+export async function getCountriesByIds(ids: string[]): Promise<Country[]> {
+  if (ids.length === 0) return [];
+  const supabase = createClient();
+  const { data } = await supabase
+    .from('countries')
+    .select('*')
+    .in('id', ids);
+  const list = (data ?? []) as Country[];
+  // Preserve input order
+  const byId = new Map<string, Country>();
+  for (const c of list) byId.set(c.id, c);
+  return ids.map((i) => byId.get(i)).filter(Boolean) as Country[];
 }
 
 export interface GroupSlot {

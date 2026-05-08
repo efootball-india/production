@@ -79,6 +79,8 @@ export default function AllTimeXIBuilder() {
   const [hydrated, setHydrated] = useState(false);
   const [sheetName, setSheetName] = useState('');
   const [sheetNumber, setSheetNumber] = useState('');
+    const [isExporting, setIsExporting] = useState(false);
+
 
   useEffect(() => {
     try {
@@ -182,8 +184,62 @@ export default function AllTimeXIBuilder() {
     closeSheet();
   }
 
-  function shareXI() {
-    alert('Image export coming soon — for now, screenshot your squad and share!');
+ async function shareXI() {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      const slotsForExport = FORMATIONS[formation];
+      const svgString = buildExportSvg(squadName || 'My All-Time XI', formation, slotsForExport, xi);
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      const loaded = new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('SVG load failed'));
+      });
+      img.src = svgUrl;
+      await loaded;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1920;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('No canvas context');
+      ctx.fillStyle = '#F4EFE7';
+      ctx.fillRect(0, 0, 1080, 1920);
+      ctx.drawImage(img, 0, 0, 1080, 1920);
+      URL.revokeObjectURL(svgUrl);
+
+      await new Promise<void>((resolve, reject) => {
+        canvas.toBlob((pngBlob) => {
+          if (!pngBlob) {
+            reject(new Error('PNG generation failed'));
+            return;
+          }
+          const pngUrl = URL.createObjectURL(pngBlob);
+          const a = document.createElement('a');
+          a.href = pngUrl;
+          const safe =
+            (squadName || 'all-time-xi')
+              .replace(/[^a-z0-9]+/gi, '-')
+              .toLowerCase()
+              .replace(/^-+|-+$/g, '')
+              .slice(0, 40) || 'all-time-xi';
+          a.download = `${safe}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(pngUrl), 2000);
+          resolve();
+        }, 'image/png');
+      });
+    } catch (e) {
+      console.error(e);
+      alert('Could not generate image. Try screenshotting your squad instead.');
+    } finally {
+      setIsExporting(false);
+    }
   }
 
   const editingSlotData = editingSlot ? slots.find((s) => s.id === editingSlot) ?? null : null;
@@ -245,7 +301,7 @@ export default function AllTimeXIBuilder() {
             <rect x="28" y="128" width="44" height="14" fill="none" stroke="rgba(244,239,231,0.5)" strokeWidth="0.4" />
             <rect x="38" y="136" width="24" height="6" fill="none" stroke="rgba(244,239,231,0.5)" strokeWidth="0.4" />
 
-            {slots.map((s) => {
+        {slots.map((s) => {
               const player = xi[s.id];
               if (player) {
                 return (
@@ -285,6 +341,23 @@ export default function AllTimeXIBuilder() {
                 </g>
               );
             })}
+              return (
+                <g
+                  key={s.id}
+                  className="atxi-slot"
+                  transform={`translate(${s.x},${s.y})`}
+                  onClick={() => openSheet(s.id)}
+                >
+                  <circle r="9" className="atxi-slot-empty" />
+                  <text className="atxi-slot-plus" x="0" y="3" textAnchor="middle" fontSize="9" fontWeight="300">
+                    +
+                  </text>
+                  <text className="atxi-role" x="0" y="16" textAnchor="middle" fontSize="3.8">
+                    {s.label}
+                  </text>
+                </g>
+              );
+            })}
           </svg>
         </div>
 
@@ -301,8 +374,8 @@ export default function AllTimeXIBuilder() {
         </div>
 
         <div className="atxi-actions">
-          <button type="button" className="atxi-cta-ghost" onClick={reset}>
-            Reset
+        <button type="button" className="atxi-cta" onClick={shareXI} disabled={isExporting}>
+            {isExporting ? 'Generating…' : 'Share XI →'}
           </button>
           <button type="button" className="atxi-cta" onClick={shareXI}>
             Share XI →
@@ -385,7 +458,7 @@ export default function AllTimeXIBuilder() {
 function KitGlyph({ number }: { number: string }) {
   const num = number != null && number !== '' ? number : '';
   return (
-    <g transform="translate(0,0) scale(0.21)">
+    <g transform="translate(0,0) scale(0.15)">
       <g transform="translate(-50,-52)">
         <path d="M 25 15 L 5 30 L 12 42 L 25 32 Z" fill="#0E0E0C" />
         <path d="M 75 15 L 95 30 L 88 42 L 75 32 Z" fill="#0E0E0C" />
@@ -641,6 +714,89 @@ const ATXI_CSS = `
     display: flex; gap: 8px; align-items: center;
     flex-wrap: wrap;
   }
+  function escapeXml(s: string): string {
+  return String(s).replace(/[&<>"']/g, (c) => {
+    switch (c) {
+      case '&': return '&amp;';
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '"': return '&quot;';
+      case "'": return '&apos;';
+      default: return c;
+    }
+  });
+}
+
+function buildExportSvg(
+  squadName: string,
+  formation: string,
+  slots: { id: string; label: string; x: number; y: number }[],
+  xi: Record<string, { name: string; number: string }>
+): string {
+  const slotsXml = slots
+    .map((s) => {
+      const p = xi[s.id];
+      if (p) {
+        const numText =
+          p.number !== ''
+            ? `<text x="50" y="68" text-anchor="middle" font-weight="900" font-size="30" fill="#D4A82A" font-family="Archivo, system-ui, sans-serif">${escapeXml(p.number)}</text>`
+            : '';
+        return `
+          <g transform="translate(${s.x},${s.y})">
+            <g transform="scale(0.17)">
+              <g transform="translate(-50,-52)">
+                <path d="M 25 15 L 5 30 L 12 42 L 25 32 Z" fill="#0E0E0C"/>
+                <path d="M 75 15 L 95 30 L 88 42 L 75 32 Z" fill="#0E0E0C"/>
+                <path d="M 25 15 L 75 15 L 75 90 L 25 90 Z" fill="#0E0E0C"/>
+                <path d="M 25 15 L 75 15 L 75 90 L 25 90 Z" fill="none" stroke="rgba(244,239,231,0.40)" stroke-width="0.7"/>
+                <path d="M 40 15 L 50 28 L 60 15" stroke="#D4A82A" stroke-width="2.4" fill="none"/>
+                ${numText}
+              </g>
+            </g>
+            <text x="0" y="11" text-anchor="middle" font-size="3.4" font-weight="800" fill="#F4EFE7" font-family="Archivo, system-ui, sans-serif">${escapeXml(p.name.toUpperCase())}</text>
+          </g>
+        `;
+      }
+      return `
+        <g transform="translate(${s.x},${s.y})">
+          <circle r="6.5" fill="rgba(244,239,231,0.06)" stroke="rgba(244,239,231,0.5)" stroke-width="0.5" stroke-dasharray="1.5 1.5"/>
+          <text x="0" y="13" text-anchor="middle" font-size="3.4" font-weight="700" fill="rgba(244,239,231,0.55)" font-family="Archivo, system-ui, sans-serif">${escapeXml(s.label)}</text>
+        </g>
+      `;
+    })
+    .join('');
+
+  const safeSquad = escapeXml(squadName);
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <rect x="0" y="0" width="1080" height="200" fill="#F4EFE7"/>
+  <text x="60" y="84" font-size="20" font-weight="700" letter-spacing="4" fill="#D4A82A" font-family="JetBrains Mono, ui-monospace, monospace">★ ALL-TIME XI &#183; ${formation}</text>
+  <text x="60" y="160" font-size="64" font-weight="900" letter-spacing="-1.5" fill="#1A1A18" font-family="Archivo, system-ui, sans-serif">${safeSquad}<tspan fill="#D4A82A" font-style="italic">.</tspan></text>
+
+  <g transform="translate(0, 200) scale(10.8)">
+    <rect x="0" y="0" width="100" height="145" fill="#1B4A2D"/>
+    <rect x="0" y="0" width="100" height="14.5" fill="#1F5230"/>
+    <rect x="0" y="29" width="100" height="14.5" fill="#1F5230"/>
+    <rect x="0" y="58" width="100" height="14.5" fill="#1F5230"/>
+    <rect x="0" y="87" width="100" height="14.5" fill="#1F5230"/>
+    <rect x="0" y="116" width="100" height="14.5" fill="#1F5230"/>
+    <rect x="3" y="3" width="94" height="139" fill="none" stroke="rgba(244,239,231,0.5)" stroke-width="0.4"/>
+    <line x1="3" y1="72.5" x2="97" y2="72.5" stroke="rgba(244,239,231,0.5)" stroke-width="0.4"/>
+    <circle cx="50" cy="72.5" r="9" fill="none" stroke="rgba(244,239,231,0.5)" stroke-width="0.4"/>
+    <circle cx="50" cy="72.5" r="0.8" fill="rgba(244,239,231,0.5)"/>
+    <rect x="28" y="3" width="44" height="14" fill="none" stroke="rgba(244,239,231,0.5)" stroke-width="0.4"/>
+    <rect x="38" y="3" width="24" height="6" fill="none" stroke="rgba(244,239,231,0.5)" stroke-width="0.4"/>
+    <rect x="28" y="128" width="44" height="14" fill="none" stroke="rgba(244,239,231,0.5)" stroke-width="0.4"/>
+    <rect x="38" y="136" width="24" height="6" fill="none" stroke="rgba(244,239,231,0.5)" stroke-width="0.4"/>
+    ${slotsXml}
+  </g>
+
+  <rect x="0" y="1768" width="1080" height="152" fill="#1A1A18"/>
+  <text x="60" y="1832" font-size="22" font-weight="700" letter-spacing="6" fill="#D4A82A" font-family="JetBrains Mono, ui-monospace, monospace">EFTBL.IN</text>
+  <text x="60" y="1880" font-size="22" font-weight="500" fill="#F4EFE7" font-family="Archivo, system-ui, sans-serif">Build your own all-time XI &#8594;</text>
+</svg>`;
+}
   .atxi-sheet-actions .atxi-cta { flex: 0 0 auto; }
   .atxi-sheet-actions .atxi-cta-ghost { flex: 0 0 auto; }
 `;

@@ -212,4 +212,164 @@ export async function spinForParticipant(formData: FormData) {
     // Fisher-Yates partial shuffle to pick n distinct items
     for (let i = pool.length - 1; i > pool.length - 1 - n; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [pool[i],
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    const picks = pool.slice(pool.length - n);
+    const ids = picks.map((c) => c.id).join(',');
+    revalidatePath(`/admin/tournaments/${slug}/draw`);
+    redirect(`/admin/tournaments/${slug}/draw?candidates=${ids}&for=${participantId}`);
+  }
+
+  // Non-winner: pick 1
+  const idx = Math.floor(Math.random() * available.length);
+  const picked = available[idx];
+
+  await supabase
+    .from('tournament_participants')
+    .update({
+      country_id: picked.id,
+      drawn_at: new Date().toISOString(),
+    })
+    .eq('id', participantId);
+
+  revalidatePath(`/admin/tournaments/${slug}/draw`);
+  redirect(`/admin/tournaments/${slug}/draw?revealed=${picked.code}&for=${participantId}`);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Quiz-winner picks one of three
+// ─────────────────────────────────────────────────────────────────────
+
+export async function pickCandidate(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const slug = formData.get('slug') as string;
+  const participantId = formData.get('participant_id') as string;
+  const countryId = formData.get('country_id') as string;
+  if (!slug || !participantId || !countryId) redirect('/');
+
+  const { data: tournament } = await supabase
+    .from('tournaments').select('id').eq('slug', slug).maybeSingle();
+  if (!tournament) redirect('/');
+
+  const { data: p } = await supabase
+    .from('tournament_participants')
+    .select('id, country_id, is_quiz_winner')
+    .eq('id', participantId)
+    .maybeSingle();
+  if (!p) redirect(`/admin/tournaments/${slug}/draw`);
+  if (p.country_id) {
+    redirect(`/admin/tournaments/${slug}/draw?error=${encodeURIComponent('Already drawn')}`);
+  }
+
+  // Defensive: ensure country isn't taken
+  const { data: takenBy } = await supabase
+    .from('tournament_participants')
+    .select('id')
+    .eq('tournament_id', tournament.id)
+    .eq('country_id', countryId)
+    .maybeSingle();
+  if (takenBy) {
+    redirect(`/admin/tournaments/${slug}/draw?error=${encodeURIComponent('Country no longer available')}`);
+  }
+
+  const { data: country } = await supabase
+    .from('countries')
+    .select('id, code')
+    .eq('id', countryId)
+    .maybeSingle();
+  if (!country) redirect(`/admin/tournaments/${slug}/draw`);
+
+  await supabase
+    .from('tournament_participants')
+    .update({
+      country_id: country.id,
+      drawn_at: new Date().toISOString(),
+      // Quiz winners get no rerolls — mark as max so the reroll button never shows
+      rerolls_used: maxRerollsForWinner(),
+    })
+    .eq('id', participantId);
+
+  revalidatePath(`/admin/tournaments/${slug}/draw`);
+  redirect(`/admin/tournaments/${slug}/draw?revealed=${country.code}&for=${participantId}`);
+}
+
+export async function acceptDraw(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const slug = formData.get('slug') as string;
+  const participantId = formData.get('participant_id') as string;
+  if (!slug || !participantId) redirect('/');
+
+  await supabase
+    .from('tournament_participants')
+    .update({ rerolls_used: maxRerollsForWinner() })
+    .eq('id', participantId);
+
+  revalidatePath(`/admin/tournaments/${slug}/draw`);
+  redirect(`/admin/tournaments/${slug}/draw`);
+}
+
+export async function completeDraw(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const slug = formData.get('slug') as string;
+  if (!slug) redirect('/');
+
+  const { data: tournament } = await supabase
+    .from('tournaments').select('id').eq('slug', slug).maybeSingle();
+  if (!tournament) redirect('/');
+
+  const { count: undrawn } = await supabase
+    .from('tournament_participants')
+    .select('*', { count: 'exact', head: true })
+    .eq('tournament_id', tournament.id)
+    .is('country_id', null)
+    .eq('status', 'registered');
+
+  if ((undrawn ?? 0) > 0) {
+    redirect(`/admin/tournaments/${slug}/draw?error=${encodeURIComponent('Some players not yet drawn')}`);
+  }
+
+  await supabase.from('tournament_draws').update({
+    status: 'completed',
+    completed_at: new Date().toISOString(),
+  }).eq('tournament_id', tournament.id);
+
+  await supabase.from('tournaments').update({ status: 'in_progress' }).eq('id', tournament.id);
+
+  revalidatePath(`/admin/tournaments/${slug}/draw`);
+  redirect(`/tournaments/${slug}`);
+}
+
+export async function resetDraw(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const slug = formData.get('slug') as string;
+  if (!slug) redirect('/');
+
+  const { data: tournament } = await supabase
+    .from('tournaments').select('id').eq('slug', slug).maybeSingle();
+  if (!tournament) redirect('/');
+
+  const { count: scoredMatches } = await supabase
+    .from('matches')
+    .select('*', { count: 'exact', head: true })
+    .eq('tournament_id', tournament.id)
+    .not('home_score', 'is', null);
+
+  if ((scoredMatches ?? 0) > 0) {
+    redirect(`/admin/tournaments/${slug}/draw?error=${encodeURIComponent('Cannot reset: matches already played')}`);
+  }
+
+  await supabase
+    .from('tournament_participants')
+    .update({ country_id: null, drawn_at: null, rerolls_used: 0 })
+    .eq('tournament_id', tournament.id);
+
+  await supabase.from('tournament_draws').upsert({
+    tournament_id: tournament.id,
+    status: 'not_started',
+    started_at: null,
+    completed_at: null,
+  });
+
+  revalidatePath(`/admin/tournaments/${slug}/draw`);
+  redirect(`/admin/tournaments/${slug}/draw`);
+}

@@ -1,4 +1,4 @@
-// PASS-2-ACTIONS-DRAW (draw order + quiz-winner pick-1-of-3)
+// PASS-3-ACTIONS-DRAW (draw order via position input + quiz-winner pick-1-of-3)
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
@@ -64,11 +64,17 @@ async function persistOrder(ordered: { id: string }[]) {
   );
 }
 
-export async function moveParticipantUp(formData: FormData) {
+export async function setParticipantPosition(formData: FormData) {
   const { supabase } = await requireAdmin();
   const slug = formData.get('slug') as string;
   const participantId = formData.get('participant_id') as string;
-  if (!slug || !participantId) redirect('/');
+  const targetRaw = formData.get('target_position') as string;
+  if (!slug || !participantId || !targetRaw) redirect('/');
+
+  const target = parseInt(targetRaw, 10);
+  if (isNaN(target) || target < 1) {
+    redirect(`/admin/tournaments/${slug}/draw?error=${encodeURIComponent('Invalid position')}`);
+  }
 
   const { data: tournament } = await supabase
     .from('tournaments').select('id').eq('slug', slug).maybeSingle();
@@ -76,33 +82,19 @@ export async function moveParticipantUp(formData: FormData) {
 
   const list = await listParticipantsForDraw(tournament.id);
   const active = list.filter((p) => p.status === 'registered');
-  const idx = active.findIndex((p) => p.id === participantId);
-  if (idx > 0) {
-    [active[idx - 1], active[idx]] = [active[idx], active[idx - 1]];
-    await persistOrder(active);
+  const currentIdx = active.findIndex((p) => p.id === participantId);
+  if (currentIdx < 0) redirect(`/admin/tournaments/${slug}/draw`);
+
+  // Clamp to valid range, convert to 0-indexed
+  const targetIdx = Math.max(0, Math.min(active.length - 1, target - 1));
+  if (targetIdx === currentIdx) {
+    redirect(`/admin/tournaments/${slug}/draw`);
   }
 
-  revalidatePath(`/admin/tournaments/${slug}/draw`);
-  redirect(`/admin/tournaments/${slug}/draw`);
-}
-
-export async function moveParticipantDown(formData: FormData) {
-  const { supabase } = await requireAdmin();
-  const slug = formData.get('slug') as string;
-  const participantId = formData.get('participant_id') as string;
-  if (!slug || !participantId) redirect('/');
-
-  const { data: tournament } = await supabase
-    .from('tournaments').select('id').eq('slug', slug).maybeSingle();
-  if (!tournament) redirect('/');
-
-  const list = await listParticipantsForDraw(tournament.id);
-  const active = list.filter((p) => p.status === 'registered');
-  const idx = active.findIndex((p) => p.id === participantId);
-  if (idx >= 0 && idx < active.length - 1) {
-    [active[idx], active[idx + 1]] = [active[idx + 1], active[idx]];
-    await persistOrder(active);
-  }
+  // Splice the participant out and re-insert at target
+  const [moved] = active.splice(currentIdx, 1);
+  active.splice(targetIdx, 0, moved);
+  await persistOrder(active);
 
   revalidatePath(`/admin/tournaments/${slug}/draw`);
   redirect(`/admin/tournaments/${slug}/draw`);

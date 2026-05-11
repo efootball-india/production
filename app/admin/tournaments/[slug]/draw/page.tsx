@@ -1,4 +1,4 @@
-// PASS-4-PAGE-DRAW (draw_order setup + quiz-winner candidate-pick mode)
+// PASS-5-PAGE-DRAW (position-input reorder + quiz-winner candidate-pick mode)
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getCurrentPlayer } from '@/lib/player';
@@ -15,8 +15,7 @@ import {
   startDraw,
   completeDraw,
   resetDraw,
-  moveParticipantUp,
-  moveParticipantDown,
+  setParticipantPosition,
   shuffleDrawOrder,
   resetDrawOrder,
 } from '../../../../actions/draw';
@@ -27,8 +26,6 @@ import {
   StartDrawButton,
   CompleteDrawButton,
   ResetDrawButton,
-  MoveUpButton,
-  MoveDownButton,
   ShuffleOrderButton,
   ResetOrderButton,
 } from '../../../../../components/DrawActionButtons';
@@ -133,7 +130,6 @@ export default async function DrawPage({
   const candidateCountriesRaw = isCandidateMode
     ? await getCountriesByIds(candidateIds)
     : [];
-  // Hide candidate mode if the participant already has a country (stale URL)
   const candidateModeValid =
     isCandidateMode &&
     candidatesParticipant !== null &&
@@ -230,7 +226,7 @@ export default async function DrawPage({
             <div className="dr-setup-eye">SETUP · ORDER + QUIZ WINNERS</div>
             <p className="dr-setup-body">
               Quiz winners get <strong>3 country choices</strong> when their turn comes — they pick one, the other two go back to the pool.
-              Set the draw order below (or shuffle randomly), mark quiz winners, then start the draw.
+              <strong> Click any position number</strong> and type a new one to move a player. Or shuffle randomly. Mark quiz winners, then start the draw.
             </p>
 
             {active.length > 1 && (
@@ -254,7 +250,20 @@ export default async function DrawPage({
               ) : (
                 active.map((p, i) => (
                   <div key={p.id} className="dr-setup-row">
-                    <span className="num">{String(i + 1).padStart(2, '0')}</span>
+                    <form action={setParticipantPosition} className="dr-pos-form">
+                      <input type="hidden" name="participant_id" value={p.id} />
+                      <input type="hidden" name="slug" value={tournament.slug} />
+                      <input
+                        type="number"
+                        name="target_position"
+                        className="dr-pos-input"
+                        defaultValue={i + 1}
+                        min={1}
+                        max={active.length}
+                        aria-label={`Position of ${p.player?.display_name ?? p.player?.username ?? 'player'}`}
+                        title="Type a position number, press Enter"
+                      />
+                    </form>
                     <span className="who">
                       {p.player?.display_name ?? p.player?.username ?? '?'}
                       <span className="handle">
@@ -265,16 +274,6 @@ export default async function DrawPage({
                       {p.is_quiz_winner && (
                         <span className="winner-pill">★ QUIZ WINNER</span>
                       )}
-                      <form action={moveParticipantUp}>
-                        <input type="hidden" name="participant_id" value={p.id} />
-                        <input type="hidden" name="slug" value={tournament.slug} />
-                        <MoveUpButton disabled={i === 0} />
-                      </form>
-                      <form action={moveParticipantDown}>
-                        <input type="hidden" name="participant_id" value={p.id} />
-                        <input type="hidden" name="slug" value={tournament.slug} />
-                        <MoveDownButton disabled={i === active.length - 1} />
-                      </form>
                       <form action={toggleQuizWinner}>
                         <input type="hidden" name="participant_id" value={p.id} />
                         <input type="hidden" name="slug" value={tournament.slug} />
@@ -627,7 +626,7 @@ const STYLES_CSS = `
   }
   .dr-setup-row {
     display: grid;
-    grid-template-columns: 28px 1fr auto;
+    grid-template-columns: 40px 1fr auto;
     gap: 10px; align-items: center;
     padding: 9px 12px;
     background: hsl(var(--surface));
@@ -635,16 +634,40 @@ const STYLES_CSS = `
   }
   @media (max-width: 720px) {
     .dr-setup-row {
-      grid-template-columns: 24px 1fr;
+      grid-template-columns: 36px 1fr;
     }
     .dr-setup-actions-cluster {
       grid-column: 1 / -1;
       justify-content: flex-end;
     }
   }
-  .dr-setup-row .num {
+  .dr-pos-form {
+    margin: 0; padding: 0;
+  }
+  .dr-pos-input {
+    width: 36px; height: 28px;
+    padding: 0 4px;
+    background: hsl(var(--bg));
+    border: 1px solid hsl(var(--ink) / 0.20);
+    color: hsl(var(--ink) / 0.72);
     font-family: var(--font-mono), ui-monospace, monospace;
-    font-size: 10px; font-weight: 700; color: hsl(var(--ink) / 0.42);
+    font-size: 11px; font-weight: 700;
+    text-align: center;
+    outline: none;
+    -moz-appearance: textfield;
+  }
+  .dr-pos-input::-webkit-outer-spin-button,
+  .dr-pos-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .dr-pos-input:focus {
+    border-color: hsl(var(--accent));
+    color: hsl(var(--ink));
+    background: hsl(var(--accent) / 0.04);
+  }
+  .dr-pos-input:hover {
+    border-color: hsl(var(--ink) / 0.40);
   }
   .dr-setup-row .who {
     font-family: var(--font-sans), system-ui, sans-serif;
@@ -680,20 +703,6 @@ const STYLES_CSS = `
     border-color: hsl(var(--ink)); color: hsl(var(--ink));
   }
   .dr-setup-btn:disabled { opacity: 0.5; cursor: wait; }
-  .dr-setup-arrow {
-    width: 28px; height: 28px;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 11px;
-    background: transparent;
-    border: 1px solid hsl(var(--ink) / 0.20);
-    color: hsl(var(--ink) / 0.72);
-    cursor: pointer;
-    font-family: var(--font-mono), ui-monospace, monospace;
-  }
-  .dr-setup-arrow:hover:not(:disabled) {
-    border-color: hsl(var(--ink)); color: hsl(var(--ink));
-  }
-  .dr-setup-arrow:disabled { opacity: 0.25; cursor: not-allowed; }
   .dr-setup-empty {
     padding: 32px 16px; text-align: center;
     background: hsl(var(--surface));

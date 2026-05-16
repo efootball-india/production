@@ -1,4 +1,4 @@
-// PASS-44-TOURNAMENT-LAYOUT (added Goal of the Tournament banner)
+// PASS-45-TOURNAMENT-LAYOUT (Goal of the Tournament banner, inlined)
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTournamentBySlug, isCurrentUserRegistered, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments';
@@ -12,7 +12,7 @@ type EyebrowTone = 'live' | 'ok' | 'subtle' | 'warn';
 
 // ─── Goal of the Tournament banner config ─────────────────────────────
 // Set to null to hide the banner. Replace with your Google Drive URL.
-const GOTT_DRIVE_URL: string | null = 'https://drive.google.com/REPLACE_WITH_YOUR_URL';
+const GOTT_DRIVE_URL: string | null = 'https://drive.google.com/drive/folders/17Px3mJsPY31vTzSMNwWjc7RCoxhVj8mj';
 // Which tournament slugs should show the banner. Add/remove as needed.
 const GOTT_ENABLED_SLUGS = new Set<string>(['eftbl-world-cup']);
 // ──────────────────────────────────────────────────────────────────────
@@ -165,7 +165,75 @@ export default async function TournamentLayout({
         )}
 
         {showGoalBanner && GOTT_DRIVE_URL && (
-          <GoalOfTournamentBanner driveUrl={GOTT_DRIVE_URL} />
+          <div
+            className="mb-5 md:mb-6 max-w-xl"
+            style={{
+              background: '#0E0E0C',
+              border: '1px solid #D4A82A',
+              boxShadow: '4px 4px 0 #D4A82A',
+              padding: '18px 18px 16px',
+            }}
+          >
+            <div
+              style={{
+                fontFamily: 'var(--font-mono), ui-monospace, monospace',
+                fontSize: '10px',
+                fontWeight: 700,
+                letterSpacing: '0.20em',
+                textTransform: 'uppercase',
+                color: '#D4A82A',
+                marginBottom: '8px',
+              }}
+            >
+              ⚽ GOAL OF THE TOURNAMENT
+            </div>
+            <div
+              style={{
+                fontFamily: 'var(--font-sans), system-ui, sans-serif',
+                fontWeight: 900,
+                fontSize: '22px',
+                lineHeight: 1,
+                letterSpacing: '-0.025em',
+                color: '#F4EFE7',
+                marginBottom: '8px',
+              }}
+            >
+              Submit your best goal.
+            </div>
+            <p
+              style={{
+                fontFamily: 'var(--font-sans), system-ui, sans-serif',
+                fontSize: '13px',
+                lineHeight: 1.45,
+                color: 'rgba(244, 239, 231, 0.72)',
+                margin: '0 0 14px',
+                maxWidth: '460px',
+              }}
+            >
+              Upload your goal clip to the shared Drive folder. Voting opens after the group stage.
+            </p>
+            
+              href={GOTT_DRIVE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-block',
+                fontFamily: 'var(--font-mono), ui-monospace, monospace',
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                color: '#0E0E0C',
+                background: '#D4A82A',
+                border: '1px solid #D4A82A',
+                padding: '9px 16px',
+                textDecoration: 'none',
+                lineHeight: 1,
+              }}
+            >
+              Submit on Drive →
+            </a>
+          </div>
         )}
 
         {tournament.description && (
@@ -331,81 +399,6 @@ export default async function TournamentLayout({
         {children}
       </div>
     </main>
-  );
-}
-
-function GoalOfTournamentBanner({ driveUrl }: { driveUrl: string }) {
-  const gold = '#D4A82A';
-  return (
-    <div
-      className="mb-5 md:mb-6 max-w-xl"
-      style={{
-        background: '#0E0E0C',
-        border: `1px solid ${gold}`,
-        boxShadow: `4px 4px 0 ${gold}`,
-        padding: '18px 18px 16px',
-      }}
-    >
-      <div
-        style={{
-          fontFamily: 'var(--font-mono), ui-monospace, monospace',
-          fontSize: '10px',
-          fontWeight: 700,
-          letterSpacing: '0.20em',
-          textTransform: 'uppercase',
-          color: gold,
-          marginBottom: '8px',
-        }}
-      >
-        ⚽ GOAL OF THE TOURNAMENT
-      </div>
-      <div
-        style={{
-          fontFamily: 'var(--font-sans), system-ui, sans-serif',
-          fontWeight: 900,
-          fontSize: '22px',
-          lineHeight: 1,
-          letterSpacing: '-0.025em',
-          color: '#F4EFE7',
-          marginBottom: '8px',
-        }}
-      >
-        Submit your best goal.
-      </div>
-      <p
-        style={{
-          fontFamily: 'var(--font-sans), system-ui, sans-serif',
-          fontSize: '13px',
-          lineHeight: 1.45,
-          color: 'rgba(244, 239, 231, 0.72)',
-          margin: '0 0 14px',
-          maxWidth: '460px',
-        }}
-      >
-        Upload your goal clip to the shared Drive folder. Voting opens after the group stage.
-      </p>
-      
-        href={driveUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          display: 'inline-block',
-          fontFamily: 'var(--font-mono), ui-monospace, monospace',
-          fontSize: '11px',
-          fontWeight: 700,
-          letterSpacing: '0.18em',
-          textTransform: 'uppercase',
-          color: '#0E0E0C',
-          background: gold,
-          border: `1px solid ${gold}`,
-          padding: '9px 16px',
-          textDecoration: 'none',
-          lineHeight: 1,
-        }}
-      >
-        Submit on Drive →
-      </a>
-    </div>
   );
 }
 

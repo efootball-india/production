@@ -157,16 +157,16 @@ export default async function TournamentLayout({
           </div>
         )}
 
-        {showGoalBanner && (
+       {showGoalBanner && (
           <Link
             href={goalBannerLink}
             target="_blank"
             rel="noopener noreferrer"
             className="block mb-5 md:mb-6 max-w-xl no-underline"
             style={{
-              background: '#0E0E0C',
-              border: '1px solid #D4A82A',
-              boxShadow: '4px 4px 0 #D4A82A',
+              background: 'hsl(var(--accent))',
+              border: '1px solid hsl(var(--accent))',
+              boxShadow: '4px 4px 0 hsl(var(--ink))',
               padding: '18px',
             }}
           >
@@ -177,7 +177,7 @@ export default async function TournamentLayout({
                 fontWeight: 700,
                 letterSpacing: '0.20em',
                 textTransform: 'uppercase',
-                color: '#D4A82A',
+                color: 'rgba(255, 255, 255, 0.85)',
                 marginBottom: '8px',
               }}
             >
@@ -190,7 +190,7 @@ export default async function TournamentLayout({
                 fontSize: '22px',
                 lineHeight: 1,
                 letterSpacing: '-0.025em',
-                color: '#F4EFE7',
+                color: '#FFFFFF',
                 marginBottom: '8px',
               }}
             >
@@ -201,7 +201,7 @@ export default async function TournamentLayout({
                 fontFamily: 'var(--font-sans), system-ui, sans-serif',
                 fontSize: '13px',
                 lineHeight: 1.45,
-                color: 'rgba(244, 239, 231, 0.72)',
+                color: 'rgba(255, 255, 255, 0.75)',
                 marginBottom: '14px',
                 maxWidth: '460px',
               }}
@@ -216,9 +216,9 @@ export default async function TournamentLayout({
                 fontWeight: 700,
                 letterSpacing: '0.18em',
                 textTransform: 'uppercase',
-                color: '#0E0E0C',
-                background: '#D4A82A',
-                border: '1px solid #D4A82A',
+                color: 'hsl(var(--accent))',
+                background: '#FFFFFF',
+                border: '1px solid #FFFFFF',
                 padding: '9px 16px',
                 lineHeight: 1,
               }}

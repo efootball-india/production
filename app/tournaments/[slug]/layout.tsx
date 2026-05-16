@@ -1,4 +1,4 @@
-// PASS-45-TOURNAMENT-LAYOUT (Goal of the Tournament banner, inlined)
+// PASS-46-TOURNAMENT-LAYOUT (Goal of the Tournament banner, anchor tag fixed)
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTournamentBySlug, isCurrentUserRegistered, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments';
@@ -10,12 +10,8 @@ import TournamentTabs from '../../../components/TournamentTabs';
 
 type EyebrowTone = 'live' | 'ok' | 'subtle' | 'warn';
 
-// ─── Goal of the Tournament banner config ─────────────────────────────
-// Set to null to hide the banner. Replace with your Google Drive URL.
 const GOTT_DRIVE_URL = 'https://drive.google.com/drive/folders/17Px3mJsPY31vTzSMNwWjc7RCoxhVj8mj';
-// Which tournament slugs should show the banner. Add/remove as needed.
 const GOTT_ENABLED_SLUGS = ['eftbl-world-cup'];
-// ──────────────────────────────────────────────────────────────────────
 
 function getEyebrow(status: string): { text: string; tone: EyebrowTone } {
   switch (status) {
@@ -66,12 +62,10 @@ export default async function TournamentLayout({
   const dateMeta = getDateMeta(tournament.status, tournament.starts_at);
   const capacityValue = `${registeredCount}${tournament.max_participants ? ` / ${tournament.max_participants}` : ''}`;
 
-  // Read defensively in case the type hasn't been updated yet
   const bannerUrl: string | null = (tournament as any).banner_image_url ?? null;
   const rulesText: string | null = (tournament as any).rules ?? null;
   const hasRules = !!(rulesText && rulesText.trim().length > 0);
 
-  // Show Goal of the Tournament banner only for enabled tournaments that are in progress
   const showGoalBanner =
     GOTT_DRIVE_URL !== null &&
     GOTT_ENABLED_SLUGS.includes(tournament.slug) &&
@@ -83,10 +77,11 @@ export default async function TournamentLayout({
     : eyebrow.tone === 'warn' ? 'text-status-warn'
     : 'text-subtle';
 
+  const goalBannerLink = GOTT_DRIVE_URL;
+
   return (
     <main className="max-w-[920px] mx-auto px-5 md:px-8 pt-6 md:pt-10 pb-24">
 
-      {/* Breadcrumb */}
       <Link
         href="/tournaments"
         className="label hover:text-default transition-colors inline-block mb-5"
@@ -94,7 +89,6 @@ export default async function TournamentLayout({
         ← All tournaments
       </Link>
 
-      {/* Banner */}
       <div className="border border-ink-strong overflow-hidden mb-7 md:mb-8">
         <div className="relative w-full h-[120px] md:h-[220px] bg-card-2">
           {bannerUrl ? (
@@ -110,7 +104,6 @@ export default async function TournamentLayout({
         </div>
       </div>
 
-      {/* Header — eyebrow + title + 3-col stat strip */}
       <header className="mb-7 md:mb-8">
         <div className={`label-strong mb-2 md:mb-3 flex items-center gap-2 ${eyebrowToneClass}`}>
           {eyebrow.tone === 'live' && (
@@ -164,14 +157,17 @@ export default async function TournamentLayout({
           </div>
         )}
 
-        {showGoalBanner && GOTT_DRIVE_URL && (
-          <div
-            className="mb-5 md:mb-6 max-w-xl"
+        {showGoalBanner && (
+          <Link
+            href={goalBannerLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block mb-5 md:mb-6 max-w-xl no-underline"
             style={{
               background: '#0E0E0C',
               border: '1px solid #D4A82A',
               boxShadow: '4px 4px 0 #D4A82A',
-              padding: '18px 18px 16px',
+              padding: '18px',
             }}
           >
             <div
@@ -200,22 +196,19 @@ export default async function TournamentLayout({
             >
               Submit your best goal.
             </div>
-            <p
+            <div
               style={{
                 fontFamily: 'var(--font-sans), system-ui, sans-serif',
                 fontSize: '13px',
                 lineHeight: 1.45,
                 color: 'rgba(244, 239, 231, 0.72)',
-                margin: '0 0 14px',
+                marginBottom: '14px',
                 maxWidth: '460px',
               }}
             >
               Upload your goal clip to the shared Drive folder. Voting opens after the group stage.
-            </p>
-            
-              href={GOTT_DRIVE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            </div>
+            <span
               style={{
                 display: 'inline-block',
                 fontFamily: 'var(--font-mono), ui-monospace, monospace',
@@ -227,13 +220,12 @@ export default async function TournamentLayout({
                 background: '#D4A82A',
                 border: '1px solid #D4A82A',
                 padding: '9px 16px',
-                textDecoration: 'none',
                 lineHeight: 1,
               }}
             >
               Submit on Drive →
-            </a>
-          </div>
+            </span>
+          </Link>
         )}
 
         {tournament.description && (
@@ -243,12 +235,10 @@ export default async function TournamentLayout({
         )}
       </header>
 
-      {/* Action row — register / withdraw / sign in / complete profile / offline notice */}
       <div className="mb-6 md:mb-8">
         {(() => {
           const isOfflineRegistration = tournament.slug === 'eftbl-world-cup';
 
-          // Offline-registration tournaments: show notice instead of register flow
           if (isOfflineRegistration && tournament.status === 'registration_open') {
             if (player && profileOk && isRegistered) {
               return (
@@ -270,7 +260,6 @@ export default async function TournamentLayout({
             );
           }
 
-          // Normal flow
           return (
             <>
               {!player && (
@@ -331,7 +320,6 @@ export default async function TournamentLayout({
         })()}
       </div>
 
-      {/* Admin shortcuts */}
       {isAdmin && (
         <div className="mb-3">
           <div className="font-mono text-[9px] font-bold tracking-[0.18em] uppercase text-status-ok mb-2">
@@ -374,7 +362,6 @@ export default async function TournamentLayout({
         </div>
       )}
 
-      {/* Mod shortcuts */}
       {isMod && hasFixtures && (
         <div className="mb-3">
           <div className="font-mono text-[9px] font-bold tracking-[0.18em] uppercase text-status-warn mb-2">
@@ -391,10 +378,8 @@ export default async function TournamentLayout({
         </div>
       )}
 
-      {/* Tabs (sticky) */}
       <TournamentTabs slug={tournament.slug} hasRules={hasRules} />
 
-      {/* Tab content */}
       <div className="pt-6">
         {children}
       </div>

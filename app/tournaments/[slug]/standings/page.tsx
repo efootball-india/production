@@ -70,10 +70,7 @@ export default async function StandingsTab({ params }: { params: { slug: string 
   const allGroupsFinal =
     groupResults.length > 0 && completedGroups === groupResults.length;
 
-  const thirdsExtras = new Map
-    string,
-    { wins: number; draws: number; losses: number }
-  >();
+ const thirdsExtras = new Map<string, { wins: number; draws: number; losses: number }>();
   for (const g of groupResults) {
     const third = g.standings[2];
     if (!third) continue;

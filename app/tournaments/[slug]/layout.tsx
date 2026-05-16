@@ -12,9 +12,9 @@ type EyebrowTone = 'live' | 'ok' | 'subtle' | 'warn';
 
 // ─── Goal of the Tournament banner config ─────────────────────────────
 // Set to null to hide the banner. Replace with your Google Drive URL.
-const GOTT_DRIVE_URL: string | null = 'https://drive.google.com/drive/folders/17Px3mJsPY31vTzSMNwWjc7RCoxhVj8mj';
+const GOTT_DRIVE_URL = 'https://drive.google.com/drive/folders/17Px3mJsPY31vTzSMNwWjc7RCoxhVj8mj';
 // Which tournament slugs should show the banner. Add/remove as needed.
-const GOTT_ENABLED_SLUGS = new Set<string>(['eftbl-world-cup']);
+const GOTT_ENABLED_SLUGS = ['eftbl-world-cup'];
 // ──────────────────────────────────────────────────────────────────────
 
 function getEyebrow(status: string): { text: string; tone: EyebrowTone } {
@@ -74,7 +74,7 @@ export default async function TournamentLayout({
   // Show Goal of the Tournament banner only for enabled tournaments that are in progress
   const showGoalBanner =
     GOTT_DRIVE_URL !== null &&
-    GOTT_ENABLED_SLUGS.has(tournament.slug) &&
+    GOTT_ENABLED_SLUGS.includes(tournament.slug) &&
     (tournament.status === 'in_progress' || tournament.status === 'registration_closed');
 
   const eyebrowToneClass =

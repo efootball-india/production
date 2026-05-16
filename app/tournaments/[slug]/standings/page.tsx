@@ -1,4 +1,4 @@
-// PASS-45-STANDINGS-TAB (editorial · group cards + best 3rds)
+// PASS-46-STANDINGS-TAB (added GF · GA · GD columns + responsive collapse)
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getGroupStandings } from '@/lib/fixtures';
@@ -70,7 +70,7 @@ export default async function StandingsTab({ params }: { params: { slug: string 
   const allGroupsFinal =
     groupResults.length > 0 && completedGroups === groupResults.length;
 
-  const thirdsExtras = new Map<
+  const thirdsExtras = new Map
     string,
     { wins: number; draws: number; losses: number }
   >();
@@ -155,6 +155,9 @@ function GroupCard({ groupResult }: { groupResult: GroupResult }) {
         <span className="left">#</span>
         <span className="left">TEAM</span>
         <span>W-D-L</span>
+        <span className="opt">GF</span>
+        <span className="opt">GA</span>
+        <span>GD</span>
         <span>PTS</span>
       </div>
 
@@ -164,6 +167,10 @@ function GroupCard({ groupResult }: { groupResult: GroupResult }) {
         standings.map((s) => {
           const rowClass = getRowClass(s.position, groupSize);
           const handle = s.player?.username ?? s.player?.display_name ?? '';
+          const gf = s.goals_for ?? 0;
+          const ga = s.goals_against ?? 0;
+          const gd = s.goal_diff ?? 0;
+          const gdClass = gd > 0 ? 'pos' : gd < 0 ? 'neg' : 'zero';
           return (
             <div key={s.participant_id} className={`ef-row ${rowClass}`}>
               <span className="ef-pos">{s.position}</span>
@@ -177,6 +184,9 @@ function GroupCard({ groupResult }: { groupResult: GroupResult }) {
               <span className="ef-rec">
                 {s.wins ?? 0}-{s.draws ?? 0}-{s.losses ?? 0}
               </span>
+              <span className="ef-num opt">{gf}</span>
+              <span className="ef-num opt">{ga}</span>
+              <span className={`ef-gd ${gdClass}`}>{formatGD(gd)}</span>
               <span className="ef-pts">{s.points ?? 0}</span>
             </div>
           );
@@ -464,7 +474,7 @@ function Styles() {
 
       .ef-table-head {
         display: grid;
-        grid-template-columns: 22px minmax(0, 1fr) 56px 32px;
+        grid-template-columns: 22px minmax(0, 1fr) 52px 26px 26px 36px 32px;
         gap: 6px;
         align-items: center;
         padding: 6px 16px;
@@ -484,7 +494,7 @@ function Styles() {
 
       .ef-row {
         display: grid;
-        grid-template-columns: 22px minmax(0, 1fr) 56px 32px;
+        grid-template-columns: 22px minmax(0, 1fr) 52px 26px 26px 36px 32px;
         gap: 6px;
         align-items: center;
         padding: 9px 16px;
@@ -501,6 +511,18 @@ function Styles() {
         padding-left: 13px;
       }
       .ef-row.eliminated { opacity: 0.42; }
+
+      /* Hide GF/GA columns on small screens; GD stays */
+      @media (max-width: 480px) {
+        .ef-table-head,
+        .ef-row {
+          grid-template-columns: 22px minmax(0, 1fr) 52px 36px 32px;
+        }
+        .ef-table-head .opt,
+        .ef-row .opt {
+          display: none;
+        }
+      }
 
       .ef-pos {
         font-family: var(--font-sans), system-ui, sans-serif;
@@ -576,6 +598,31 @@ function Styles() {
         color: hsl(var(--ink));
         font-weight: 700;
       }
+
+      .ef-num {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 11px;
+        font-weight: 600;
+        text-align: center;
+        color: hsl(var(--ink) / 0.62);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.02em;
+      }
+      .ef-row.qualify .ef-num { color: hsl(var(--ink)); font-weight: 700; }
+
+      .ef-gd {
+        font-family: var(--font-mono), ui-monospace, monospace;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.02em;
+      }
+      .ef-gd.pos { color: hsl(var(--accent)); }
+      .ef-gd.neg { color: hsl(var(--warn)); }
+      .ef-gd.zero { color: hsl(var(--ink) / 0.42); }
+      .ef-row.eliminated .ef-gd.pos,
+      .ef-row.eliminated .ef-gd.neg { opacity: 0.7; }
 
       .ef-pts {
         font-family: var(--font-sans), system-ui, sans-serif;

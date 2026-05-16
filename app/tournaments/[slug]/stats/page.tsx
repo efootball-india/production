@@ -1,6 +1,10 @@
-// PASS-45-STATS-TAB (editorial)
+// PASS-46-STATS-TAB (added Top scorers section at top)
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+
+type ScorerEntry = { goals: number; name: string; player: string };
+type ScorerWithRank = ScorerEntry & { rank: number };
+type WinnerEntry = { count: number; name: string; player: string };
 
 export default async function StatsTab({ params }: { params: { slug: string } }) {
   const supabase = createClient();
@@ -44,7 +48,8 @@ export default async function StatsTab({ params }: { params: { slug: string } })
   let biggestMargin: any = null;
   let biggestMarginValue = -1;
 
-  const winsByParticipant = new Map<string, { count: number; name: string; player: string }>();
+  const winsByParticipant = new Map<string, WinnerEntry>();
+  const goalsByParticipant = new Map<string, ScorerEntry>();
 
   for (const m of completedMatches ?? []) {
     const total = (m.home_score ?? 0) + (m.away_score ?? 0);
@@ -63,6 +68,26 @@ export default async function StatsTab({ params }: { params: { slug: string } })
       biggestMarginValue = margin;
     }
 
+    // Tally goals scored per participant
+    const home = m.home as any;
+    const away = m.away as any;
+    if (home?.id) {
+      const existing = goalsByParticipant.get(home.id);
+      goalsByParticipant.set(home.id, {
+        goals: (existing?.goals ?? 0) + (m.home_score ?? 0),
+        name: home.country?.name ?? '—',
+        player: home.player?.username ?? home.player?.display_name ?? '—',
+      });
+    }
+    if (away?.id) {
+      const existing = goalsByParticipant.get(away.id);
+      goalsByParticipant.set(away.id, {
+        goals: (existing?.goals ?? 0) + (m.away_score ?? 0),
+        name: away.country?.name ?? '—',
+        player: away.player?.username ?? away.player?.display_name ?? '—',
+      });
+    }
+
     if (m.winner_participant_id) {
       const winnerSide =
         (m.home as any)?.id === m.winner_participant_id ? m.home : m.away;
@@ -77,6 +102,23 @@ export default async function StatsTab({ params }: { params: { slug: string } })
         });
       }
     }
+  }
+
+  // Top scorers: dense-rank, include all ties in top 3 ranks
+  const sortedScorers = Array.from(goalsByParticipant.values())
+    .filter((s) => s.goals > 0)
+    .sort((a, b) => b.goals - a.goals);
+
+  const topScorers: ScorerWithRank[] = [];
+  let lastGoals = -1;
+  let currentRank = 0;
+  for (const s of sortedScorers) {
+    if (s.goals !== lastGoals) {
+      currentRank++;
+      if (currentRank > 3) break;
+      lastGoals = s.goals;
+    }
+    topScorers.push({ ...s, rank: currentRank });
   }
 
   const topWinners = Array.from(winsByParticipant.values())
@@ -113,9 +155,45 @@ export default async function StatsTab({ params }: { params: { slug: string } })
           </div>
         </div>
 
-        {(highestScoring || biggestMargin) && (
+        {topScorers.length > 0 && (
           <>
             <div className="efs-section-head">
+              <h3>Top scorers.</h3>
+              <span className="meta">
+                {topScorers.length} PLAYER{topScorers.length === 1 ? '' : 'S'}
+              </span>
+            </div>
+
+            <div className="efs-leaderboard efs-scorers">
+              <div className="efs-lb-head">
+                <span>#</span>
+                <span>PLAYER</span>
+                <span className="right">G</span>
+              </div>
+
+              {topScorers.map((s, i) => (
+                <div
+                  key={i}
+                  className={`efs-lb-row ${s.rank === 1 ? 'first' : ''}`}
+                >
+                  <span className="efs-lb-pos">{s.rank}</span>
+                  <div className="efs-lb-team">
+                    <span className="efs-lb-cntry">{s.name}</span>
+                    <span className="efs-lb-handle">{s.player}</span>
+                  </div>
+                  <span className="efs-lb-wins">
+                    {s.goals}
+                    <span className="unit">G</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {(highestScoring || biggestMargin) && (
+          <>
+            <div className="efs-section-head" style={{ marginTop: 20 }}>
               <h3>Match records.</h3>
               <span className="meta">
                 {[highestScoring, biggestMargin].filter(Boolean).length} RECORDS

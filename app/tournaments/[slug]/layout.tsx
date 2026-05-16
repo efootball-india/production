@@ -1,4 +1,4 @@
-// PASS-43-TOURNAMENT-LAYOUT (with Rules tab)
+// PASS-44-TOURNAMENT-LAYOUT (added Goal of the Tournament banner)
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTournamentBySlug, isCurrentUserRegistered, FORMAT_LABELS, STATUS_LABELS } from '@/lib/tournaments';
@@ -9,6 +9,13 @@ import { registerForTournament, withdrawFromTournament } from '../../actions/tou
 import TournamentTabs from '../../../components/TournamentTabs';
 
 type EyebrowTone = 'live' | 'ok' | 'subtle' | 'warn';
+
+// ─── Goal of the Tournament banner config ─────────────────────────────
+// Set to null to hide the banner. Replace with your Google Drive URL.
+const GOTT_DRIVE_URL: string | null = 'https://drive.google.com/REPLACE_WITH_YOUR_URL';
+// Which tournament slugs should show the banner. Add/remove as needed.
+const GOTT_ENABLED_SLUGS = new Set<string>(['eftbl-world-cup']);
+// ──────────────────────────────────────────────────────────────────────
 
 function getEyebrow(status: string): { text: string; tone: EyebrowTone } {
   switch (status) {
@@ -58,12 +65,17 @@ export default async function TournamentLayout({
   const eyebrow = getEyebrow(tournament.status);
   const dateMeta = getDateMeta(tournament.status, tournament.starts_at);
   const capacityValue = `${registeredCount}${tournament.max_participants ? ` / ${tournament.max_participants}` : ''}`;
-  const capacityForBanner = `${registeredCount}${tournament.max_participants ? `/${tournament.max_participants}` : ''} PLAYERS`;
 
   // Read defensively in case the type hasn't been updated yet
   const bannerUrl: string | null = (tournament as any).banner_image_url ?? null;
   const rulesText: string | null = (tournament as any).rules ?? null;
   const hasRules = !!(rulesText && rulesText.trim().length > 0);
+
+  // Show Goal of the Tournament banner only for enabled tournaments that are in progress
+  const showGoalBanner =
+    GOTT_DRIVE_URL !== null &&
+    GOTT_ENABLED_SLUGS.has(tournament.slug) &&
+    (tournament.status === 'in_progress' || tournament.status === 'registration_closed');
 
   const eyebrowToneClass =
     eyebrow.tone === 'live'   ? 'text-status-live'
@@ -98,7 +110,7 @@ export default async function TournamentLayout({
         </div>
       </div>
 
-      {/* Header — Option 2: eyebrow + title + 3-col stat strip */}
+      {/* Header — eyebrow + title + 3-col stat strip */}
       <header className="mb-7 md:mb-8">
         <div className={`label-strong mb-2 md:mb-3 flex items-center gap-2 ${eyebrowToneClass}`}>
           {eyebrow.tone === 'live' && (
@@ -114,7 +126,8 @@ export default async function TournamentLayout({
         </div>
 
         <h1 className="display-h1 mb-5 md:mb-6">{tournament.name}.</h1>
-<div className="hairline-strong-t pt-4 grid grid-cols-3 gap-3 md:gap-6 mb-5 md:mb-6">
+
+        <div className="hairline-strong-t pt-4 grid grid-cols-3 gap-3 md:gap-6 mb-5 md:mb-6">
           <div className="min-w-0">
             <div className="label mb-1">Format</div>
             <div className="font-sans font-bold text-xs md:text-base text-default truncate">
@@ -151,13 +164,18 @@ export default async function TournamentLayout({
           </div>
         )}
 
+        {showGoalBanner && GOTT_DRIVE_URL && (
+          <GoalOfTournamentBanner driveUrl={GOTT_DRIVE_URL} />
+        )}
+
         {tournament.description && (
           <p className="text-muted text-base md:text-lg leading-relaxed max-w-2xl">
             {tournament.description}
           </p>
         )}
       </header>
-{/* Action row — register / withdraw / sign in / complete profile / offline notice */}
+
+      {/* Action row — register / withdraw / sign in / complete profile / offline notice */}
       <div className="mb-6 md:mb-8">
         {(() => {
           const isOfflineRegistration = tournament.slug === 'eftbl-world-cup';
@@ -313,6 +331,81 @@ export default async function TournamentLayout({
         {children}
       </div>
     </main>
+  );
+}
+
+function GoalOfTournamentBanner({ driveUrl }: { driveUrl: string }) {
+  const gold = '#D4A82A';
+  return (
+    <div
+      className="mb-5 md:mb-6 max-w-xl"
+      style={{
+        background: '#0E0E0C',
+        border: `1px solid ${gold}`,
+        boxShadow: `4px 4px 0 ${gold}`,
+        padding: '18px 18px 16px',
+      }}
+    >
+      <div
+        style={{
+          fontFamily: 'var(--font-mono), ui-monospace, monospace',
+          fontSize: '10px',
+          fontWeight: 700,
+          letterSpacing: '0.20em',
+          textTransform: 'uppercase',
+          color: gold,
+          marginBottom: '8px',
+        }}
+      >
+        ⚽ GOAL OF THE TOURNAMENT
+      </div>
+      <div
+        style={{
+          fontFamily: 'var(--font-sans), system-ui, sans-serif',
+          fontWeight: 900,
+          fontSize: '22px',
+          lineHeight: 1,
+          letterSpacing: '-0.025em',
+          color: '#F4EFE7',
+          marginBottom: '8px',
+        }}
+      >
+        Submit your best goal.
+      </div>
+      <p
+        style={{
+          fontFamily: 'var(--font-sans), system-ui, sans-serif',
+          fontSize: '13px',
+          lineHeight: 1.45,
+          color: 'rgba(244, 239, 231, 0.72)',
+          margin: '0 0 14px',
+          maxWidth: '460px',
+        }}
+      >
+        Upload your goal clip to the shared Drive folder. Voting opens after the group stage.
+      </p>
+      
+        href={driveUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'inline-block',
+          fontFamily: 'var(--font-mono), ui-monospace, monospace',
+          fontSize: '11px',
+          fontWeight: 700,
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+          color: '#0E0E0C',
+          background: gold,
+          border: `1px solid ${gold}`,
+          padding: '9px 16px',
+          textDecoration: 'none',
+          lineHeight: 1,
+        }}
+      >
+        Submit on Drive →
+      </a>
+    </div>
   );
 }
 

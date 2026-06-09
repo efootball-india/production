@@ -6,7 +6,7 @@ const ICS_PUBLIC_URL = "https://eftbl.in/fifa-wc-2026.ics";
 const APPLE_CAL_URL = `webcal://eftbl.in/fifa-wc-2026.ics`;
 const GOOGLE_CAL_URL = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(ICS_PUBLIC_URL)}`;
 
-export function WorldCupCard() {
+export default function WorldCupCard() {
   return (
     <div className="border border-black bg-[#FAFAF7] shadow-[6px_6px_0px_#0A0A0A] p-5 flex flex-col gap-4">
       {/* Header */}

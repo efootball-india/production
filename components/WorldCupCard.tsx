@@ -63,7 +63,8 @@ export default function WorldCupCard() {
         </a>
 
         <a
-          href={GOOGLE_CAL_URL}
+           href="/fifa-wc-2026.ics"
+  download="FIFA-WC-2026.ics"
           target="_blank"
           rel="noopener noreferrer"
           className="flex-1 flex items-center justify-center gap-2 bg-[#047857] border border-[#047857] px-4 py-2.5 text-[#FAFAF7] hover:bg-[#065f46] hover:border-[#065f46] transition-colors duration-150 text-xs font-bold uppercase tracking-wider"
@@ -75,7 +76,7 @@ export default function WorldCupCard() {
             <path d="M4.5 1v2.5M9.5 1v2.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
             <path d="M4 8h2M8 8h2M4 10.5h2" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
           </svg>
-          Add to Google Calendar
+  Download for Google Calendar
         </a>
       </div>
 

@@ -1,0 +1,1779 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//FIFA WC 2026 IST Enriched//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:FIFA World Cup 2026 (IST)
+X-WR-TIMEZONE:Asia/Kolkata
+BEGIN:VEVENT
+UID:wc2026-001@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260611T190000Z
+DTEND:20260611T210000Z
+SUMMARY:🇲🇽 Mexico vs South Africa 🇿🇦 | Group A
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 1\n📋 Group A\n🕐 Kick
+ off: Fri 12 Jun, 12:30 AM IST\n🏟️ Estadio Azteca, Mexico City\n🌎
+  Local time: 3:00 PM
+LOCATION:Estadio Azteca\, Mexico City
+CATEGORIES:Group A
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Mexico vs South Africa starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-002@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260612T020000Z
+DTEND:20260612T040000Z
+SUMMARY:🇰🇷 South Korea vs Czechia 🇨🇿 | Group A
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 2\n📋 Group A\n🕐 Kick
+ off: Fri 12 Jun, 07:30 AM IST\n🏟️ Estadio Akron, Guadalajara\n🌎 
+ Local time: 9:00 PM
+LOCATION:Estadio Akron\, Guadalajara
+CATEGORIES:Group A
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:South Korea vs Czechia starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-003@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260612T190000Z
+DTEND:20260612T210000Z
+SUMMARY:🇨🇦 Canada vs Bosnia and Herzegovina 🇧🇦 | Group B
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 3\n📋 Group B\n🕐 Kick
+ off: Sat 13 Jun, 12:30 AM IST\n🏟️ BMO Field, Toronto\n🌎 Local ti
+ me: 3:00 PM
+LOCATION:BMO Field\, Toronto
+CATEGORIES:Group B
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Canada vs Bosnia and Herzegovina starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-004@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260613T010000Z
+DTEND:20260613T030000Z
+SUMMARY:🇺🇸 USA vs Paraguay 🇵🇾 | Group D
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 4\n📋 Group D\n🕐 Kick
+ off: Sat 13 Jun, 06:30 AM IST\n🏟️ SoFi Stadium, Inglewood, CA\n🌎
+  Local time: 6:00 PM
+LOCATION:SoFi Stadium\, Inglewood\, CA
+CATEGORIES:Group D
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:USA vs Paraguay starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-005@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260613T190000Z
+DTEND:20260613T210000Z
+SUMMARY:🇶🇦 Qatar vs Switzerland 🇨🇭 | Group B
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 5\n📋 Group B\n🕐 Kick
+ off: Sun 14 Jun, 12:30 AM IST\n🏟️ Levi's Stadium, Santa Clara, CA\n
+ 🌎 Local time: 9:00 PM (prev day)
+LOCATION:Levi's Stadium\, Santa Clara\, CA
+CATEGORIES:Group B
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Qatar vs Switzerland starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-006@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260613T220000Z
+DTEND:20260614T000000Z
+SUMMARY:🇧🇷 Brazil vs Morocco 🇲🇦 | Group C
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 6\n📋 Group C\n🕐 Kick
+ off: Sun 14 Jun, 03:30 AM IST\n🏟️ MetLife Stadium, East Rutherford,
+  NJ\n🌎 Local time: 6:00 PM
+LOCATION:MetLife Stadium\, East Rutherford\, NJ
+CATEGORIES:Group C
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Brazil vs Morocco starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-007@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260614T010000Z
+DTEND:20260614T030000Z
+SUMMARY:🇭🇹 Haiti vs Scotland 🏴󠁧󠁢󠁳󠁣󠁴󠁿 | Group C
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 7\n📋 Group C\n🕐 Kick
+ off: Sun 14 Jun, 06:30 AM IST\n🏟️ Gillette Stadium, Foxborough, MA\
+ n🌎 Local time: 9:00 PM
+LOCATION:Gillette Stadium\, Foxborough\, MA
+CATEGORIES:Group C
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Haiti vs Scotland starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-008@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260614T040000Z
+DTEND:20260614T060000Z
+SUMMARY:🇦🇺 Australia vs Turkiye 🇹🇷 | Group D
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 8\n📋 Group D\n🕐 Kick
+ off: Sun 14 Jun, 09:30 AM IST\n🏟️ BC Place, Vancouver\n🌎 Local t
+ ime: 6:00 PM (prev day)
+LOCATION:BC Place\, Vancouver
+CATEGORIES:Group D
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Australia vs Turkiye starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-009@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260614T170000Z
+DTEND:20260614T190000Z
+SUMMARY:🇩🇪 Germany vs Curacao 🇨🇼 | Group F
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 9\n📋 Group F\n🕐 Kick
+ off: Sun 14 Jun, 10:30 PM IST\n🏟️ NRG Stadium, Houston\n🌎 Local 
+ time: 12:00 PM
+LOCATION:NRG Stadium\, Houston
+CATEGORIES:Group F
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Germany vs Curacao starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-010@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260614T200000Z
+DTEND:20260614T220000Z
+SUMMARY:🇳🇱 Netherlands vs Japan 🇯🇵 | Group E
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 10\n📋 Group E\n🕐 Kic
+ koff: Mon 15 Jun, 01:30 AM IST\n🏟️ AT&T Stadium, Arlington, TX\n
+ 🌎 Local time: 3:00 PM
+LOCATION:AT&T Stadium\, Arlington\, TX
+CATEGORIES:Group E
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Netherlands vs Japan starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-011@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260614T230000Z
+DTEND:20260615T010000Z
+SUMMARY:🇨🇮 Ivory Coast vs Ecuador 🇪🇨 | Group F
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 11\n📋 Group F\n🕐 Kic
+ koff: Mon 15 Jun, 04:30 AM IST\n🏟️ Lincoln Financial Field, Philade
+ lphia\n🌎 Local time: 7:00 PM
+LOCATION:Lincoln Financial Field\, Philadelphia
+CATEGORIES:Group F
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Ivory Coast vs Ecuador starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-012@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260615T020000Z
+DTEND:20260615T040000Z
+SUMMARY:🇸🇪 Sweden vs Tunisia 🇹🇳 | Group E
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 12\n📋 Group E\n🕐 Kic
+ koff: Mon 15 Jun, 07:30 AM IST\n🏟️ Estadio BBVA, Monterrey\n🌎 Lo
+ cal time: 9:00 PM
+LOCATION:Estadio BBVA\, Monterrey
+CATEGORIES:Group E
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Sweden vs Tunisia starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-013@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260615T160000Z
+DTEND:20260615T180000Z
+SUMMARY:🇪🇸 Spain vs Cape Verde 🇨🇻 | Group H
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 13\n📋 Group H\n🕐 Kic
+ koff: Mon 15 Jun, 09:30 PM IST\n🏟️ Mercedes-Benz Stadium, Atlanta\n
+ 🌎 Local time: 12:00 PM
+LOCATION:Mercedes-Benz Stadium\, Atlanta
+CATEGORIES:Group H
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Spain vs Cape Verde starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-014@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260615T190000Z
+DTEND:20260615T210000Z
+SUMMARY:🇧🇪 Belgium vs Egypt 🇪🇬 | Group G
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 14\n📋 Group G\n🕐 Kic
+ koff: Tue 16 Jun, 12:30 AM IST\n🏟️ Lumen Field, Seattle\n🌎 Local
+  time: 12:00 PM
+LOCATION:Lumen Field\, Seattle
+CATEGORIES:Group G
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Belgium vs Egypt starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-015@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260615T220000Z
+DTEND:20260616T000000Z
+SUMMARY:🇸🇦 Saudi Arabia vs Uruguay 🇺🇾 | Group H
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 15\n📋 Group H\n🕐 Kic
+ koff: Tue 16 Jun, 03:30 AM IST\n🏟️ Hard Rock Stadium, Miami Gardens
+ , FL\n🌎 Local time: 6:00 PM
+LOCATION:Hard Rock Stadium\, Miami Gardens\, FL
+CATEGORIES:Group H
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Saudi Arabia vs Uruguay starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-016@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260616T010000Z
+DTEND:20260616T030000Z
+SUMMARY:🇮🇷 Iran vs New Zealand 🇳🇿 | Group G
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 16\n📋 Group G\n🕐 Kic
+ koff: Tue 16 Jun, 06:30 AM IST\n🏟️ SoFi Stadium, Inglewood, CA\n
+ 🌎 Local time: 6:00 PM
+LOCATION:SoFi Stadium\, Inglewood\, CA
+CATEGORIES:Group G
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Iran vs New Zealand starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-017@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260616T190000Z
+DTEND:20260616T210000Z
+SUMMARY:🇫🇷 France vs Senegal 🇸🇳 | Group I
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 17\n📋 Group I\n🕐 Kic
+ koff: Wed 17 Jun, 12:30 AM IST\n🏟️ MetLife Stadium, East Rutherford
+ , NJ\n🌎 Local time: 3:00 PM
+LOCATION:MetLife Stadium\, East Rutherford\, NJ
+CATEGORIES:Group I
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:France vs Senegal starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-018@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260616T220000Z
+DTEND:20260617T000000Z
+SUMMARY:🇮🇶 Iraq vs Norway 🇳🇴 | Group I
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 18\n📋 Group I\n🕐 Kic
+ koff: Wed 17 Jun, 03:30 AM IST\n🏟️ Gillette Stadium, Foxborough, MA
+ \n🌎 Local time: 6:00 PM
+LOCATION:Gillette Stadium\, Foxborough\, MA
+CATEGORIES:Group I
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Iraq vs Norway starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-019@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260617T010000Z
+DTEND:20260617T030000Z
+SUMMARY:🇦🇷 Argentina vs Algeria 🇩🇿 | Group J
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 19\n📋 Group J\n🕐 Kic
+ koff: Wed 17 Jun, 06:30 AM IST\n🏟️ Arrowhead Stadium, Kansas City\n
+ 🌎 Local time: 9:00 PM
+LOCATION:Arrowhead Stadium\, Kansas City
+CATEGORIES:Group J
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Argentina vs Algeria starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-020@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260617T040000Z
+DTEND:20260617T060000Z
+SUMMARY:🇦🇹 Austria vs Jordan 🇯🇴 | Group J
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 20\n📋 Group J\n🕐 Kic
+ koff: Wed 17 Jun, 09:30 AM IST\n🏟️ Levi's Stadium, Santa Clara, CA\
+ n🌎 Local time: 9:00 PM (prev day)
+LOCATION:Levi's Stadium\, Santa Clara\, CA
+CATEGORIES:Group J
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Austria vs Jordan starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-021@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260617T170000Z
+DTEND:20260617T190000Z
+SUMMARY:🇵🇹 Portugal vs DR Congo 🇨🇩 | Group K
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 21\n📋 Group K\n🕐 Kic
+ koff: Wed 17 Jun, 10:30 PM IST\n🏟️ NRG Stadium, Houston\n🌎 Local
+  time: 12:00 PM
+LOCATION:NRG Stadium\, Houston
+CATEGORIES:Group K
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Portugal vs DR Congo starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-022@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260617T200000Z
+DTEND:20260617T220000Z
+SUMMARY:🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs Croatia 🇭🇷 | Group 
+ L
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 22\n📋 Group L\n🕐 Kic
+ koff: Thu 18 Jun, 01:30 AM IST\n🏟️ AT&T Stadium, Arlington, TX\n
+ 🌎 Local time: 3:00 PM
+LOCATION:AT&T Stadium\, Arlington\, TX
+CATEGORIES:Group L
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:England vs Croatia starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-023@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260617T230000Z
+DTEND:20260618T010000Z
+SUMMARY:🇬🇭 Ghana vs Panama 🇵🇦 | Group L
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 23\n📋 Group L\n🕐 Kic
+ koff: Thu 18 Jun, 04:30 AM IST\n🏟️ BMO Field, Toronto\n🌎 Local t
+ ime: 7:00 PM
+LOCATION:BMO Field\, Toronto
+CATEGORIES:Group L
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Ghana vs Panama starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-024@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260618T020000Z
+DTEND:20260618T040000Z
+SUMMARY:🇺🇿 Uzbekistan vs Colombia 🇨🇴 | Group K
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 24\n📋 Group K\n🕐 Kic
+ koff: Thu 18 Jun, 07:30 AM IST\n🏟️ Estadio Azteca, Mexico City\n
+ 🌎 Local time: 8:00 PM
+LOCATION:Estadio Azteca\, Mexico City
+CATEGORIES:Group K
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Uzbekistan vs Colombia starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-025@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260618T160000Z
+DTEND:20260618T180000Z
+SUMMARY:🇨🇿 Czechia vs South Africa 🇿🇦 | Group A
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 25\n📋 Group A\n🕐 Kic
+ koff: Thu 18 Jun, 09:30 PM IST\n🏟️ Mercedes-Benz Stadium, Atlanta\n
+ 🌎 Local time: 12:00 PM
+LOCATION:Mercedes-Benz Stadium\, Atlanta
+CATEGORIES:Group A
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Czechia vs South Africa starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-026@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260618T190000Z
+DTEND:20260618T210000Z
+SUMMARY:🇨🇭 Switzerland vs Bosnia and Herzegovina 🇧🇦 | Group B
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 26\n📋 Group B\n🕐 Kic
+ koff: Fri 19 Jun, 12:30 AM IST\n🏟️ SoFi Stadium, Inglewood, CA\n
+ 🌎 Local time: 12:00 PM
+LOCATION:SoFi Stadium\, Inglewood\, CA
+CATEGORIES:Group B
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Switzerland vs Bosnia and Herzegovina starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-027@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260618T220000Z
+DTEND:20260619T000000Z
+SUMMARY:🇨🇦 Canada vs Qatar 🇶🇦 | Group B
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 27\n📋 Group B\n🕐 Kic
+ koff: Fri 19 Jun, 03:30 AM IST\n🏟️ BC Place, Vancouver\n🌎 Local 
+ time: 3:00 PM
+LOCATION:BC Place\, Vancouver
+CATEGORIES:Group B
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Canada vs Qatar starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-028@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260619T010000Z
+DTEND:20260619T030000Z
+SUMMARY:🇲🇽 Mexico vs South Korea 🇰🇷 | Group A
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 28\n📋 Group A\n🕐 Kic
+ koff: Fri 19 Jun, 06:30 AM IST\n🏟️ Estadio Akron, Guadalajara\n🌎
+  Local time: 8:00 PM
+LOCATION:Estadio Akron\, Guadalajara
+CATEGORIES:Group A
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Mexico vs South Korea starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-029@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260619T190000Z
+DTEND:20260619T210000Z
+SUMMARY:🇺🇸 USA vs Australia 🇦🇺 | Group D
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 29\n📋 Group D\n🕐 Kic
+ koff: Sat 20 Jun, 12:30 AM IST\n🏟️ Lumen Field, Seattle\n🌎 Local
+  time: 12:00 PM
+LOCATION:Lumen Field\, Seattle
+CATEGORIES:Group D
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:USA vs Australia starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-030@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260619T220000Z
+DTEND:20260620T000000Z
+SUMMARY:🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland vs Morocco 🇲🇦 | Group
+  C
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 30\n📋 Group C\n🕐 Kic
+ koff: Sat 20 Jun, 03:30 AM IST\n🏟️ Gillette Stadium, Foxborough, MA
+ \n🌎 Local time: 6:00 PM
+LOCATION:Gillette Stadium\, Foxborough\, MA
+CATEGORIES:Group C
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Scotland vs Morocco starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-031@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260620T010000Z
+DTEND:20260620T030000Z
+SUMMARY:🇧🇷 Brazil vs Haiti 🇭🇹 | Group C
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 31\n📋 Group C\n🕐 Kic
+ koff: Sat 20 Jun, 06:30 AM IST\n🏟️ Lincoln Financial Field, Philade
+ lphia\n🌎 Local time: 9:00 PM
+LOCATION:Lincoln Financial Field\, Philadelphia
+CATEGORIES:Group C
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Brazil vs Haiti starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-032@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260620T040000Z
+DTEND:20260620T060000Z
+SUMMARY:🇹🇷 Turkiye vs Paraguay 🇵🇾 | Group D
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 32\n📋 Group D\n🕐 Kic
+ koff: Sat 20 Jun, 09:30 AM IST\n🏟️ Levi's Stadium, Santa Clara, CA\
+ n🌎 Local time: 9:00 PM (prev day)
+LOCATION:Levi's Stadium\, Santa Clara\, CA
+CATEGORIES:Group D
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Turkiye vs Paraguay starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-033@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260620T170000Z
+DTEND:20260620T190000Z
+SUMMARY:🇳🇱 Netherlands vs Sweden 🇸🇪 | Group E
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 33\n📋 Group E\n🕐 Kic
+ koff: Sat 20 Jun, 10:30 PM IST\n🏟️ NRG Stadium, Houston\n🌎 Local
+  time: 12:00 PM
+LOCATION:NRG Stadium\, Houston
+CATEGORIES:Group E
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Netherlands vs Sweden starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-034@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260620T200000Z
+DTEND:20260620T220000Z
+SUMMARY:🇩🇪 Germany vs Ivory Coast 🇨🇮 | Group F
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 34\n📋 Group F\n🕐 Kic
+ koff: Sun 21 Jun, 01:30 AM IST\n🏟️ BMO Field, Toronto\n🌎 Local t
+ ime: 4:00 PM
+LOCATION:BMO Field\, Toronto
+CATEGORIES:Group F
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Germany vs Ivory Coast starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-035@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260621T000000Z
+DTEND:20260621T020000Z
+SUMMARY:🇪🇨 Ecuador vs Curacao 🇨🇼 | Group F
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 35\n📋 Group F\n🕐 Kic
+ koff: Sun 21 Jun, 05:30 AM IST\n🏟️ Arrowhead Stadium, Kansas City\n
+ 🌎 Local time: 7:00 PM
+LOCATION:Arrowhead Stadium\, Kansas City
+CATEGORIES:Group F
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Ecuador vs Curacao starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-036@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260621T040000Z
+DTEND:20260621T060000Z
+SUMMARY:🇹🇳 Tunisia vs Japan 🇯🇵 | Group E
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 36\n📋 Group E\n🕐 Kic
+ koff: Sun 21 Jun, 09:30 AM IST\n🏟️ Estadio BBVA, Monterrey\n🌎 Lo
+ cal time: 11:00 PM (prev day)
+LOCATION:Estadio BBVA\, Monterrey
+CATEGORIES:Group E
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Tunisia vs Japan starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-037@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260621T160000Z
+DTEND:20260621T180000Z
+SUMMARY:🇪🇸 Spain vs Saudi Arabia 🇸🇦 | Group H
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 37\n📋 Group H\n🕐 Kic
+ koff: Sun 21 Jun, 09:30 PM IST\n🏟️ Mercedes-Benz Stadium, Atlanta\n
+ 🌎 Local time: 12:00 PM
+LOCATION:Mercedes-Benz Stadium\, Atlanta
+CATEGORIES:Group H
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Spain vs Saudi Arabia starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-038@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260621T190000Z
+DTEND:20260621T210000Z
+SUMMARY:🇧🇪 Belgium vs Iran 🇮🇷 | Group G
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 38\n📋 Group G\n🕐 Kic
+ koff: Mon 22 Jun, 12:30 AM IST\n🏟️ SoFi Stadium, Inglewood, CA\n
+ 🌎 Local time: 12:00 PM
+LOCATION:SoFi Stadium\, Inglewood\, CA
+CATEGORIES:Group G
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Belgium vs Iran starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-039@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260621T220000Z
+DTEND:20260622T000000Z
+SUMMARY:🇺🇾 Uruguay vs Cape Verde 🇨🇻 | Group H
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 39\n📋 Group H\n🕐 Kic
+ koff: Mon 22 Jun, 03:30 AM IST\n🏟️ Hard Rock Stadium, Miami Gardens
+ , FL\n🌎 Local time: 6:00 PM
+LOCATION:Hard Rock Stadium\, Miami Gardens\, FL
+CATEGORIES:Group H
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Uruguay vs Cape Verde starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-040@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260622T010000Z
+DTEND:20260622T030000Z
+SUMMARY:🇳🇿 New Zealand vs Egypt 🇪🇬 | Group G
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 40\n📋 Group G\n🕐 Kic
+ koff: Mon 22 Jun, 06:30 AM IST\n🏟️ BC Place, Vancouver\n🌎 Local 
+ time: 6:00 PM
+LOCATION:BC Place\, Vancouver
+CATEGORIES:Group G
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:New Zealand vs Egypt starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-041@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260622T170000Z
+DTEND:20260622T190000Z
+SUMMARY:🇦🇷 Argentina vs Austria 🇦🇹 | Group J
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 41\n📋 Group J\n🕐 Kic
+ koff: Mon 22 Jun, 10:30 PM IST\n🏟️ AT&T Stadium, Arlington, TX\n
+ 🌎 Local time: 12:00 PM
+LOCATION:AT&T Stadium\, Arlington\, TX
+CATEGORIES:Group J
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Argentina vs Austria starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-042@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260622T210000Z
+DTEND:20260622T230000Z
+SUMMARY:🇫🇷 France vs Iraq 🇮🇶 | Group I
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 42\n📋 Group I\n🕐 Kic
+ koff: Tue 23 Jun, 02:30 AM IST\n🏟️ Lincoln Financial Field, Philade
+ lphia\n🌎 Local time: 5:00 PM
+LOCATION:Lincoln Financial Field\, Philadelphia
+CATEGORIES:Group I
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:France vs Iraq starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-043@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260623T000000Z
+DTEND:20260623T020000Z
+SUMMARY:🇳🇴 Norway vs Senegal 🇸🇳 | Group I
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 43\n📋 Group I\n🕐 Kic
+ koff: Tue 23 Jun, 05:30 AM IST\n🏟️ MetLife Stadium, East Rutherford
+ , NJ\n🌎 Local time: 8:00 PM
+LOCATION:MetLife Stadium\, East Rutherford\, NJ
+CATEGORIES:Group I
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Norway vs Senegal starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-044@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260623T030000Z
+DTEND:20260623T050000Z
+SUMMARY:🇯🇴 Jordan vs Algeria 🇩🇿 | Group J
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 44\n📋 Group J\n🕐 Kic
+ koff: Tue 23 Jun, 08:30 AM IST\n🏟️ Levi's Stadium, Santa Clara, CA\
+ n🌎 Local time: 8:00 PM
+LOCATION:Levi's Stadium\, Santa Clara\, CA
+CATEGORIES:Group J
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Jordan vs Algeria starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-045@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260623T170000Z
+DTEND:20260623T190000Z
+SUMMARY:🇵🇹 Portugal vs Uzbekistan 🇺🇿 | Group K
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 45\n📋 Group K\n🕐 Kic
+ koff: Tue 23 Jun, 10:30 PM IST\n🏟️ NRG Stadium, Houston\n🌎 Local
+  time: 12:00 PM
+LOCATION:NRG Stadium\, Houston
+CATEGORIES:Group K
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Portugal vs Uzbekistan starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-046@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260623T200000Z
+DTEND:20260623T220000Z
+SUMMARY:🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs Ghana 🇬🇭 | Group L
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 46\n📋 Group L\n🕐 Kic
+ koff: Wed 24 Jun, 01:30 AM IST\n🏟️ Gillette Stadium, Foxborough, MA
+ \n🌎 Local time: 4:00 PM
+LOCATION:Gillette Stadium\, Foxborough\, MA
+CATEGORIES:Group L
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:England vs Ghana starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-047@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260623T230000Z
+DTEND:20260624T010000Z
+SUMMARY:🇵🇦 Panama vs Croatia 🇭🇷 | Group L
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 47\n📋 Group L\n🕐 Kic
+ koff: Wed 24 Jun, 04:30 AM IST\n🏟️ BMO Field, Toronto\n🌎 Local t
+ ime: 7:00 PM
+LOCATION:BMO Field\, Toronto
+CATEGORIES:Group L
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Panama vs Croatia starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-048@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260624T020000Z
+DTEND:20260624T040000Z
+SUMMARY:🇨🇴 Colombia vs DR Congo 🇨🇩 | Group K
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 48\n📋 Group K\n🕐 Kic
+ koff: Wed 24 Jun, 07:30 AM IST\n🏟️ Estadio Akron, Guadalajara\n🌎
+  Local time: 8:00 PM
+LOCATION:Estadio Akron\, Guadalajara
+CATEGORIES:Group K
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Colombia vs DR Congo starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-049@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260624T190000Z
+DTEND:20260624T210000Z
+SUMMARY:🇨🇭 Switzerland vs Canada 🇨🇦 | Group B
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 49\n📋 Group B\n🕐 Kic
+ koff: Thu 25 Jun, 12:30 AM IST\n🏟️ Lumen Field, Seattle\n🌎 Local
+  time: 12:00 PM
+LOCATION:Lumen Field\, Seattle
+CATEGORIES:Group B
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Switzerland vs Canada starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-050@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260624T190000Z
+DTEND:20260624T210000Z
+SUMMARY:🇧🇦 Bosnia and Herzegovina vs Qatar 🇶🇦 | Group B
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 50\n📋 Group B\n🕐 Kic
+ koff: Thu 25 Jun, 12:30 AM IST\n🏟️ BC Place, Vancouver\n🌎 Local 
+ time: 12:00 PM
+LOCATION:BC Place\, Vancouver
+CATEGORIES:Group B
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Bosnia and Herzegovina vs Qatar starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-051@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260624T220000Z
+DTEND:20260625T000000Z
+SUMMARY:🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland vs Brazil 🇧🇷 | Group 
+ C
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 51\n📋 Group C\n🕐 Kic
+ koff: Thu 25 Jun, 03:30 AM IST\n🏟️ Hard Rock Stadium, Miami Gardens
+ , FL\n🌎 Local time: 6:00 PM
+LOCATION:Hard Rock Stadium\, Miami Gardens\, FL
+CATEGORIES:Group C
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Scotland vs Brazil starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-052@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260624T220000Z
+DTEND:20260625T000000Z
+SUMMARY:🇲🇦 Morocco vs Haiti 🇭🇹 | Group C
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 52\n📋 Group C\n🕐 Kic
+ koff: Thu 25 Jun, 03:30 AM IST\n🏟️ Mercedes-Benz Stadium, Atlanta\n
+ 🌎 Local time: 6:00 PM
+LOCATION:Mercedes-Benz Stadium\, Atlanta
+CATEGORIES:Group C
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Morocco vs Haiti starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-053@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260625T010000Z
+DTEND:20260625T030000Z
+SUMMARY:🇨🇿 Czechia vs Mexico 🇲🇽 | Group A
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 53\n📋 Group A\n🕐 Kic
+ koff: Thu 25 Jun, 06:30 AM IST\n🏟️ Estadio Azteca, Mexico City\n
+ 🌎 Local time: 8:00 PM
+LOCATION:Estadio Azteca\, Mexico City
+CATEGORIES:Group A
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Czechia vs Mexico starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-054@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260625T010000Z
+DTEND:20260625T030000Z
+SUMMARY:🇿🇦 South Africa vs South Korea 🇰🇷 | Group A
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 54\n📋 Group A\n🕐 Kic
+ koff: Thu 25 Jun, 06:30 AM IST\n🏟️ Estadio BBVA, Monterrey\n🌎 Lo
+ cal time: 8:00 PM
+LOCATION:Estadio BBVA\, Monterrey
+CATEGORIES:Group A
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:South Africa vs South Korea starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-055@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260625T200000Z
+DTEND:20260625T220000Z
+SUMMARY:🇪🇨 Ecuador vs Germany 🇩🇪 | Group F
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 55\n📋 Group F\n🕐 Kic
+ koff: Fri 26 Jun, 01:30 AM IST\n🏟️ MetLife Stadium, East Rutherford
+ , NJ\n🌎 Local time: 4:00 PM
+LOCATION:MetLife Stadium\, East Rutherford\, NJ
+CATEGORIES:Group F
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Ecuador vs Germany starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-056@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260625T200000Z
+DTEND:20260625T220000Z
+SUMMARY:🇨🇼 Curacao vs Ivory Coast 🇨🇮 | Group F
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 56\n📋 Group F\n🕐 Kic
+ koff: Fri 26 Jun, 01:30 AM IST\n🏟️ Lincoln Financial Field, Philade
+ lphia\n🌎 Local time: 4:00 PM
+LOCATION:Lincoln Financial Field\, Philadelphia
+CATEGORIES:Group F
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Curacao vs Ivory Coast starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-057@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260625T230000Z
+DTEND:20260626T010000Z
+SUMMARY:🇯🇵 Japan vs Sweden 🇸🇪 | Group E
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 57\n📋 Group E\n🕐 Kic
+ koff: Fri 26 Jun, 04:30 AM IST\n🏟️ AT&T Stadium, Arlington, TX\n
+ 🌎 Local time: 6:00 PM
+LOCATION:AT&T Stadium\, Arlington\, TX
+CATEGORIES:Group E
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Japan vs Sweden starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-058@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260625T230000Z
+DTEND:20260626T010000Z
+SUMMARY:🇹🇳 Tunisia vs Netherlands 🇳🇱 | Group E
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 58\n📋 Group E\n🕐 Kic
+ koff: Fri 26 Jun, 04:30 AM IST\n🏟️ Arrowhead Stadium, Kansas City\n
+ 🌎 Local time: 6:00 PM
+LOCATION:Arrowhead Stadium\, Kansas City
+CATEGORIES:Group E
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Tunisia vs Netherlands starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-059@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260626T020000Z
+DTEND:20260626T040000Z
+SUMMARY:🇹🇷 Turkiye vs USA 🇺🇸 | Group D
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 59\n📋 Group D\n🕐 Kic
+ koff: Fri 26 Jun, 07:30 AM IST\n🏟️ SoFi Stadium, Inglewood, CA\n
+ 🌎 Local time: 7:00 PM
+LOCATION:SoFi Stadium\, Inglewood\, CA
+CATEGORIES:Group D
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Turkiye vs USA starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-060@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260626T020000Z
+DTEND:20260626T040000Z
+SUMMARY:🇵🇾 Paraguay vs Australia 🇦🇺 | Group D
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 60\n📋 Group D\n🕐 Kic
+ koff: Fri 26 Jun, 07:30 AM IST\n🏟️ Levi's Stadium, Santa Clara, CA\
+ n🌎 Local time: 7:00 PM
+LOCATION:Levi's Stadium\, Santa Clara\, CA
+CATEGORIES:Group D
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Paraguay vs Australia starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-061@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260626T190000Z
+DTEND:20260626T210000Z
+SUMMARY:🇳🇴 Norway vs France 🇫🇷 | Group I
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 61\n📋 Group I\n🕐 Kic
+ koff: Sat 27 Jun, 12:30 AM IST\n🏟️ Gillette Stadium, Foxborough, MA
+ \n🌎 Local time: 3:00 PM
+LOCATION:Gillette Stadium\, Foxborough\, MA
+CATEGORIES:Group I
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Norway vs France starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-062@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260626T190000Z
+DTEND:20260626T210000Z
+SUMMARY:🇸🇳 Senegal vs Iraq 🇮🇶 | Group I
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 62\n📋 Group I\n🕐 Kic
+ koff: Sat 27 Jun, 12:30 AM IST\n🏟️ BMO Field, Toronto\n🌎 Local t
+ ime: 3:00 PM
+LOCATION:BMO Field\, Toronto
+CATEGORIES:Group I
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Senegal vs Iraq starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-063@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260627T000000Z
+DTEND:20260627T020000Z
+SUMMARY:🇨🇻 Cape Verde vs Saudi Arabia 🇸🇦 | Group H
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 63\n📋 Group H\n🕐 Kic
+ koff: Sat 27 Jun, 05:30 AM IST\n🏟️ NRG Stadium, Houston\n🌎 Local
+  time: 7:00 PM
+LOCATION:NRG Stadium\, Houston
+CATEGORIES:Group H
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Cape Verde vs Saudi Arabia starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-064@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260627T000000Z
+DTEND:20260627T020000Z
+SUMMARY:🇺🇾 Uruguay vs Spain 🇪🇸 | Group H
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 64\n📋 Group H\n🕐 Kic
+ koff: Sat 27 Jun, 05:30 AM IST\n🏟️ Estadio Akron, Guadalajara\n🌎
+  Local time: 7:00 PM
+LOCATION:Estadio Akron\, Guadalajara
+CATEGORIES:Group H
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Uruguay vs Spain starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-065@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260627T030000Z
+DTEND:20260627T050000Z
+SUMMARY:🇪🇬 Egypt vs Iran 🇮🇷 | Group G
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 65\n📋 Group G\n🕐 Kic
+ koff: Sat 27 Jun, 08:30 AM IST\n🏟️ Lumen Field, Seattle\n🌎 Local
+  time: 8:00 PM
+LOCATION:Lumen Field\, Seattle
+CATEGORIES:Group G
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Egypt vs Iran starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-066@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260627T030000Z
+DTEND:20260627T050000Z
+SUMMARY:🇳🇿 New Zealand vs Belgium 🇧🇪 | Group G
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 66\n📋 Group G\n🕐 Kic
+ koff: Sat 27 Jun, 08:30 AM IST\n🏟️ BC Place, Vancouver\n🌎 Local 
+ time: 8:00 PM
+LOCATION:BC Place\, Vancouver
+CATEGORIES:Group G
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:New Zealand vs Belgium starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-067@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260627T210000Z
+DTEND:20260627T230000Z
+SUMMARY:🇵🇦 Panama vs England 🏴󠁧󠁢󠁥󠁮󠁧󠁿 | Group L
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 67\n📋 Group L\n🕐 Kic
+ koff: Sun 28 Jun, 02:30 AM IST\n🏟️ MetLife Stadium, East Rutherford
+ , NJ\n🌎 Local time: 5:00 PM
+LOCATION:MetLife Stadium\, East Rutherford\, NJ
+CATEGORIES:Group L
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Panama vs England starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-068@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260627T210000Z
+DTEND:20260627T230000Z
+SUMMARY:🇭🇷 Croatia vs Ghana 🇬🇭 | Group L
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 68\n📋 Group L\n🕐 Kic
+ koff: Sun 28 Jun, 02:30 AM IST\n🏟️ Lincoln Financial Field, Philade
+ lphia\n🌎 Local time: 5:00 PM
+LOCATION:Lincoln Financial Field\, Philadelphia
+CATEGORIES:Group L
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Croatia vs Ghana starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-069@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260627T233000Z
+DTEND:20260628T013000Z
+SUMMARY:🇨🇴 Colombia vs Portugal 🇵🇹 | Group K
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 69\n📋 Group K\n🕐 Kic
+ koff: Sun 28 Jun, 05:00 AM IST\n🏟️ Hard Rock Stadium, Miami Gardens
+ , FL\n🌎 Local time: 7:30 PM
+LOCATION:Hard Rock Stadium\, Miami Gardens\, FL
+CATEGORIES:Group K
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Colombia vs Portugal starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-070@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260627T233000Z
+DTEND:20260628T013000Z
+SUMMARY:🇨🇩 DR Congo vs Uzbekistan 🇺🇿 | Group K
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 70\n📋 Group K\n🕐 Kic
+ koff: Sun 28 Jun, 05:00 AM IST\n🏟️ Mercedes-Benz Stadium, Atlanta\n
+ 🌎 Local time: 7:30 PM
+LOCATION:Mercedes-Benz Stadium\, Atlanta
+CATEGORIES:Group K
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:DR Congo vs Uzbekistan starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-071@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260628T020000Z
+DTEND:20260628T040000Z
+SUMMARY:🇩🇿 Algeria vs Austria 🇦🇹 | Group J
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 71\n📋 Group J\n🕐 Kic
+ koff: Sun 28 Jun, 07:30 AM IST\n🏟️ Arrowhead Stadium, Kansas City\n
+ 🌎 Local time: 9:00 PM
+LOCATION:Arrowhead Stadium\, Kansas City
+CATEGORIES:Group J
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Algeria vs Austria starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-072@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260628T020000Z
+DTEND:20260628T040000Z
+SUMMARY:🇯🇴 Jordan vs Argentina 🇦🇷 | Group J
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 72\n📋 Group J\n🕐 Kic
+ koff: Sun 28 Jun, 07:30 AM IST\n🏟️ AT&T Stadium, Arlington, TX\n
+ 🌎 Local time: 9:00 PM
+LOCATION:AT&T Stadium\, Arlington\, TX
+CATEGORIES:Group J
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Jordan vs Argentina starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-073@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260628T190000Z
+DTEND:20260628T210000Z
+SUMMARY:⚽ Runners-up A vs Runners-up B ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 73\n📋 Round of 32\n🕐
+  Kickoff: Mon 29 Jun, 12:30 AM IST\n🏟️ SoFi Stadium, Inglewood, CA\
+ n🌎 Local time: 12:00 PM
+LOCATION:SoFi Stadium\, Inglewood\, CA
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Runners-up A vs Runners-up B starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-074@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260629T170000Z
+DTEND:20260629T190000Z
+SUMMARY:⚽ Winners C vs Runners-up F ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 74\n📋 Round of 32\n🕐
+  Kickoff: Mon 29 Jun, 10:30 PM IST\n🏟️ Estadio BBVA, Monterrey\n
+ 🌎 Local time: 12:00 PM
+LOCATION:Estadio BBVA\, Monterrey
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Winners C vs Runners-up F starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-075@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260629T203000Z
+DTEND:20260629T223000Z
+SUMMARY:⚽ Winners E vs Best 3rd A/B/C/D/F ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 75\n📋 Round of 32\n🕐
+  Kickoff: Tue 30 Jun, 02:00 AM IST\n🏟️ Gillette Stadium, Foxborough
+ , MA\n🌎 Local time: 4:30 PM
+LOCATION:Gillette Stadium\, Foxborough\, MA
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Winners E vs Best 3rd A/B/C/D/F starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-076@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260630T010000Z
+DTEND:20260630T030000Z
+SUMMARY:⚽ Winners F vs Runners-up C ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 76\n📋 Round of 32\n🕐
+  Kickoff: Tue 30 Jun, 06:30 AM IST\n🏟️ NRG Stadium, Houston\n🌎 L
+ ocal time: 8:00 PM
+LOCATION:NRG Stadium\, Houston
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Winners F vs Runners-up C starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-077@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260630T170000Z
+DTEND:20260630T190000Z
+SUMMARY:⚽ Runners-up E vs Runners-up I ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 77\n📋 Round of 32\n🕐
+  Kickoff: Tue 30 Jun, 10:30 PM IST\n🏟️ Estadio Azteca, Mexico City\
+ n🌎 Local time: 12:00 PM
+LOCATION:Estadio Azteca\, Mexico City
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Runners-up E vs Runners-up I starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-078@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260630T210000Z
+DTEND:20260630T230000Z
+SUMMARY:⚽ Winners I vs Best 3rd C/D/F/G/H ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 78\n📋 Round of 32\n🕐
+  Kickoff: Wed 01 Jul, 02:30 AM IST\n🏟️ AT&T Stadium, Arlington, TX\
+ n🌎 Local time: 4:00 PM
+LOCATION:AT&T Stadium\, Arlington\, TX
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Winners I vs Best 3rd C/D/F/G/H starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-079@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260701T010000Z
+DTEND:20260701T030000Z
+SUMMARY:⚽ Winners A vs Best 3rd C/E/F/H/I ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 79\n📋 Round of 32\n🕐
+  Kickoff: Wed 01 Jul, 06:30 AM IST\n🏟️ MetLife Stadium, East Ruther
+ ford, NJ\n🌎 Local time: 8:00 PM
+LOCATION:MetLife Stadium\, East Rutherford\, NJ
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Winners A vs Best 3rd C/E/F/H/I starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-080@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260701T160000Z
+DTEND:20260701T180000Z
+SUMMARY:⚽ Winners L vs Best 3rd E/H/I/J/K ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 80\n📋 Round of 32\n🕐
+  Kickoff: Wed 01 Jul, 09:30 PM IST\n🏟️ Lumen Field, Seattle\n🌎 L
+ ocal time: 9:00 AM
+LOCATION:Lumen Field\, Seattle
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Winners L vs Best 3rd E/H/I/J/K starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-081@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260701T200000Z
+DTEND:20260701T220000Z
+SUMMARY:⚽ Winners G vs Best 3rd A/E/H/I/J ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 81\n📋 Round of 32\n🕐
+  Kickoff: Thu 02 Jul, 01:30 AM IST\n🏟️ Mercedes-Benz Stadium, Atlan
+ ta\n🌎 Local time: 4:00 PM
+LOCATION:Mercedes-Benz Stadium\, Atlanta
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Winners G vs Best 3rd A/E/H/I/J starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-082@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260702T000000Z
+DTEND:20260702T020000Z
+SUMMARY:⚽ Winners D vs Best 3rd B/E/F/I/J ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 82\n📋 Round of 32\n🕐
+  Kickoff: Thu 02 Jul, 05:30 AM IST\n🏟️ Levi's Stadium, Santa Clara,
+  CA\n🌎 Local time: 5:00 PM
+LOCATION:Levi's Stadium\, Santa Clara\, CA
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Winners D vs Best 3rd B/E/F/I/J starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-083@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260702T190000Z
+DTEND:20260702T210000Z
+SUMMARY:⚽ Winners H vs Runners-up J ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 83\n📋 Round of 32\n🕐
+  Kickoff: Fri 03 Jul, 12:30 AM IST\n🏟️ SoFi Stadium, Inglewood, CA\
+ n🌎 Local time: 12:00 PM
+LOCATION:SoFi Stadium\, Inglewood\, CA
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Winners H vs Runners-up J starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-084@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260702T230000Z
+DTEND:20260703T010000Z
+SUMMARY:⚽ Runners-up K vs Runners-up L ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 84\n📋 Round of 32\n🕐
+  Kickoff: Fri 03 Jul, 04:30 AM IST\n🏟️ BMO Field, Toronto\n🌎 Loc
+ al time: 7:00 PM
+LOCATION:BMO Field\, Toronto
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Runners-up K vs Runners-up L starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-085@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260703T030000Z
+DTEND:20260703T050000Z
+SUMMARY:⚽ Winners B vs Best 3rd E/F/G/I/J ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 85\n📋 Round of 32\n🕐
+  Kickoff: Fri 03 Jul, 08:30 AM IST\n🏟️ BC Place, Vancouver\n🌎 Lo
+ cal time: 8:00 PM
+LOCATION:BC Place\, Vancouver
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Winners B vs Best 3rd E/F/G/I/J starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-086@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260703T180000Z
+DTEND:20260703T200000Z
+SUMMARY:⚽ Runners-up D vs Runners-up G ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 86\n📋 Round of 32\n🕐
+  Kickoff: Fri 03 Jul, 11:30 PM IST\n🏟️ AT&T Stadium, Arlington, TX\
+ n🌎 Local time: 1:00 PM
+LOCATION:AT&T Stadium\, Arlington\, TX
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Runners-up D vs Runners-up G starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-087@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260703T220000Z
+DTEND:20260704T000000Z
+SUMMARY:⚽ Winners J vs Runners-up H ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 87\n📋 Round of 32\n🕐
+  Kickoff: Sat 04 Jul, 03:30 AM IST\n🏟️ Hard Rock Stadium, Miami Gar
+ dens, FL\n🌎 Local time: 6:00 PM
+LOCATION:Hard Rock Stadium\, Miami Gardens\, FL
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Winners J vs Runners-up H starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-088@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260704T013000Z
+DTEND:20260704T033000Z
+SUMMARY:⚽ Winners K vs Best 3rd D/E/I/J/L ⚽ | Round of 32
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 88\n📋 Round of 32\n🕐
+  Kickoff: Sat 04 Jul, 07:00 AM IST\n🏟️ Arrowhead Stadium, Kansas Ci
+ ty\n🌎 Local time: 8:30 PM
+LOCATION:Arrowhead Stadium\, Kansas City
+CATEGORIES:Round of 32
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Winners K vs Best 3rd D/E/I/J/L starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-089@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260704T170000Z
+DTEND:20260704T190000Z
+SUMMARY:⚽ Round of 16 Match 1 vs TBD ⚽ | Round of 16
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 89\n📋 Round of 16\n🕐
+  Kickoff: Sat 04 Jul, 10:30 PM IST\n🏟️ Lincoln Financial Field, Phi
+ ladelphia\n🌎 Local time: 1:00 PM
+LOCATION:Lincoln Financial Field\, Philadelphia
+CATEGORIES:Round of 16
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Round of 16 Match 1 vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-090@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260704T210000Z
+DTEND:20260704T230000Z
+SUMMARY:⚽ Round of 16 Match 2 vs TBD ⚽ | Round of 16
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 90\n📋 Round of 16\n🕐
+  Kickoff: Sun 05 Jul, 02:30 AM IST\n🏟️ NRG Stadium, Houston\n🌎 L
+ ocal time: 4:00 PM
+LOCATION:NRG Stadium\, Houston
+CATEGORIES:Round of 16
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Round of 16 Match 2 vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-091@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260705T200000Z
+DTEND:20260705T220000Z
+SUMMARY:⚽ Round of 16 Match 3 vs TBD ⚽ | Round of 16
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 91\n📋 Round of 16\n🕐
+  Kickoff: Mon 06 Jul, 01:30 AM IST\n🏟️ MetLife Stadium, East Ruther
+ ford, NJ\n🌎 Local time: 4:00 PM
+LOCATION:MetLife Stadium\, East Rutherford\, NJ
+CATEGORIES:Round of 16
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Round of 16 Match 3 vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-092@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260706T000000Z
+DTEND:20260706T020000Z
+SUMMARY:⚽ Round of 16 Match 4 vs TBD ⚽ | Round of 16
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 92\n📋 Round of 16\n🕐
+  Kickoff: Mon 06 Jul, 05:30 AM IST\n🏟️ Estadio Azteca, Mexico City\
+ n🌎 Local time: 7:00 PM
+LOCATION:Estadio Azteca\, Mexico City
+CATEGORIES:Round of 16
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Round of 16 Match 4 vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-093@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260706T190000Z
+DTEND:20260706T210000Z
+SUMMARY:⚽ Round of 16 Match 5 vs TBD ⚽ | Round of 16
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 93\n📋 Round of 16\n🕐
+  Kickoff: Tue 07 Jul, 12:30 AM IST\n🏟️ Lumen Field, Seattle\n🌎 L
+ ocal time: 12:00 PM
+LOCATION:Lumen Field\, Seattle
+CATEGORIES:Round of 16
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Round of 16 Match 5 vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-094@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260707T000000Z
+DTEND:20260707T020000Z
+SUMMARY:⚽ Round of 16 Match 6 vs TBD ⚽ | Round of 16
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 94\n📋 Round of 16\n🕐
+  Kickoff: Tue 07 Jul, 05:30 AM IST\n🏟️ AT&T Stadium, Arlington, TX\
+ n🌎 Local time: 7:00 PM
+LOCATION:AT&T Stadium\, Arlington\, TX
+CATEGORIES:Round of 16
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Round of 16 Match 6 vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-095@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260707T160000Z
+DTEND:20260707T180000Z
+SUMMARY:⚽ Round of 16 Match 7 vs TBD ⚽ | Round of 16
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 95\n📋 Round of 16\n🕐
+  Kickoff: Tue 07 Jul, 09:30 PM IST\n🏟️ Mercedes-Benz Stadium, Atlan
+ ta\n🌎 Local time: 12:00 PM
+LOCATION:Mercedes-Benz Stadium\, Atlanta
+CATEGORIES:Round of 16
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Round of 16 Match 7 vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-096@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260707T200000Z
+DTEND:20260707T220000Z
+SUMMARY:⚽ Round of 16 Match 8 vs TBD ⚽ | Round of 16
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 96\n📋 Round of 16\n🕐
+  Kickoff: Wed 08 Jul, 01:30 AM IST\n🏟️ BC Place, Vancouver\n🌎 Lo
+ cal time: 1:00 PM
+LOCATION:BC Place\, Vancouver
+CATEGORIES:Round of 16
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Round of 16 Match 8 vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-097@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260709T200000Z
+DTEND:20260709T220000Z
+SUMMARY:⚽ Quarterfinal 1 vs TBD ⚽ | Quarterfinal
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 97\n📋 Quarterfinal\n
+ 🕐 Kickoff: Fri 10 Jul, 01:30 AM IST\n🏟️ Gillette Stadium, Foxbor
+ ough, MA\n🌎 Local time: 4:00 PM
+LOCATION:Gillette Stadium\, Foxborough\, MA
+CATEGORIES:Quarterfinal
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Quarterfinal 1 vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-098@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260710T190000Z
+DTEND:20260710T210000Z
+SUMMARY:⚽ Quarterfinal 2 vs TBD ⚽ | Quarterfinal
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 98\n📋 Quarterfinal\n
+ 🕐 Kickoff: Sat 11 Jul, 12:30 AM IST\n🏟️ SoFi Stadium, Inglewood,
+  CA\n🌎 Local time: 12:00 PM
+LOCATION:SoFi Stadium\, Inglewood\, CA
+CATEGORIES:Quarterfinal
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Quarterfinal 2 vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-099@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260711T210000Z
+DTEND:20260711T230000Z
+SUMMARY:⚽ Quarterfinal 3 vs TBD ⚽ | Quarterfinal
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 99\n📋 Quarterfinal\n
+ 🕐 Kickoff: Sun 12 Jul, 02:30 AM IST\n🏟️ Arrowhead Stadium, Kansa
+ s City\n🌎 Local time: 4:00 PM
+LOCATION:Arrowhead Stadium\, Kansas City
+CATEGORIES:Quarterfinal
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Quarterfinal 3 vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-100@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260712T010000Z
+DTEND:20260712T030000Z
+SUMMARY:⚽ Quarterfinal 4 vs TBD ⚽ | Quarterfinal
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 100\n📋 Quarterfinal\n
+ 🕐 Kickoff: Sun 12 Jul, 06:30 AM IST\n🏟️ Hard Rock Stadium, Miami
+  Gardens, FL\n🌎 Local time: 8:00 PM
+LOCATION:Hard Rock Stadium\, Miami Gardens\, FL
+CATEGORIES:Quarterfinal
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Quarterfinal 4 vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-101@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260714T190000Z
+DTEND:20260714T210000Z
+SUMMARY:⚽ Semifinal 1 vs TBD ⚽ | Semifinal
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 101\n📋 Semifinal\n🕐 
+ Kickoff: Wed 15 Jul, 12:30 AM IST\n🏟️ AT&T Stadium, Arlington, TX\n
+ 🌎 Local time: 2:00 PM
+LOCATION:AT&T Stadium\, Arlington\, TX
+CATEGORIES:Semifinal
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Semifinal 1 vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-102@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260715T190000Z
+DTEND:20260715T210000Z
+SUMMARY:⚽ Semifinal 2 vs TBD ⚽ | Semifinal
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 102\n📋 Semifinal\n🕐 
+ Kickoff: Thu 16 Jul, 12:30 AM IST\n🏟️ Mercedes-Benz Stadium, Atlant
+ a\n🌎 Local time: 3:00 PM
+LOCATION:Mercedes-Benz Stadium\, Atlanta
+CATEGORIES:Semifinal
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Semifinal 2 vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-103@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260718T210000Z
+DTEND:20260718T230000Z
+SUMMARY:⚽ Third-Place Match vs TBD ⚽ | Third-Place
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 103\n📋 Third-Place\n
+ 🕐 Kickoff: Sun 19 Jul, 02:30 AM IST\n🏟️ Hard Rock Stadium, Miami
+  Gardens, FL\n🌎 Local time: 5:00 PM
+LOCATION:Hard Rock Stadium\, Miami Gardens\, FL
+CATEGORIES:Third-Place
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Third-Place Match vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:wc2026-104@fifa-ist
+DTSTAMP:20260609T000000Z
+DTSTART:20260719T190000Z
+DTEND:20260719T210000Z
+SUMMARY:⚽ FINAL vs TBD ⚽ | Final
+DESCRIPTION:🏆 FIFA World Cup 2026 — Match 104\n📋 Final\n🕐 Kick
+ off: Mon 20 Jul, 12:30 AM IST\n🏟️ MetLife Stadium, East Rutherford,
+  NJ\n🌎 Local time: 3:00 PM
+LOCATION:MetLife Stadium\, East Rutherford\, NJ
+CATEGORIES:Final
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:FINAL vs TBD starts in 30 min
+TRIGGER:-PT30M
+END:VALARM
+END:VEVENT
+END:VCALENDAR

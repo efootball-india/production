@@ -9,6 +9,8 @@ import { getFixtureTickerData } from '@/lib/homepage-fixtures';
 import SignedOutHero from '../components/SignedOutHero';
 import FixtureTicker from '../components/FixtureTicker';
 import CommunityCard from '../components/CommunityCard';
+import WorldCupCard from '../components/WorldCupCard';
+
 
 export default async function HomePage() {
   const player = await getCurrentPlayer();
@@ -82,6 +84,11 @@ export default async function HomePage() {
           seasonLabel={seasonLabel}
         />
       </section>
+
+        {/* FIFA World Cup 2026 — visible to all */}
+     <section className="max-w-[920px] mx-auto px-6 md:px-10 pt-8">
+       <WorldCupCard />
+     </section>
 
       {/* Featured cup */}
       {featured && (
